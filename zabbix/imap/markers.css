@@ -1,0 +1,431 @@
+.hostname {
+	font-weight:bold;
+	color:black;
+	text-align:left;
+}
+
+img.hardwareIcon {
+	max-width:18px;
+	max-height:18px;
+}
+
+.icon_status {
+	background-repeat: no-repeat !important;
+	border-radius:8px;
+	width:18px !important;
+	height:18px !important;
+	background-position: center center;
+	box-shadow: none !important;
+	border-width:0px !important;
+}
+
+span.st_maintenance {
+	color:gray;
+	font-weight:bold;
+}
+
+span.st_problem {
+	color:red;
+	font-weight:bold;
+}
+
+span.st_ok {
+	color:green;
+	font-weight:bold;
+}
+
+.icon_status_cluster span {
+	text-shadow: 0em 0em 3em white;
+	background-color:rgba(255, 255, 255, 0.56);
+	border-radius:0.3em;
+}
+
+.lastchange {
+	font-size: 0.7em;
+	text-align: right;
+	color: rgb(4, 76, 157);
+	text-shadow: 0em 0em 0.8em rgb(142, 255, 0);
+}
+
+.leafletlabel {
+	z-index:999 !important;
+}
+
+.icon_status_cluster {
+	background-image:none !important;
+	border-radius:16px;
+	border-width:0px !important;
+	width:26px !important;
+	height:26px !important;
+	line-height: 26px !important;
+	color: rgb(103, 94, 94);
+	font-weight:bold;
+	font-size:12px;
+	text-align: center;
+	background-position: center center;
+	font-size:8px;
+}
+
+.icon_status_0 {
+	background-color:#58F500;
+	background-image:url(images/status1.gif);
+	box-shadow: 0 0 15px #58F500;
+	z-index: 400 !important;
+}
+
+.icon_status_1 {
+	background-color:#D6F6FF;
+	background-image:url(images/status1.gif);
+	z-index: 401 !important;
+}
+
+.icon_status_2 {
+	background-color:#FFF6A5;
+	background-image:url(images/status3.gif);
+	z-index: 402 !important;
+}
+
+.icon_status_3 {
+	background-color:#FFB689;
+	background-image:url(images/status5.gif);
+	z-index: 403 !important;
+}
+
+.icon_status_4 {
+	background-color:#FF9999;
+	background-image:url(images/status5.gif);
+	z-index: 404 !important;
+}
+
+.icon_status_5 {
+	background-color:#FF3838;
+	background-image:url(images/status5.gif);
+	z-index: 405 !important;
+	box-shadow: 0 0 15px #FF3838;
+}
+
+.maintenance {
+	background-image:url(images/maintenance.png) !important;
+	background-position: center center;
+}
+.maintenance.nottrigger {
+	background-color:#F7FD04 !important;
+	background-image:url(images/maintenance.png) !important;
+	z-index: 403 !important;
+	background-position: center center;
+}
+
+.trigger {
+	padding:2px;
+	margin-bottom:3px;
+	border: 1px solid grey;
+	border-radius: 4px;
+	color:black;
+}
+
+.triggerst0 {
+	background-color:#58F500;
+}
+
+.triggerst1 {
+	background-color:#D6F6FF;
+}
+
+.triggerst2 {
+	background-color:#FFF6A5;
+}
+
+.triggerst3 {
+	background-color:#FFB689;
+}
+
+.triggerst4 {
+	background-color:#FF9999;
+}
+
+.triggerst5 {
+	background-color:#FF3838;
+}
+
+div.search-control {
+	background-color:white;
+	border-radius:5px;
+	border: 2px solid rgba(0,0,0,0.2);
+}
+
+.search-control input {
+    border: 0px;
+    width: 
+}
+.search-control input:focus {
+    min-width:20em;
+    outline:none;
+}
+
+div.result {
+	width:30em;
+	margin-right: 2em;
+	margin-top:2em;
+}
+
+#search-control-list {
+	max-height:20em;
+	overflow-y:auto;
+}
+
+img.vertical-middle {
+	vertical-align:middle;
+}
+
+.my-location-control a {
+	display:block;
+	background-image: url(leaflet/images/my-location.png);
+	width: 30px;
+	height: 30px;
+}
+
+div.hostcontrol {
+	text-align:right;
+	margin-top:5px;
+	min-width: 100px;
+}
+
+#imapmes {
+	background-color: transparent;
+	text-align: center;
+	display: block;
+	position: absolute;
+	top: 10px;
+	width: 300px;
+	margin-left: -150px;
+	left: 50%;
+}
+
+#imapmes div {
+	position: relative;
+	display: inline-block;
+	margin-bottom: 5px;
+	width: 280px;
+	padding: 2px;
+	background-color:rgba(0, 0, 0, 0.78);
+	border-radius:10px;
+	color: rgba(255, 255, 255, 0.65);
+}
+
+#imapmes div div {
+	display:inline-block;
+	background-color: transparent;
+	font-size: 14px;
+}
+
+#imapmes .close {
+	background-color: transparent;
+	display: inline-block;
+	position: absolute;
+	right: 5px;
+	top: 2px;
+	color: red;
+	width: 8px;
+	cursor: pointer;
+	padding: 0px;
+	margin: 0px;
+	font-weight: 900;
+	font-size: 0.9em;
+}
+
+#show_hosts_list {
+	position:absolute;
+	top:80px;
+	right:0px;
+	background-color:rgba(0, 0, 0, 0.59);
+	display:block;
+	border-top-left-radius:20px;
+	border-bottom-left-radius:20px;
+	padding:5px;
+	cursor:pointer;
+	color:white;
+}
+
+#out_hosts_list {
+	width:200px;
+	position:absolute;
+	top:80px;
+	right:0px;
+	height:50%;
+	background-color:rgba(0, 0, 0, 0.59);
+	display:block;
+	border-top-left-radius:20px;
+	border-bottom-left-radius:20px;
+	z-index:1001;
+}
+
+#close_hosts_list {
+	position:absolute;
+	top:0px;
+	right:10px;
+	background-color:transparent;
+	display:block;
+	color:white;
+	cursor:pointer;
+}
+
+#search_hosts_list {
+	position:absolute;
+	top:15px;
+	left:5px;
+	right:10px;
+	background-color:transparent;
+	display:block;
+}
+
+#search_hosts_list input {
+	width:100%;
+	box-sizing: border-box;
+}
+
+#search_hosts_list input {
+	border: 1px solid #9E9E9E;
+	color: #F4EEEE;
+	padding: 2px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	font-size: 11px;
+	font-family: Verdana;
+	background: rgba(0, 0, 0, 0.51);
+	border-radius: 4px;
+}
+
+#hosts_list {
+	position:absolute;
+	top:40px;
+	bottom:20px;
+	right:0px;
+	left:5px;
+	background-color:transparent;
+	display:block;
+	overflow-y:auto;
+}
+
+.nicescroll {
+	scrollbar-3d-light-color: #000000;
+	scrollbar-arrow-color: #F2F5FF;
+	scrollbar-base-color: #F2F5FF;
+	scrollbar-dark-shadow-color: #000000;
+	scrollbar-face-color: #475059;
+	scrollbar-highlight-color: #B8C2CC;
+	scrollbar-shadow-color: #B8C2CC;
+	scrollbar-track-color: #262D34;
+	scrollbar-height: 10px
+}
+
+.nicescroll scrollbar[orient="horizontal"] slider{
+height: 10px !important;
+width: 10px !important;
+}
+
+.nicescroll::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
+	background-color: #CCCCCC;
+}
+
+.nicescroll::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+
+.nicescroll::-webkit-scrollbar-thumb
+{
+	background-color: black;
+}
+
+#hosts_list .host_in_list {
+	border-radius:5px;
+	padding:2px;
+	background-color:gray;
+	margin-bottom:3px;
+	color:white;
+	cursor:pointer;
+}
+
+#hosts_list .host_in_list:hover {
+	background-color:rgb(90, 89, 89);
+}
+
+#hosts_list .host_in_list:active {
+	background-color:black;
+}
+
+.host_crosschair {
+	cursor:crosshair;
+}
+
+.hardware-select {
+      padding:2px;
+      border-radius:5px;
+      background-color:rgba(128, 128, 128, 0.4);
+      margin-bottom:2px;
+      cursor:pointer;
+}
+
+.hardware-select.active {
+      background-color:rgba(128, 128, 128, 0.8);
+}
+
+.hardware-select img {
+      vertical-align: middle;
+}
+
+.hostcontrol a {
+	margin:5px;
+}
+
+#filter-indicator {
+	display:inline-block;
+}
+
+#filter-indicator img {
+	height:1.2em;
+}
+
+.delbutton {
+	color:red;
+	font-weight:bold;
+}
+
+#linkoptionsdialog .item.linkdash {
+	display:none !important;
+	margin-bottom:15px;
+	font-size:1.2em;
+	font-weight:bold;
+}
+
+.leaflet-control-measure {
+	background-image:url(images/measure.png);
+}
+
+.links_filter {
+	display:block;
+	position:absolute;
+	top:2px;
+	left:0;
+	right:20px;
+	z-index:900;
+}
+
+.links_filter input {
+	width:100%;
+}
+
+.links_fields {
+ 	display:block;
+	position:absolute;
+	top:0px;
+	left:0;
+	padding-top:25px;
+	height:100%;
+	box-sizing: border-box;
+	z-index:899;
+	right:2px;
+}

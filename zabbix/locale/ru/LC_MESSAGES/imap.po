@@ -1,0 +1,105 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: imap v.0.0.1\n"
+"POT-Creation-Date: 2014-11-30 23:31+0300\n"
+"PO-Revision-Date: 2014-12-06 02:50+0300\n"
+"Last-Translator: RusFox <horonitel@gmail.com>\n"
+"Language-Team:  <horonitel@gmail.com>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
+"X-Poedit-Basepath: ../../../\n"
+"X-Poedit-SearchPath-0: .\n"
+
+msgid "Delete link"
+msgstr "Удалить связь"
+
+msgid "Link options"
+msgstr "Параметры связи"
+
+msgid "Link name"
+msgstr "Имя для связи"
+
+msgid "Link color"
+msgstr "Цвет линии"
+
+msgid "Link width"
+msgstr "Толщина линии"
+
+msgid "Link opacity"
+msgstr "Прозрачность линии"
+
+msgid "Link dash"
+msgstr "Шаблон линии"
+
+msgid "Select hosts for links"
+msgstr "Выберите узлы для связи"
+
+msgid "Host\\'s links"
+msgstr "Связи узлов"
+
+msgid "Delete location"
+msgstr "Удалить местоположение"
+
+msgid "Set a hardware type"
+msgstr "Выбрать тип оборудования"
+
+msgid "Hosts"
+msgstr "Узлы сети"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "This host does not have coordinates"
+msgstr "Этот узел сети не имеет координат"
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "Failed to update data"
+msgstr "Обновление данных завершилось неудачно"
+
+msgid "Select a new position"
+msgstr "Выберите новое местоположение"
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+#: imap.php:8 imap.php:185
+msgid "Interactive map"
+msgstr "Интерактивная карта"
+
+#: imap.php:171
+msgid "Group"
+msgstr "Группа"
+
+#: imap.php:172
+msgid "Host"
+msgstr "Узел сети"
+
+#: imap.php:175
+msgid "Minimum trigger severity"
+msgstr "Минимальная серьезность триггеров"
+
+#: imap.php:178
+msgid "Control map"
+msgstr "Контроль карты"
+
+#: imap.php:179
+msgid "With triggers only"
+msgstr "Только с триггерами"
+
+#: imap.php:221
+msgid "Search"
+msgstr "Поиск"
+
+#: imap.php:224
+msgid "Change location"
+msgstr "Изменить местоположение"
+
+#: imap.php:225
+msgid "Add a link to another host"
+msgstr "Добавить связь с другим хостом"
