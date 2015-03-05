@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Imap : Interactive map for Zabbix">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Imap</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/RussianFox/imap">View on GitHub</a>
+
+          <h1 id="project_title">Imap</h1>
+          <h2 id="project_tagline">Interactive map for Zabbix</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/RussianFox/imap/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/RussianFox/imap/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><strong>Важно: Аддон не вносит никаких изменений в существующие базу и данные. В любой момент вы удаляете файлы, папку и внесенные изменения и все возвращается на круги своя.</strong></p>
+
+<p>Сам аддон содержит папку imap и файл imap.php, а также файлы добавочной локализации (на существующую локализацию не влияет).</p>
+
+<p>Распакуйте их в папку с web-мордой zabbix (типа, /usr/share/zabbix). Выставите правильные права (на чтение для web-сервера).
+Если сразу открыть imap.php в браузере, вы получите сообщение, типа:</p>
+
+<blockquote>
+<p>Доступ запрещен.
+Вы подключены как admin. У вас нет полномочий для доступа к этой странице.</p>
+</blockquote>
+
+<p>Нужно добавить ссылку на карту в интерфейс</p>
+
+<p>Чтобы встроить ссылку на карту в интерфейс, придется немного поправить один системный файл.</p>
+
+<p>Нас интересует файл <strong>include/menu.inc.php</strong> Пример встраивания ниже.</p>
+
+<blockquote>
+<p>array(</p>
+
+<p>'url' =&gt; 'srv_status.php',</p>
+
+<p>'label' =&gt; _('IT services'),</p>
+
+<p>'force_disable_all_nodes' =&gt; true,</p>
+
+<p>'sub_pages' =&gt; array('report3.php', 'chart5.php')
+),</p>
+
+<p>array(</p>
+
+<p>'url'=&gt;'imap.php',</p>
+
+<p>'label'=&gt;_('Interactive map')</p>
+
+<p>),</p>
+
+<p>array(</p>
+
+<p>'url' =&gt; 'chart3.php'</p>
+
+<p>),</p>
+</blockquote>
+
+<p><img src="http://zabbiximap.lisss.ru/screenshots/001.png" alt="Скриншот1">
+<img src="http://zabbiximap.lisss.ru/screenshots/002.png" alt="Скриншот2">
+<img src="http://zabbiximap.lisss.ru/screenshots/003.png" alt="Скриншот3">
+<img src="http://zabbiximap.lisss.ru/screenshots/004.png" alt="Скриншот4"></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Imap maintained by <a href="https://github.com/RussianFox">RussianFox</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
