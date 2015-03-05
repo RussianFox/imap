@@ -45,9 +45,9 @@
 		};
 		
 		if (bingAPIkey) {
-			baseMaps["Bing"] = new L.BingLayer(bingAPIkey);
-			baseMaps["Bing+Labels"] = new L.BingLayer(bingAPIkey, {type: 'AerialWithLabels'});
-			baseMaps["Bing Roads"] = new L.BingLayer(bingAPIkey, {type: 'Road'});
+			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey);
+			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {type: 'AerialWithLabels'});
+			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {type: 'Road'});
 		};
 		
 		try {
@@ -57,8 +57,8 @@
 		} finally {};
 		
 		try {
-			baseMaps["Google"] = new L.Google();
-			baseMaps["Google Terrain"] = new L.Google('TERRAIN');
+			baseMaps["Google Satellite"] = new L.Google();
+			baseMaps["Google"] = new L.Google('TERRAIN');
 			baseMaps["Google Hybrid"] = new L.Google('HYBRID');
 		} finally {};		
 		
