@@ -293,6 +293,7 @@ div.hostcontrol {
 	font-family: Verdana;
 	background: rgba(0, 0, 0, 0.51);
 	border-radius: 4px;
+	-webkit-appearance: none;
 }
 
 #hosts_list {
