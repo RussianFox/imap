@@ -50,6 +50,14 @@
 			baseMaps["Bing Roads"] = new L.BingLayer(bingAPIkey, {type: 'Road'});
 		};
 		
+		try {
+			baseMaps["Yandex"] = new L.Yandex();
+		} finally {};
+		
+		try {
+			baseMaps["Google"] = new L.Google();
+		} finally {};		
+		
 		return([baseMaps,overlayMaps]);
 	}
 	_imap.markers = new L.MarkerClusterGroup({
