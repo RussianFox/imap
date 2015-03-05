@@ -52,10 +52,14 @@
 		
 		try {
 			baseMaps["Yandex"] = new L.Yandex();
+			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
+			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
 		} finally {};
 		
 		try {
 			baseMaps["Google"] = new L.Google();
+			baseMaps["Google Terrain"] = new L.Google('TERRAIN');
+			baseMaps["Google Hybrid"] = new L.Google('HYBRID');
 		} finally {};		
 		
 		return([baseMaps,overlayMaps]);
