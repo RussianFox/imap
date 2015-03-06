@@ -43,4 +43,8 @@ Interactive map for Zabbix
 
 В папке imap лежит файл tables.sql Вы можете открыть phpmyadmin, выбрать базу данных Zabbix, и выбрать этот файл в разделе Import
 
-Второй способ для любителей командной строки: mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables.sql Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
+Второй способ для любителей командной строки:
+
+`mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables.sql`
+
+Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
