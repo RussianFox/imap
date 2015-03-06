@@ -187,7 +187,7 @@ if ($output=='ajax') {
 		$options['monitored_hosts'] = true;
 		$options['withInventory'] = true;
 		$options['selectInterfaces'] = 'extend';
-		$options['selectInventory'] = array('location_lat','location_lon','type');
+		$options['selectInventory'] = array('location_lat','location_lon','type','url_a','url_b','url_c');
 		$options['selectMaintenances'] = 'extend';
 		$hosts = API::Host()->get($options);
 		

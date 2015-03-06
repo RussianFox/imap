@@ -840,7 +840,15 @@
 		if (_imap.settings.show_icons) rstr = rstr + '<a onClick="getHardware('+host_id+')" href="#" Title="'+locale['Set a hardware type']+'"><img src="imap/images/hardware.png"></a>';
 		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+locale['Show debug information']+'"><img src="imap/images/debug.png"></a>';
 		rstr = rstr + '</div>';
-		rstr = rstr + '<div class=hostdescription>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</div>';
+		
+		var lhh = '';
+		if (_imap.markersList[host_id].host_info) {
+			if (_imap.markersList[host_id].host_info.inventory.url_a) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_a+'" target=_blank>URL A</a></div>';
+			if (_imap.markersList[host_id].host_info.inventory.url_b) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_b+'" target=_blank>URL B</a></div>';
+			if (_imap.markersList[host_id].host_info.inventory.url_c) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
+		};
+		
+		rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre> '+lhh+' </div>';
 		rstr = rstr + '<div class=triggers>';
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
 			for (var nn in _imap.markersList[host_id].triggers) {

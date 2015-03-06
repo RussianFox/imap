@@ -430,3 +430,17 @@ width: 10px !important;
 	z-index:899;
 	right:2px;
 }
+
+.hostdescription .link {
+	display:inline-block;
+	margin-right:2em;
+	padding:0.1em;
+	padding-left:0.5em;
+	padding-right:0.5em;
+	background-color:rgba(128, 128, 128, 0.25);
+	border-radius:2px;
+}
+
+.leaflet-popup .triggers {
+	margin-top:0.5em;
+}
