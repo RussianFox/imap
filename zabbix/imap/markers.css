@@ -444,3 +444,9 @@ width: 10px !important;
 .leaflet-popup .triggers {
 	margin-top:0.5em;
 }
+
+.leaflet-popup .hosterror {
+	margin-bottom:0.5em;
+	color:red;
+	font-size:0.9em;
+}

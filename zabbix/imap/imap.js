@@ -825,6 +825,11 @@
 		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
 		var rstr = '';
+		
+		if (_imap.markersList[host_id].host_info) {
+			if (_imap.markersList[host_id].host_info.error) rstr = rstr +'<div class=hosterror> Error: '+ _imap.markersList[host_id].host_info.error+'</div>';
+		};
+		
 		rstr = rstr + '<div>';
 		var shh = '';
 		if (_imap.markersList[host_id].host_info) jQuery(_imap.markersList[host_id].host_info.scripts).each(function() { shh=shh+'{&quot;name&quot;:&quot;'+this.name+'&quot;,&quot;scriptid&quot;:&quot;'+this.scriptid+'&quot;,&quot;confirmation&quot;:&quot;&quot;},'; });
