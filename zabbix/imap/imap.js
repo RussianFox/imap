@@ -215,6 +215,7 @@
 	};
 	
 	function hostsFilter(hh,ff) {
+		if (ff == undefined) return true;
 		if (ff == '') return true;
 		if (!_imap.markersList[hh].host_info) return true;
 		var res = false;
