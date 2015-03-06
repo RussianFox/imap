@@ -412,10 +412,10 @@ if (count($glinks)==0) $check_links = false;
 <script src="imap/leaflet/plugins/layer/tile/Bing.js"></script>
 <script src="imap/leaflet/plugins/html2canvas.js"></script>
 
-<script src="http://api-maps.yandex.ru/2.1/?load=package.map&lang=en-UA" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=en-UA" type="text/javascript"></script>
 <script src="imap/leaflet/plugins/layer/tile/Yandex.js"></script>
 
-<script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
 <script src="imap/leaflet/plugins/layer/tile/Google.js"></script>
 
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>
