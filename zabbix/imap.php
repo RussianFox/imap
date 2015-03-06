@@ -409,8 +409,8 @@ if (count($glinks)==0) $check_links = false;
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.css" />
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.Default.css" />
 <script src="imap/leaflet/plugins/leaflet.markercluster.js"></script>
+
 <script src="imap/leaflet/plugins/layer/tile/Bing.js"></script>
-<script src="imap/leaflet/plugins/html2canvas.js"></script>
 
 <script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=en-UA" type="text/javascript"></script>
 <script src="imap/leaflet/plugins/layer/tile/Yandex.js"></script>

@@ -99,19 +99,6 @@
 	_imap.lines = new Object;
 	_imap.hostsfilter = '';
 	
-	function takeScreenshot() {
-		html2canvas(jQuery('#mapdiv'), {
-			allowTaint: true,
-			logging: true,
-			taintTest: true,
-			useCORS: true,
-			onrendered: function(canvas) {
-				document.body.appendChild(canvas);
-			}
-		});
-		return true;
-	};
-	
 	function linkOptions(hl) {
 		var ttx='';
 		ttx = ttx + '<div class="item"><button onClick="jQuery(\'.dellinkconfirm\').show();"><span class=delbutton>X</span> '+locale['Delete link']+'</button>  </div>';
