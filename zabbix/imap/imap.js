@@ -826,8 +826,9 @@
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
 		var rstr = '';
 		rstr = rstr + '<div>';
-		var hh = '<span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;host&quot;,&quot;hostid&quot;:&quot;'+host_id+'&quot;,&quot;showGraphs&quot;:true,&quot;showScreens&quot;:true,&quot;showTriggers&quot;:true,&quot;hasGoTo&quot;:true}">'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</span>';
-		
+		var shh = '';
+		if (_imap.markersList[host_id].host_info) jQuery(_imap.markersList[host_id].host_info.scripts).each(function() { shh=shh+'{&quot;name&quot;:&quot;'+this.name+'&quot;,&quot;scriptid&quot;:&quot;'+this.scriptid+'&quot;,&quot;confirmation&quot;:&quot;&quot;},'; });
+		var hh = '<span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;host&quot;,&quot;hostid&quot;:&quot;'+host_id+'&quot;,&quot;showGraphs&quot;:true,&quot;showScreens&quot;:true,&quot;showTriggers&quot;:true,&quot;hasGoTo&quot;:true,&quot;scripts&quot;:['+shh.slice(0, -1)+']}">'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</span>';
 		rstr = rstr + '<div class=hostname>';
 		var hardware = ((_imap.markersList[host_id].marker.options.hardware && _imap.settings.show_icons)?'<img onerror="this.src=\'imap/hardware/none.png\';" title="'+_imap.markersList[host_id].marker.options.hardware+'" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\' class=hardwareIcon>':'');
 		rstr = rstr + hardware;

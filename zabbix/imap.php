@@ -11,7 +11,6 @@ textdomain("frontend");
 
 $page['file'] = 'imap.php';
 $page['hist_arg'] = array('groupid', 'hostid', 'show_severity','control_map','with_triggers_only');
-//$page['scripts'] = array('class.cswitcher.js');
 
 		if (function_exists('get_request')) { 
 		    $lat = get_request('lat', null);
@@ -125,8 +124,6 @@ $pageFilter = new CPageFilter(array(
 $_REQUEST['groupid'] = $pageFilter->groupid;
 $_REQUEST['hostid'] = $pageFilter->hostid;
 
-//$showSeverity = $pageFilter->severityMin;
-
 function rightsErrorAjax() {
 		$responseData = '{"jsonrpc": "2.0","error": {"message": "Access error. Check rights."}}';
 		echo $responseData;
@@ -172,13 +169,10 @@ if ($output=='ajax') {
 		$options['expandData'] = true;
 		$options['expandDescription'] = true;
 		$options['selectLastEvent'] = 'extend';
-		//$options['only_true'] = true;
-		//$options['active'] = true;
 		$options['monitored'] = true;
 		$options['maintenance'] = false;
 		$options['skipDependent'] = true;
 		$options['filter'] = array('value' => TRIGGER_VALUE_TRUE);
-		//$options['withUnacknowledgedEvents'] = true;
 		if ($showSeverity > TRIGGER_SEVERITY_NOT_CLASSIFIED) {
 			$options['min_severity'] = $showSeverity;
 		};
@@ -196,6 +190,17 @@ if ($output=='ajax') {
 		$options['selectInventory'] = array('location_lat','location_lon','type');
 		$options['selectMaintenances'] = 'extend';
 		$hosts = API::Host()->get($options);
+		
+		//список скриптов
+		$hostids = array();
+		foreach ($hosts as $host) {
+			$hostids[] = $host['hostid'];
+		};
+		$scripts = API::Script()->getScriptsByHosts($hostids);
+		foreach ($hosts as $host) {
+			$hosts[$host['hostid']]['scripts'] = $scripts[$host['hostid']];
+		};
+		
 		$responseData = json_encode($hosts, FALSE);
 		echo $responseData;
 		exit;
@@ -281,7 +286,6 @@ if ($output=='ajax') {
 		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
-				//if ($shost==$thost) continue;
 				if (API::Host()->isWritable(array($hostid))) {
 					$res = 'INSERT hosts_links VALUES('.
 									'NULL,'.
@@ -295,7 +299,6 @@ if ($output=='ajax') {
 				};
 			};
 
-		//$res = count($thostid);
 		$responseData = json_encode(array('result'=>$res), FALSE);
 		echo $responseData;
 		exit;
@@ -436,10 +439,6 @@ if (count($glinks)==0) $check_links = false;
 	jQuery('#show_hosts_list').click(function(){jQuery(this).hide(); jQuery('#out_hosts_list').animate({width:'toggle'},200);});
 	jQuery('#close_hosts_list').click(function(){jQuery('#out_hosts_list').animate({width:'toggle'},200); jQuery('#show_hosts_list').show(); });
 	jQuery( "#search_hosts_list input" ).on('input',function() {
-		/*jQuery('.host_in_list').show();
-		jQuery('.host_in_list').not(function(){
-			return jQuery(this).attr('hostname').toLowerCase().indexOf(jQuery( "#search_hosts_list input" ).val().toLowerCase())>-1
-		}).hide();*/
 		getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
 	});
 	var _imap = new Object;
