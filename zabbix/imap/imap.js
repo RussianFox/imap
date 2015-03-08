@@ -209,7 +209,7 @@
 		res = ((res) || (_imap.markersList[hh].host_info.name.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.host.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.description.toLowerCase().indexOf(ff.toLowerCase())>-1));
-		res = ((res) || (_imap.markersList[hh].host_info.inventory.type.toLowerCase().indexOf(ff.toLowerCase())>-1));
+		res = ((res) || (_imap.markersList[hh].host_info.inventory[_imap.settings.hardware_field].toLowerCase().indexOf(ff.toLowerCase())>-1));
 		
 		var ob = jQuery.makeArray( _imap.markersList[hh].host_info.interfaces );
 		
