@@ -390,8 +390,16 @@ if (count($glinks)==0) $check_links = false;
 $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
 if (count($glinks)==0) $check_links = false;
 
+$needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
+foreach ($needThisFiles as $file) {
+	if ( !is_readable ( $file ) ) {
+		echo '<div id=imapworkareaError style="color:red; font-size:1.4em;">'._('If you see this message, it means that the script had problems with access to the files. Try to set read permissions for the web-server to a folder imap.').'</div>';
+		break;
+	};
+};
 ?>
-<div id=imapworkareaError style="color:red; font-size:1.4em;">Если вы видите это сообщение, значит у скрипта возникли проблемы с доступом к файлам. Попробуйте выставить права на чтение для web-сервера на папку imap.</div>
+
+
 <div id=imapworkarea style="display:none; position:relative;">
 	<div id=mapdiv style="width:100%; height:300px;"></div>
 	<div id=ajax></div>
@@ -502,12 +510,9 @@ if (count($glinks)==0) $check_links = false;
 <?php
 
 	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js"></script>';
+	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
-?>
 
-<?php
-
-if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
 textdomain("frontend");
 if ($output!='block') {
