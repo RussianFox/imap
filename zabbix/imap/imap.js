@@ -425,7 +425,8 @@
 				action_ajax: 'set_hardware',
 				output: 'ajax',
 				hostid: hh,
-				hardware: im
+				hardware: im,
+				hardwareField: _imap.settings.hardware_field
 			},
 			success: function(data){
 				_imap.markersList[+hh].marker.options.hardware = im;
@@ -911,7 +912,8 @@
 				hostid: _imap.filter.hostid,
 				groupid: _imap.filter.groupid,
 				action_ajax: 'get_hosts',
-				output: 'ajax'
+				output: 'ajax',
+				hardwareField: _imap.settings.hardware_field
 			},
 			success: function(data){
 			  
@@ -939,7 +941,7 @@
 					};
 					var host_lat = +(host.inventory.location_lat).replace(',', '.');
 					var host_lon = +(host.inventory.location_lon).replace(',', '.');
-					var hardware = host.inventory.type;
+					var hardware = host.inventory[_imap.settings.hardware_field];
 					
 					var maintenance = (host.maintenance_status === '1' ? true:false);
 					var maintenance_t = (maintenance?'maintenance ':'');

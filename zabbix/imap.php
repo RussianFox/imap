@@ -12,17 +12,9 @@ textdomain("frontend");
 $page['file'] = 'imap.php';
 $page['hist_arg'] = array('groupid', 'hostid', 'show_severity','control_map','with_triggers_only');
 
-		if (function_exists('get_request')) { 
-		    $lat = get_request('lat', null);
-		    $lng = get_request('lng', null);
-		};
-
-		if (function_exists('getRequest')) { 
-		    $lat = getRequest('lat', null);
-		    $lng = getRequest('lng', null);
-		};
-
-if (function_exists('get_request')) { 
+if (function_exists('get_request')) {
+	$lat = get_request('lat', null);
+	$lng = get_request('lng', null);
 	$with_triggers_only = get_request('with_triggers_only', 0);
 	$control_map = get_request('control_map', 0);
 	$showSeverity = get_request('severity_min', 0);
@@ -36,9 +28,12 @@ if (function_exists('get_request')) {
 	$hardware = ''.get_request('hardware', '');
 	$linkid = get_request('linkid', null);
 	$linkoptions = get_request('linkoptions', null);
+	$hardwareField = get_request('hardwareField','type');
 };
 
-if (function_exists('getRequest')) { 
+if (function_exists('getRequest')) {
+	$lat = getRequest('lat', null);
+	$lng = getRequest('lng', null);
 	$with_triggers_only = getRequest('with_triggers_only', 0);
 	$control_map = getRequest('control_map', 0);
 	$showSeverity = getRequest('severity_min', 0);
@@ -52,7 +47,7 @@ if (function_exists('getRequest')) {
 	$hardware = ''.getRequest('hardware', '');
 	$linkid = getRequest('linkid', null);
 	$linkoptions = getRequest('linkoptions', null);
-	
+	$hardwareField = getRequest('hardwareField');
 };
 
 if (function_exists('get_current_nodeid')) { 
@@ -89,7 +84,8 @@ $fields = array(
 	'pmasterid' =>	array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
 	'favaction' =>	array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
 	'favstate' =>	array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
-	'favdata' =>	array(T_ZBX_STR, O_OPT, null,	null,		null)
+	'favdata' =>	array(T_ZBX_STR, O_OPT, null,	null,		null),
+	'hardwareField' =>	array(T_ZBX_STR, O_OPT, null,	null,		null)
 );
 check_fields($fields);
 
@@ -187,7 +183,8 @@ if ($output=='ajax') {
 		$options['monitored_hosts'] = true;
 		$options['withInventory'] = true;
 		$options['selectInterfaces'] = 'extend';
-		$options['selectInventory'] = array('location_lat','location_lon','type','url_a','url_b','url_c');
+		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
+		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
 		$options['selectMaintenances'] = 'extend';
 		$hosts = API::Host()->get($options);
 		
@@ -250,11 +247,9 @@ if ($output=='ajax') {
 		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
 		$options = array(
 			'hostid' => $hostid,
-			'inventory' => array(
-				'type' => $hardware
-			)
+			'inventory' => array()
 		);
-		
+		$options['inventory'][$hardwareField] = $hardware;
 		$hosts = API::Host()->update($options);
 		
 		$responseData = json_encode(array('result' => $hosts), FALSE);
@@ -463,6 +458,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.use_zoom_slider = true;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
+	_imap.settings.hardware_field = 'type';
 	
 	bingAPIkey=false;
 	

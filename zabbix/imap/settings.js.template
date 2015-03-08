@@ -17,3 +17,7 @@ _imap.settings.use_zoom_slider = true;
 /* false - if you don't use links for hosts */
 /* Значение false для использования линий связи между хостами */
 _imap.settings.links_enabled = true;
+
+/* What inventory field using for icon */
+/* Поле инвентарных данных, используемое для иконки */
+_imap.settings.hardware_field = 'type';
