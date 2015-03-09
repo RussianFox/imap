@@ -204,6 +204,7 @@
 	function hostsFilter(hh,ff) {
 		if (ff == undefined) return true;
 		if (ff == '') return true;
+		if (!_imap.markersList[hh]) return true;
 		if (!_imap.markersList[hh].host_info) return true;
 		var res = false;
 		res = ((res) || (_imap.markersList[hh].host_info.name.toLowerCase().indexOf(ff.toLowerCase())>-1));
@@ -258,7 +259,11 @@
 			return;
 		};
 		jQuery('.links_fields table tr').hide();
-		jQuery('.links_fields table tr').filter(function(){ return( hostsFilter(jQuery(this).attr('hostid'),tx) ) }).show();
+		jQuery('.links_fields table tr').filter(
+		  function(index) {
+		    return( hostsFilter(jQuery(this).attr('hostid'),tx) );
+		  }
+		).show();
 		
 	};
 	
@@ -767,7 +772,9 @@
 		ttx = ttx+'<tr class="header"></tr>';
 		var hhs = jQuery('.host_in_list');
 		for (var nn=0; nn<hhs.length; nn++) {
-			if (+jQuery(hhs[nn]).attr('hostid')!==+hh) ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</td></tr>';
+			if ( ( +jQuery(hhs[nn]).attr('hostid')!==+hh ) && (_imap.markersList[+jQuery(hhs[nn]).attr('hostid')]) ) {
+				ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</td></tr>';
+			};
 		};
 		ttx = ttx+'</table>';
 		ttx = ttx+'</div>';
