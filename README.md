@@ -6,30 +6,20 @@ Interactive map for Zabbix
 Чтобы подключить imap в стандартный интерфейс, отредактируйте include/menu.inc.php
 Пример правки:
 
+	array(
+		'url' => 'srv_status.php',
+		'label' => _('IT services'),
+		'force_disable_all_nodes' => true,
+		'sub_pages' => array('report3.php', 'chart5.php')
+	),
+	array(
+		'url'=>'imap.php',
+		'label'=>_('Interactive map')
+	),
+	array(
 
->array(
->
->'url' => 'srv_status.php',
->
->'label' => _('IT services'),
->
->'force_disable_all_nodes' => true,
->
->'sub_pages' => array('report3.php', 'chart5.php') ),
->
->array(
->
->'url'=>'imap.php',
->
->'label'=>_('Interactive map')
->
->),
->
->array(
->
->'url' => 'chart3.php'
->
->),
+		'url' => 'chart3.php'
+	),
 
 Теперь основной функционал работоспособен. Зайдите в ваш Zabbix и вы увидите новый пункт меню.
 
