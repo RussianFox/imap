@@ -258,7 +258,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='get_link') {
-		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		
 		$res1 = DB::find('hosts_links', array('id' => $linkid));
 		$res2 = DB::find('hosts_links_settings', array('ids' => $linkid));
 		
@@ -283,7 +283,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='get_links') {
-		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		
 		$res1 = DB::find('hosts_links');
 		$res2 = DB::find('hosts_links_settings');
 		
@@ -308,7 +308,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='add_links') {
-		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		
 		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
@@ -324,7 +324,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='update_link') {
-		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
 		
@@ -341,7 +341,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='del_link') {
-		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
 		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
