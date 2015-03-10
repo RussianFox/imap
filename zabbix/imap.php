@@ -258,39 +258,63 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='get_link') {
-		$glinks = DBfetchArray(DBselect(
-			'SELECT hosts_links.id AS id, hosts_links.host1, hosts_links.host2, hosts_links.name, hosts_links_settings.*
-			FROM hosts_links LEFT OUTER JOIN hosts_links_settings ON hosts_links.id = hosts_links_settings.ids WHERE hosts_links.id = '.$linkid
-		));
-		$responseData = json_encode($glinks, FALSE);
+		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		$res1 = DB::find('hosts_links', array('id' => $linkid));
+		$res2 = DB::find('hosts_links_settings', array('ids' => $linkid));
+		
+		$res = array();
+		
+		foreach ($res1 as $res1t) {
+			foreach ($res2 as $res2t) {
+				if ($res1t['id']==$res2t['ids']) {
+					$res1t = $res1t+$res2t;
+				};
+			};
+			if (!$res1t['dash']) $res1t['dash']=0;
+			if (!$res1t['weight']) $res1t['weight']=0;
+			if (!$res1t['color']) $res1t['color']=0;
+			if (!$res1t['opacity']) $res1t['opacity']=0;
+			$res[] = $res1t;
+		};
+		
+		$responseData = json_encode($res, FALSE);
 		echo $responseData;
 		exit;
 	};
 	
 	if ($action_ajax=='get_links') {
-		$glinks = DBfetchArray(DBselect(
-			'SELECT hosts_links.id AS id, hosts_links.host1, hosts_links.host2, hosts_links.name, hosts_links_settings.*
-			FROM hosts_links LEFT OUTER JOIN hosts_links_settings ON hosts_links.id = hosts_links_settings.ids'
-		));
-		$responseData = json_encode($glinks, FALSE);
+		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
+		$res1 = DB::find('hosts_links');
+		$res2 = DB::find('hosts_links_settings');
+		
+		$res = array();
+		
+		foreach ($res1 as $res1t) {
+			foreach ($res2 as $res2t) {
+				if ($res1t['id']==$res2t['ids']) {
+					$res1t = $res1t+$res2t;
+				};
+			};
+			if (!$res1t['dash']) $res1t['dash']=0;
+			if (!$res1t['weight']) $res1t['weight']=0;
+			if (!$res1t['color']) $res1t['color']=0;
+			if (!$res1t['opacity']) $res1t['opacity']=0;
+			$res[] = $res1t;
+		};
+		
+		$responseData = json_encode($res, FALSE);
 		echo $responseData;
 		exit;
 	};
 	
 	if ($action_ajax=='add_links') {
+		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
 		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
 				if (API::Host()->isWritable(array($hostid))) {
-					$res = 'INSERT hosts_links VALUES('.
-									'NULL,'.
-									'NULL,'.
-									MIN($shost,$thost).','.
-									MAX($shost,$thost).
-						');';
-					DBstart();
-					DBexecute($res);
-					DBend();
+					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
+					$res = DB::insert('hosts_links', array($newlink));
 				};
 			};
 
@@ -300,25 +324,16 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='update_link') {
+		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
-		$res = 'UPDATE hosts_links SET
-		';
-		if ($linkoptions['linkname']) $res = $res.'name = "'.$linkoptions['linkname'].'"';
-		$res = $res.'
-			WHERE id='.$link;
-		DBstart();
-		DBexecute($res);
-		DBend();
 		
-		$res = 'REPLACE INTO hosts_links_settings SET ids='.$link.'
-		';
-		if ($linkoptions['linkcolor']) $res = $res.', color = "'.$linkoptions['linkcolor'].'"';
-		if ($linkoptions['linkweight']) $res = $res.', weight = '.$linkoptions['linkweight'];
-		if ($linkoptions['linkopacity']) $res = $res.', opacity = '.$linkoptions['linkopacity'];
-		DBstart();
-		DBexecute($res);
-		DBend();
+		$newlink = array( 'values' => array('name' => $linkoptions['linkname'] ), 'where' => array( 'id' => $link ) );
+		$res = DB::update('hosts_links', array($newlink));
+		
+		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
+		
+		$res = DB::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
 		
 		$responseData = json_encode(array('result'=>htmlspecialchars($res),'linkoptions'=>$linkoptions), FALSE);
 		echo $responseData;
@@ -326,16 +341,11 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='del_link') {
+		DB::$schema = include(dirname(__FILE__).'/imap/imap-schema.php');
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
-		$zz = 'DELETE FROM hosts_links_settings WHERE id='.$link;
-		DBstart();
-		$res=DBexecute($zz);
-		DBend();
-		$zz = 'DELETE FROM hosts_links WHERE id='.$link;
-		DBstart();
-		$res=DBexecute($zz);
-		DBend();
+		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DB::delete('hosts_links', array('id'=>array($link)));
 		
 		$responseData = json_encode(array('result'=>TRUE), FALSE);
 		echo $responseData;
@@ -379,11 +389,11 @@ if ($output!='block') {
 	textdomain("imap");
 };
 //проверяем наличие таблиц в БД
-$check_links = true;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
-if (count($glinks)==0) $check_links = false;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
-if (count($glinks)==0) $check_links = false;
+ $check_links = true;
+// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
+// if (count($glinks)==0) $check_links = false;
+// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
+// if (count($glinks)==0) $check_links = false;
 
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
