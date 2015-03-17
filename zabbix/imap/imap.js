@@ -4,6 +4,7 @@
 	jQuery('#imapworkareaError').hide();
 
 	function escapeHtml(text) {
+	  if (text == undefined) return '';
 	  var map = {
 	    '&': '&amp;',
 	    '<': '&lt;',
