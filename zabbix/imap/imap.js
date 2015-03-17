@@ -89,6 +89,10 @@
 			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
 		}
 	});
+		
+	_imap.markers.on('clustercontextmenu',function(tt){ 
+		tt.layer.spiderfy();
+	});
 	
 	_imap.links = L.layerGroup();
 	
