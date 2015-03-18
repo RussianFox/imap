@@ -91,7 +91,7 @@
 	});
 		
 	_imap.markers.on('clustercontextmenu',function(tt){ 
-		if ( (tt.layer._childCount<_imap.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
+		if ( (tt.layer._childCount<_imap.settings.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
 			tt.layer.spiderfy();
 		} else {
 			tt.layer.zoomToBounds();
