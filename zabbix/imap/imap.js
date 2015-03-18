@@ -4,6 +4,7 @@
 	jQuery('#imapworkareaError').hide();
 
 	function escapeHtml(text) {
+	  if (text == undefined) return '';
 	  var map = {
 	    '&': '&amp;',
 	    '<': '&lt;',
@@ -86,6 +87,14 @@
 				};
 			};
 			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
+		}
+	});
+		
+	_imap.markers.on('clustercontextmenu',function(tt){ 
+		if ( (tt.layer._childCount<_imap.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
+			tt.layer.spiderfy();
+		} else {
+			tt.layer.zoomToBounds();
 		}
 	});
 	
