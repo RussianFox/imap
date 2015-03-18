@@ -458,19 +458,22 @@ foreach ($needThisFiles as $file) {
 
 	_imap.settings = new Object;
 	
+	/* This settings changing in interactive mode */
 	_imap.settings.do_map_control = <?php echo $control_map; ?>;
 	_imap.settings.pause_map_control = false;
 	_imap.settings.show_with_triggers_only = <?php echo $with_triggers_only; ?>;
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
 
+	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
 	_imap.settings.use_search = true;
 	_imap.settings.use_zoom_slider = true;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
-	
+	_imap.settings.maxMarkersSpiderfy = 50;
 	bingAPIkey=false;
+	
 	
 	locale.Search = '<?php echo _('Search'); ?>';
 	
@@ -485,7 +488,7 @@ foreach ($needThisFiles as $file) {
 	locale['Hosts'] = '<?php echo _('Hosts'); ?>';
 	locale['This host does not have coordinates'] = '<?php echo _('This host does not have coordinates'); ?>';
 	locale['Set a hardware type'] = '<?php echo _('Set a hardware type'); ?>';
-	locale["Host's links"] = "<?php echo _("Host\'s links"); ?>";
+	locale["Host's links"] = "<?php echo _('Host\'s links'); ?>";
 	locale['Show debug information'] = "<?php echo _("Show debug information"); ?>";
 	locale['Debug information'] = "<?php echo _("Debug information"); ?>";
 	locale['Select hosts for links'] = "<?php echo _("Select hosts for links"); ?>";

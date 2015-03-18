@@ -21,3 +21,7 @@ _imap.settings.links_enabled = true;
 /* What inventory field using for icon */
 /* Поле инвентарных данных, используемое для иконки */
 _imap.settings.hardware_field = 'type';
+
+/* How many markers can spiderfy on non-max zoom map */
+/* Ограничение количества маркеров при раскрытии кластера на немаксимальном зуме карты*/
+_imap.settings.maxMarkersSpiderfy = 50;

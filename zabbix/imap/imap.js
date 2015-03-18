@@ -91,7 +91,11 @@
 	});
 		
 	_imap.markers.on('clustercontextmenu',function(tt){ 
-		tt.layer.spiderfy();
+		if ( (tt.layer._childCount<_imap.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
+			tt.layer.spiderfy();
+		} else {
+			tt.layer.zoomToBounds();
+		}
 	});
 	
 	_imap.links = L.layerGroup();
