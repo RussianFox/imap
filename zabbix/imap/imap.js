@@ -1,23 +1,34 @@
 
-	_zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	jQuery('#imapworkarea').show();
 	jQuery('#imapworkareaError').hide();
 
-	function escapeHtml(text) {
-	  if (text == undefined) return '';
-	  var map = {
-	    '&': '&amp;',
-	    '<': '&lt;',
-	    '>': '&gt;',
-	    '"': '&quot;',
-	    "'": '&#039;'
-	  };
+	_imap.links = L.layerGroup();
+	
+	_imap.markersList = new Object;
+	_imap.map = false;
+	_imap.bbox = false;
+	_imap.searchpopup;
+	_imap.lines = new Object;
+	_imap.vars = new Object;
+	_imap.vars.it_first = true;
+	_imap.hostsfilter = '';
 
-	  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
+	
+	function escapeHtml(text) {
+		if (text == undefined) return '';
+		var map = {
+		  '&': '&amp;',
+		  '<': '&lt;',
+		  '>': '&gt;',
+		  '"': '&quot;',
+		  "'": '&#039;'
+		};
+
+		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
 	
 	function getLayers() {
-	  
 		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
 		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
 		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
@@ -89,7 +100,7 @@
 			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
 		}
 	});
-		
+	
 	_imap.markers.on('clustercontextmenu',function(tt){ 
 		if ( (tt.layer._childCount<_imap.settings.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
 			tt.layer.spiderfy();
@@ -98,16 +109,7 @@
 		}
 	});
 	
-	_imap.links = L.layerGroup();
-	
-	_imap.markersList = new Object;
-	_imap.map = false;
-	_imap.it_first = true;
-	_imap.bbox = false;
-	_imap.searchpopup;
-	_imap.lines = new Object;
-	_imap.hostsfilter = '';
-	
+	/* Изменение свойств линии связи */
 	function linkOptions(hl) {
 		var ttx='';
 		ttx = ttx + '<div class="item"><button onClick="jQuery(\'.dellinkconfirm\').show();"><span class=delbutton>X</span> '+locale['Delete link']+'</button>  </div>';
@@ -181,11 +183,13 @@
 		
 	};
 	
+	/* Ошибка ajax-запроса */
 	function ajaxError(mmes,cr) {
 		if (mmes == undefined) mmes = locale['Failed to update data'];
 		showMes('<b><font color=red>'+locale['Error']+'</font></b>: '+mmes,cr);
 	};
 	
+	/* удаляем линию связи */
 	function deleteLink(linkid) {
 		jQuery.ajax({
 			url: 'imap.php',
@@ -210,6 +214,7 @@
 		});
 	};
 	
+	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
 		if (ff == undefined) return true;
 		if (ff == '') return true;
@@ -229,13 +234,15 @@
 		return res;
 	};
 	
-	var timeoutHostSearch1;
+	_imap.vars.timeoutHostSearch1 = false;
 
+	/* задержка поиска в списке хостов на карте */
 	function getHostsFilter1T(tx) {
-		if (timeoutHostSearch1) clearTimeout(timeoutHostSearch1);
-		timeoutHostSearch1=setTimeout(function(){ getHostsFilter1(tx) },1000);
+		if (_imap.vars.timeoutHostSearch1) clearTimeout(_imap.vars.timeoutHostSearch1);
+		_imap.vars.timeoutHostSearch1=setTimeout(function(){ getHostsFilter1(tx) },1000);
 	};
 
+	/* поиск в списке хостов на карте */
 	function getHostsFilter1(tx) {
 		_imap.hostsfilter = tx.toLowerCase();
 		if (_imap.hostsfilter=='') {
@@ -254,13 +261,15 @@
 		};
 	};
 	
-	var timeoutHostSearch2;
+	_imap.vars.timeoutHostSearch2 = false;
 	
+	/* задержка поиска в списке хостов выбора связи */
 	function getHostsFilter2T(tx) {
-		if (timeoutHostSearch2) clearTimeout(timeoutHostSearch2);
-		timeoutHostSearch2=setTimeout(function(){ getHostsFilter2(tx) },1000);
+		if (_imap.vars.timeoutHostSearch2) clearTimeout(_imap.vars.timeoutHostSearch2);
+		_imap.vars.timeoutHostSearch2=setTimeout(function(){ getHostsFilter2(tx) },1000);
 	};
 	
+	/* поиск в списке хостов выбора связи */
 	function getHostsFilter2() {
 		var tx = jQuery('.links_filter input').val();
 		if (tx==='') {
@@ -276,6 +285,7 @@
 		
 	};
 	
+	/* обновляем линию связи */
 	function updateLine(nn) {
 		if (!_imap.settings.links_enabled) return;
 		if ( (_imap.markersList[_imap.lines[nn][0]]) && (_imap.markersList[_imap.lines[nn][1]]) ) {
@@ -286,7 +296,7 @@
 						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][0]].marker._latlng);
 						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][1]].marker._latlng);
 						
-						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_zoom_meters[_imap.map.getZoom()]) {
+						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_imap.settings._zoom_meters[_imap.map.getZoom()]) {
 							if (!_imap.links.hasLayer(_imap.lines[nn][2])) {
 								_imap.links.addLayer(_imap.lines[nn][2]);
 							};
@@ -328,7 +338,7 @@
 		if (nl.weight == '0') nl.weight = 2;
 		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 2:L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8})};
 		if ((nl.name !== undefined) & (nl.name !== '0')) {
-			_imap.lines[nl.id][2].bindLabel(escapeHtml(nl.name));
+			_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + _imap.markersList[_imap.lines[nl.id][0]].host_info.name + '<-->' + _imap.markersList[_imap.lines[nl.id][1]].host_info.name);
 			_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
 		};
 		_imap.lines[nl.id][2].on('click',function(){linkOptions(nl.id);});
@@ -372,7 +382,10 @@
 		el = jQuery('<div/>');
 		el.html(locale['Select a new position']+' <a style="color:red;" onClick="setHostLocation();" href="#">'+locale['Cancel']+'</a>').attr("id",'mesGetHostLocation').appendTo('#imapmes');
 		jQuery(_imap.map._container).css('cursor','crosshair');
-		_imap.map.on('click',function(e){ setHostLocation(hh,e.latlng.lat,e.latlng.lng); return false; });
+		_imap.map.on('click',function(e){ 
+			setHostLocation(hh,e.latlng.lat,e.latlng.lng);
+			return false;
+		});
 	};
 	
 	function getHardware(hh,event) {
@@ -472,10 +485,10 @@
 			},
 			success: function(data){
 				if (data.result) {
-					if (!_imap.markersList[hh]) {
+					if (!_imap.markersList[hh].marker) {
 						jQuery('.host_in_list').filter('[hostid='+hh+']').remove();
 						loadHosts();
-						return;						
+						return;
 					};
 					_imap.markers.removeLayer(_imap.markersList[hh].marker);
 					_imap.markersList[hh].marker.setLatLng([lat,lng]);
@@ -603,7 +616,8 @@
 	};
 
 	function updateIcon(e,first) {
-		vMarker = e;
+		vMarker = _imap.markersList[+e].marker;
+		if (!vMarker) return;
 		while (vMarker) {
 			vMarker = vMarker.__parent;
 			if (vMarker) {
@@ -679,18 +693,20 @@
 	};
 
 	function showMarker(nn) {
+		if (!_imap.markersList[+nn].marker) return;
 		if (_imap.markersList[+nn].marker.options.show) return;
 		_imap.markers.addLayer(_imap.markersList[+nn].marker);
 		_imap.markersList[+nn].marker.options.del = false;
 		_imap.markersList[+nn].marker.options.show = true;
-		updateIcon(_imap.markersList[+nn]);
+		updateIcon(+nn);
 		updateLinesMarker(nn);
 	};
 	
 	function unshowMarker(nn) {
+		if (!_imap.markersList[+nn].marker) return;
 		if (!_imap.markersList[+nn].marker.options.show) return;
 		_imap.markersList[+nn].marker.options.del = true;
-		updateIcon(_imap.markersList[+nn]);
+		updateIcon(+nn);
 		_imap.markers.removeLayer(_imap.markersList[+nn].marker);
 		_imap.markersList[+nn].marker.options.del = false;
 		_imap.markersList[+nn].marker.options.show = false;
@@ -746,7 +762,8 @@
 					};
 				};
 				for (var nn in _imap.markersList) {
-					updateMarker(_imap.markersList[+nn].marker.options.host_id);
+					if (!_imap.markersList[+nn].marker) continue;
+					updateMarker(+nn);
 					if (_imap.settings.show_with_triggers_only) {
 						if (_imap.markersList[+nn].marker.options.status>=_imap.settings.min_status) {
 							if (hostsFilter(+nn)) showMarker(+nn);
@@ -754,18 +771,18 @@
 							unshowMarker(+nn);
 						};
 					};
-					if (_imap.markersList[+nn].marker.options.show) updateIcon(_imap.markersList[+nn].marker);
+					if (_imap.markersList[+nn].marker.options.show) updateIcon(+nn);
 					if (_imap.markersList[+nn].marker.options.status>=_imap.settings.min_status) {
 						_imap.bbox = addBbox(_imap.markersList[+nn].marker._latlng.lat,_imap.markersList[+nn].marker._latlng.lng,_imap.bbox);
 					};
 				};
-				if (_imap.settings.do_map_control | _imap.it_first) {
+				if (_imap.settings.do_map_control | _imap.vars.it_first) {
 					mapBbox(_imap.bbox);
 				};
 				
-				if (_imap.it_first) {
+				if (_imap.vars.it_first) {
 					jQuery('#mesLoading').slideUp('fast');
-					_imap.it_first = false;
+					_imap.vars.it_first = false;
 				};
 			},
 			error: function(data){
@@ -838,14 +855,19 @@
 
 	
 	function updateMarker(host_id) {
+		if (!_imap.markersList[host_id].marker) return;
 		var status=0;
 		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
 		var rstr = '';
 		
+		
+		
 		if (_imap.markersList[host_id].host_info) {
 			if (_imap.markersList[host_id].host_info.error) rstr = rstr +'<div class=hosterror> Error: '+ _imap.markersList[host_id].host_info.error+'</div>';
 		};
+		
+		
 		
 		rstr = rstr + '<div>';
 		var shh = '';
@@ -855,6 +877,9 @@
 		var hardware = ((_imap.markersList[host_id].marker.options.hardware && _imap.settings.show_icons)?'<img onerror="this.src=\'imap/hardware/none.png\';" title="'+_imap.markersList[host_id].marker.options.hardware+'" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\' class=hardwareIcon>':'');
 		rstr = rstr + hardware;
 		rstr = rstr + ' '+hh+'</div>';
+		
+		
+		
 		rstr = rstr + '<div class=hostcontrol>';
 		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+locale['Change location']+'"><img src="imap/images/target.png"></a>';
 		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+locale['Delete location']+'"><img src="imap/images/target-del.png"></a>';
@@ -863,14 +888,45 @@
 		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+locale['Show debug information']+'"><img src="imap/images/debug.png"></a>';
 		rstr = rstr + '</div>';
 		
+		
+		
+		var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
+		rstr = rstr + '<div class=host_interfaces>';
+		_imap.markersList[host_id].host_info.interfaces.each(function(el) {
+				rstr = rstr + '<div class=host_interfaces_line>';
+				var addr = el.dns;
+				if ( (el.useip=='1') && (el.ip!=='') ) 
+					addr = el.ip;
+				rstr = rstr + '<b>' + intftype[el.type] + '</b> ' + addr + ':' + el.port;
+				rstr = rstr + '</div>';
+		});
+		rstr = rstr + '</div>';
+		
+		
+		rstr = rstr + '<div class=host_des>';
+			rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre></div>';
+			
+			rstr = rstr + '<div class=host_inventory>';
+			for (nn in _imap.markersList[host_id].host_info.inventory) {
+				if (("#" + _imap.settings.exluding_inventory.join("#,#") + "#").search("#"+nn+"#") == -1)
+					if (_imap.markersList[host_id].host_info.inventory[nn].length)
+						rstr = rstr + '<div class=host_inventory_line><div class=host_inventory_line_l>'+nn+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
+			};
+			rstr = rstr + '</div>';
+		rstr = rstr + '</div>';
+		
+
+		
+		
 		var lhh = '';
 		if (_imap.markersList[host_id].host_info) {
 			if (_imap.markersList[host_id].host_info.inventory.url_a) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_a+'" target=_blank>URL A</a></div>';
 			if (_imap.markersList[host_id].host_info.inventory.url_b) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_b+'" target=_blank>URL B</a></div>';
 			if (_imap.markersList[host_id].host_info.inventory.url_c) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
 		};
+		rstr = rstr + '<div class=host_links>'+lhh+' </div>';
 		
-		rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre> '+lhh+' </div>';
+		
 		rstr = rstr + '<div class=triggers>';
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
 			for (var nn in _imap.markersList[host_id].triggers) {
@@ -942,6 +998,7 @@
 					_imap.markersList[+nn].del = true;
 				};
 				for (var nn in data) {
+					var new_host = false;
 					var host = data[+nn];
 					if (!host) continue;
 					var host_id = host.hostid;
@@ -953,48 +1010,53 @@
 						};
 					};
 					if ((host.inventory.location_lat=='') || (host.inventory.location_lat=='')) {
-						continue;
+						var host_lat = false;
+						var host_lon = false;
+					} else {
+						var host_lat = +(host.inventory.location_lat).replace(',', '.');
+						var host_lon = +(host.inventory.location_lon).replace(',', '.');
 					};
-					var host_lat = +(host.inventory.location_lat).replace(',', '.');
-					var host_lon = +(host.inventory.location_lon).replace(',', '.');
+
 					var hardware = host.inventory[_imap.settings.hardware_field];
-					
 					var maintenance = (host.maintenance_status === '1' ? true:false);
 					var maintenance_t = (maintenance?'maintenance ':'');
 					var nottrigger = (host.maintenance_type === '1' ? true:false);
 					var nottrigger_t = (nottrigger?'nottrigger ':'');
 					var description = host.description;
 					
-					if (_imap.markersList[host_id]) {
-						/*обновляем хост*/
-						host_status = _imap.markersList[host_id].marker.options.status;
+					if (!_imap.markersList[host_id]) {
+						_imap.markersList[host_id] = {marker: false, triggers: new Object, del:false, clust:false};
+					};
+					
+					_imap.markersList[host_id].host_info = host;
+					
+					if ( (host_lat) && (host_lon) ) {
+						if (!_imap.markersList[host_id].marker) {
+							_imap.markersList[host_id].marker = L.marker([host_lat,host_lon],{status:0, host_id:host_id});
+							_imap.markersList[host_id].marker.on('move',function(){ updateLinesMarker(this.options.host_id); });
+							new_host = true;
+						} else {
+							_imap.markersList[host_id].marker.setLatLng([host_lat,host_lon]);
+						};
+					};
+			
+					if (_imap.markersList[host_id].marker) {
 						_imap.markersList[host_id].marker.options.maintenance = maintenance;
 						_imap.markersList[host_id].marker.options.nottrigger = nottrigger;
 						_imap.markersList[host_id].marker.options.hardware = hardware;
 						_imap.markersList[host_id].marker.options.description = description;
-						_imap.markersList[host_id].del = false;
-					} else {
-						/*новый хост*/
-						var host_status = 0;
-						var host_marker = L.marker([host_lat,host_lon],{host_id:host_id, host_name:host_name, status:host_status, maintenance:maintenance, nottrigger:nottrigger})
-						_imap.markersList[host_id] = {marker: host_marker, triggers: new Object, del:false, clust:false};
-						_imap.markersList[host_id].marker.on('move',function(){ updateLinesMarker(this.options.host_id); });
-						_imap.markersList[host_id].marker.options.hardware = hardware;
-						_imap.markersList[host_id].marker.options.description = description;
+						_imap.markersList[host_id].marker.options.host_name = host_name;
+					};
+					_imap.markersList[host_id].del = false;
+					
+					if (new_host) {
 						if (!_imap.settings.show_with_triggers_only) {
 							updateMarker(host_id);
 							if (hostsFilter(host_id)) showMarker(host_id);
 						};
-						
-						
-						/*for (var nn in _imap.markersList) {
-							cLines++;
-							loadLine({'id':cLines, 'host1':+nn, 'host2':host_id});
-						};*/
 					};
-					_imap.markersList[host_id].host_info = host;
-
 				};
+
 				sortingHosts();
 				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
 				
@@ -1018,7 +1080,7 @@
 	};
 
 	function viewHostOnMap(hh) {
-		if (_imap.markersList[hh])
+		if (_imap.markersList[hh].marker)
 			_imap.map.setView(_imap.markersList[hh].marker._latlng,_imap.map.getMaxZoom());
 	};
 	

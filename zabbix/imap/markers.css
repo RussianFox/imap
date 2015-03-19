@@ -431,7 +431,7 @@ width: 10px !important;
 	right:2px;
 }
 
-.hostdescription .link {
+.host_links .link {
 	display:inline-block;
 	margin-right:2em;
 	padding:0.1em;
@@ -456,4 +456,32 @@ width: 10px !important;
 	word-wrap: break-word;
 	white-space: pre;
 	white-space: pre-wrap; 
+}
+
+.host_inventory {
+	display:table;
+}
+
+.host_inventory_line {
+	display:table-row;
+}
+
+.host_inventory_line_l {
+	display:table-cell;
+	text-align:right;
+	border-bottom:1px dotted grey;
+}
+
+.host_inventory_line_r {
+	display:table-cell;
+	padding-left:0.5em;
+	border-bottom:1px dotted grey;
+}
+
+.host_des {
+	max-height:150px;
+	overflow-y:auto;
+	background: rgb(228, 228, 228);
+	margin-bottom:1em;
+	padding-bottom:0.5em;
 }

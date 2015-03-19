@@ -183,8 +183,9 @@ if ($output=='ajax') {
 		$options['monitored_hosts'] = true;
 		$options['withInventory'] = true;
 		$options['selectInterfaces'] = 'extend';
-		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
-		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
+		//$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
+		$options['selectInventory'] = 'extend';
+		//if ($hardwareField) $options['selectInventory'][] = $hardwareField;
 		$options['selectMaintenances'] = 'extend';
 		$hosts = API::Host()->get($options);
 		
@@ -472,6 +473,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
 	_imap.settings.maxMarkersSpiderfy = 50;
+	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c','inventory_mode'];
 	bingAPIkey=false;
 	
 	
