@@ -75,7 +75,9 @@
 		} finally {};		
 		
 		return([baseMaps,overlayMaps]);
-	}
+	};
+	
+	
 	_imap.markers = new L.MarkerClusterGroup({
 		maxClusterRadius: 30,
 		iconCreateFunction: function (cluster) {
@@ -910,7 +912,7 @@
 			for (nn in _imap.markersList[host_id].host_info.inventory) {
 				if (("#" + _imap.settings.exluding_inventory.join("#,#") + "#").search("#"+nn+"#") == -1)
 					if (_imap.markersList[host_id].host_info.inventory[nn].length)
-						rstr = rstr + '<div class=host_inventory_line><div class=host_inventory_line_l>'+nn+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
+						rstr = rstr + '<div class=host_inventory_line><div class=host_inventory_line_l>'+locale.inventoryfields[nn]+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
 			};
 			rstr = rstr + '</div>';
 		rstr = rstr + '</div>';

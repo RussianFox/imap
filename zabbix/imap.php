@@ -508,6 +508,14 @@ foreach ($needThisFiles as $file) {
 	
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
 	
+	locale.inventoryfields = new Object;
+	
+	<?php textdomain("frontend");
+	foreach (getHostInventories() as $field): ?>
+		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
+	<?php endforeach;
+	textdomain("imap");?>
+	
 	_imap.filter = {
 		show_severity: <?php echo $pageFilter->severityMin; ?>,
 		hostid: <?php echo $pageFilter->hostid; ?>,
