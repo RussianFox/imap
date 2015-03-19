@@ -234,29 +234,32 @@ div.hostcontrol {
 }
 
 #show_hosts_list {
-	position:absolute;
-	top:80px;
-	right:0px;
-	background-color:rgba(0, 0, 0, 0.59);
-	display:block;
-	border-top-left-radius:20px;
-	border-bottom-left-radius:20px;
-	padding:5px;
-	cursor:pointer;
-	color:white;
+
+}
+
+#under_hosts_list {
+	width: 200px;
+	position: initial;
+	box-sizing: content-box;
+	padding-left:8px;
+	padding-bottom:5px;
 }
 
 #out_hosts_list {
-	width:200px;
 	position:absolute;
 	top:80px;
 	right:0px;
-	height:50%;
 	background-color:rgba(0, 0, 0, 0.59);
 	display:block;
 	border-top-left-radius:20px;
 	border-bottom-left-radius:20px;
-	z-index:1001;
+	z-index:999;
+}
+
+#show_hosts_list {
+	padding: 10px;
+	color: white;
+	font-size: 1.1em;
 }
 
 #close_hosts_list {
@@ -297,14 +300,14 @@ div.hostcontrol {
 }
 
 #hosts_list {
-	position:absolute;
-	top:40px;
-	bottom:20px;
-	right:0px;
-	left:5px;
-	background-color:transparent;
-	display:block;
-	overflow-y:auto;
+	position: relative;
+	margin-top: 45px;
+	max-height: 200px;
+	width: 100%;
+	right: 0px;
+	background-color: transparent;
+	display: block;
+	overflow-y: auto;
 }
 
 .nicescroll {

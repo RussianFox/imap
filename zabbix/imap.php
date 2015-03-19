@@ -411,11 +411,13 @@ foreach ($needThisFiles as $file) {
 	<div id=ajax></div>
 	<div id=imapmes><div id=mesLoading><div><?php echo _('Loading...'); ?></div></div></div>
 	<div id="out_hosts_list">
-		<div id=close_hosts_list><?php echo _('Close'); ?> <b>X</b></div>
-		<div id=search_hosts_list><input type=search placeholder="<?php echo _('Search'); ?>"></div>
-		<div id=hosts_list class="nicescroll"></div>
+		<div id=under_hosts_list style="display:none;">
+			<div id=search_hosts_list><input type=search placeholder="<?php echo _('Search'); ?>"></div>
+			<div id=hosts_list class="nicescroll"></div>
+		</div>
+		<div id=show_hosts_list><div id=filter-indicator><img src="imap/images/filter.png"></div> <b><?php echo _('Hosts'); ?></b></div>
 	</div>
-	<div id=show_hosts_list><div id=filter-indicator><img src="imap/images/filter.png"></div> <b><?php echo _('Hosts'); ?></b></div>
+	
 </div>
 
 <link rel="stylesheet" href="imap/leaflet/leaflet.css" />
@@ -448,10 +450,9 @@ foreach ($needThisFiles as $file) {
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
 <script type="text/javascript">
-	jQuery('#out_hosts_list').hide();
 	jQuery('#filter-indicator').hide();
-	jQuery('#show_hosts_list').click(function(){jQuery(this).hide(); jQuery('#out_hosts_list').animate({width:'toggle'},200);});
-	jQuery('#close_hosts_list').click(function(){jQuery('#out_hosts_list').animate({width:'toggle'},200); jQuery('#show_hosts_list').show(); });
+	jQuery('#show_hosts_list').mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery(this).hide(); });
+	jQuery('#out_hosts_list').mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); });
 	jQuery( "#search_hosts_list input" ).on('input',function() {
 		getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
 	});

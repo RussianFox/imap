@@ -337,7 +337,7 @@
 		if (nl.color == '0') nl.color = '#0034ff';
 		if (nl.opacity == '0') nl.opacity = 50;
 		nl.opacity = nl.opacity/100;
-		if (nl.weight == '0') nl.weight = 2;
+		if (nl.weight == '0') nl.weight = 5;
 		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 2:L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8})};
 		if ((nl.name !== undefined) & (nl.name !== '0')) {
 			_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + _imap.markersList[_imap.lines[nl.id][0]].host_info.name + '<-->' + _imap.markersList[_imap.lines[nl.id][1]].host_info.name);
