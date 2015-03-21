@@ -4,6 +4,7 @@ bindtextdomain('imap', 'locale');
 bind_textdomain_codeset('imap', 'UTF-8');
 
 require_once dirname(__FILE__).'/include/config.inc.php';
+require_once dirname(__FILE__).'/imap/DB.php';
 
 textdomain("imap");
 $page['title'] = _('Interactive map');
@@ -260,8 +261,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_link') {
 		
-		$res1 = DB::find('hosts_links', array('id' => $linkid));
-		$res2 = DB::find('hosts_links_settings', array('ids' => $linkid));
+		$res1 = DBimap::find('hosts_links', array('id' => $linkid));
+		$res2 = DBimap::find('hosts_links_settings', array('ids' => $linkid));
 		
 		$res = array();
 		
@@ -285,8 +286,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_links') {
 		
-		$res1 = DB::find('hosts_links');
-		$res2 = DB::find('hosts_links_settings');
+		$res1 = DBimap::find('hosts_links');
+		$res2 = DBimap::find('hosts_links_settings');
 		
 		$res = array();
 		
@@ -315,7 +316,7 @@ if ($output=='ajax') {
 			foreach ($thostid as $thost) {
 				if (API::Host()->isWritable(array($hostid))) {
 					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
-					$res = DB::insert('hosts_links', array($newlink));
+					$res = DBimap::insert('hosts_links', array($newlink));
 				};
 			};
 
@@ -330,11 +331,11 @@ if ($output=='ajax') {
 		$link=$linkid;
 		
 		$newlink = array( 'values' => array('name' => $linkoptions['linkname'] ), 'where' => array( 'id' => $link ) );
-		$res = DB::update('hosts_links', array($newlink));
+		$res = DBimap::update('hosts_links', array($newlink));
 		
-		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
 		
-		$res = DB::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
+		$res = DBimap::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
 		
 		$responseData = json_encode(array('result'=>htmlspecialchars($res),'linkoptions'=>$linkoptions), FALSE);
 		echo $responseData;
@@ -345,8 +346,8 @@ if ($output=='ajax') {
 		
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
-		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
-		$res = DB::delete('hosts_links', array('id'=>array($link)));
+		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('hosts_links', array('id'=>array($link)));
 		
 		$responseData = json_encode(array('result'=>TRUE), FALSE);
 		echo $responseData;
@@ -390,11 +391,11 @@ if ($output!='block') {
 	textdomain("imap");
 };
 //проверяем наличие таблиц в БД
- $check_links = true;
-// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
-// if (count($glinks)==0) $check_links = false;
-// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
-// if (count($glinks)==0) $check_links = false;
+$check_links = true;
+$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
+if (count($glinks)==0) $check_links = false;
+$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
+if (count($glinks)==0) $check_links = false;
 
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
@@ -491,7 +492,7 @@ foreach ($needThisFiles as $file) {
 	locale['Hosts'] = '<?php echo _('Hosts'); ?>';
 	locale['This host does not have coordinates'] = '<?php echo _('This host does not have coordinates'); ?>';
 	locale['Set a hardware type'] = '<?php echo _('Set a hardware type'); ?>';
-	locale["Host's links"] = "<?php echo _('Host\'s links'); ?>";
+	locale["Host's links"] = "<?php echo _("Host\'s links"); ?>";
 	locale['Show debug information'] = "<?php echo _("Show debug information"); ?>";
 	locale['Debug information'] = "<?php echo _("Debug information"); ?>";
 	locale['Select hosts for links'] = "<?php echo _("Select hosts for links"); ?>";

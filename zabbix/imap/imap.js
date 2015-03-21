@@ -327,6 +327,13 @@
 		};
 	};
 	
+	function getHostname(id) {
+		var rr='';
+		rr = _imap.markersList[+id].host_info.name;
+		if (rr == '') rr = _imap.markersList[+id].host_info.host;
+		return rr;
+	};
+	
 	function loadLine(nl) {
 		if (!_imap.settings.links_enabled) return;
 		if (_imap.lines[nl.id]) {
@@ -339,10 +346,10 @@
 		nl.opacity = nl.opacity/100;
 		if (nl.weight == '0') nl.weight = 5;
 		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 2:L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8})};
-		if ((nl.name !== undefined) & (nl.name !== '0')) {
-			_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + _imap.markersList[_imap.lines[nl.id][0]].host_info.name + '<-->' + _imap.markersList[_imap.lines[nl.id][1]].host_info.name);
-			_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
-		};
+		if (nl.name == '0') nl.name = '';
+		_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
+		_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
+		
 		_imap.lines[nl.id][2].on('click',function(){linkOptions(nl.id);});
 		updateLine(nl.id);
 		return true;
