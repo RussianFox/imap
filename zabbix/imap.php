@@ -471,6 +471,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.hardware_field = 'type';
 	_imap.settings.maxMarkersSpiderfy = 50;
 	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c','inventory_mode'];
+	_imap.settings.useIconsInMarkers = false;
 	bingAPIkey=false;
 	
 	

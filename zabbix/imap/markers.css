@@ -9,16 +9,6 @@ img.hardwareIcon {
 	max-height:18px;
 }
 
-.icon_status {
-	background-repeat: no-repeat !important;
-	border-radius:8px;
-	width:18px !important;
-	height:18px !important;
-	background-position: center center;
-	box-shadow: none !important;
-	border-width:0px !important;
-}
-
 span.st_maintenance {
 	color:gray;
 	font-weight:bold;
@@ -66,42 +56,94 @@ span.st_ok {
 	font-size:8px;
 }
 
+.icon_status_img {
+	background-repeat: no-repeat !important;
+	border-radius:10px;
+	width:24px !important;
+	height:24px !important;
+	background-position: center center;
+	box-shadow: none !important;
+	border-width:0px !important;
+	padding:0px;
+	margin:0px;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.icon_status {
+	background-repeat: no-repeat !important;
+	border-radius:8px;
+	width:18px !important;
+	height:18px !important;
+	background-position: center center;
+	box-shadow: none !important;
+	border-width:0px !important;
+	padding:0px;
+	margin:0px;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.icon_status_img img {
+	max-width:18px !important;
+	max-height:18px !important;
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 auto;
+}
+
 .icon_status_0 {
 	background-color:#58F500;
-	background-image:url(images/status1.gif);
-	box-shadow: 0 0 15px #58F500;
 	z-index: 400 !important;
 }
 
 .icon_status_1 {
 	background-color:#D6F6FF;
-	background-image:url(images/status1.gif);
 	z-index: 401 !important;
 }
 
 .icon_status_2 {
 	background-color:#FFF6A5;
-	background-image:url(images/status3.gif);
 	z-index: 402 !important;
 }
 
 .icon_status_3 {
 	background-color:#FFB689;
-	background-image:url(images/status5.gif);
 	z-index: 403 !important;
 }
 
 .icon_status_4 {
 	background-color:#FF9999;
-	background-image:url(images/status5.gif);
 	z-index: 404 !important;
 }
 
 .icon_status_5 {
 	background-color:#FF3838;
-	background-image:url(images/status5.gif);
 	z-index: 405 !important;
-	box-shadow: 0 0 15px #FF3838;
+}
+
+.icon_status_smile_0 {
+	background-image:url(images/status1.gif);
+}
+
+.icon_status_smile_1 {
+	background-image:url(images/status1.gif);
+}
+
+.icon_status_smile_2 {
+	background-image:url(images/status3.gif);
+}
+
+.icon_status_smile_3 {
+	background-image:url(images/status5.gif);
+}
+
+.icon_status_smile_4 {
+	background-image:url(images/status5.gif);
+}
+
+.icon_status_smile_5 {
+	background-image:url(images/status5.gif);
 }
 
 .maintenance {

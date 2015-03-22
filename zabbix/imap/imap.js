@@ -329,6 +329,7 @@
 	
 	function getHostname(id) {
 		var rr='';
+		if (!_imap.markersList[+id].host_info) return '';
 		rr = _imap.markersList[+id].host_info.name;
 		if (rr == '') rr = _imap.markersList[+id].host_info.host;
 		return rr;
@@ -954,7 +955,11 @@
 		};
 		_imap.markersList[host_id].marker.label.setContent(hardware+' '+escapeHtml(_imap.markersList[host_id].marker.options.host_name));
 		_imap.markersList[host_id].marker.bindPopup(rstr);
-		_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
+		if (_imap.settings.useIconsInMarkers) {
+			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status3.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
+		} else {
+			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+_imap.markersList[host_id].marker.options.status + ' icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
+		};
 	};
 	
 	function loadLinks(hl) {
