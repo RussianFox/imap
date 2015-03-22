@@ -404,6 +404,7 @@ foreach ($needThisFiles as $file) {
 		break;
 	};
 };
+
 ?>
 
 
@@ -531,6 +532,7 @@ foreach ($needThisFiles as $file) {
 <?php
 
 	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js"></script>';
+	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
 

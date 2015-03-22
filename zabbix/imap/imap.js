@@ -66,13 +66,13 @@
 			baseMaps["Yandex"] = new L.Yandex();
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
-		} finally {};
+		}  catch(e) {} finally {};
 		
 		try {
 			baseMaps["Google Satellite"] = new L.Google();
 			baseMaps["Google"] = new L.Google('TERRAIN');
 			baseMaps["Google Hybrid"] = new L.Google('HYBRID');
-		} finally {};		
+		}  catch(e) {} finally {};		
 		
 		return([baseMaps,overlayMaps]);
 	};
@@ -1220,7 +1220,7 @@
 			_imap.map.addLayer(_imap.links);
 		};
 		
-		mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
+		_imap.mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
 
 		jQuery('.leaflet-control-layers-selector').bind('change',function(){saveLayersMap()});
 		_imap.map.on('moveend',function(){ updateLines(); });
@@ -1287,8 +1287,7 @@
 		setInterval(function() { timeUpdate(); },1000);
 		loadHosts();
 		intervalID = window.setInterval(function(){loadHosts();}, 30000);
-		
-		
+		try { userAdditions(); } catch(e) {} finally {};
 	});
 
 	jQuery(window).resize(function(){if (document.readyState=='complete') mapSize()});
