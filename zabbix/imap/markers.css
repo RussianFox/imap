@@ -238,18 +238,13 @@ div.hostcontrol {
 }
 
 #under_hosts_list {
-	width: 200px;
-	position: initial;
-	box-sizing: content-box;
-	padding-left:8px;
-	padding-bottom:5px;
+	padding:5px;
 }
 
 #out_hosts_list {
-	position:absolute;
 	top:80px;
 	right:0px;
-	background-color:rgba(0, 0, 0, 0.59);
+	background-color:#fff;
 	display:block;
 	border-top-left-radius:20px;
 	border-bottom-left-radius:20px;
@@ -258,7 +253,6 @@ div.hostcontrol {
 
 #show_hosts_list {
 	padding: 10px;
-	color: white;
 	font-size: 1.1em;
 }
 
@@ -272,41 +266,21 @@ div.hostcontrol {
 	cursor:pointer;
 }
 
-#search_hosts_list {
-	position:absolute;
-	top:15px;
-	left:5px;
-	right:10px;
-	background-color:transparent;
-	display:block;
-}
-
 #search_hosts_list input {
+	border: 1px solid #9E9E9E;
+	color: #000000;
+	padding: 2px;
+	background: rgba(239, 239, 239, 0.51);
+	border-radius: 4px;
+	-webkit-appearance: none;
 	width:100%;
 	box-sizing: border-box;
 }
 
-#search_hosts_list input {
-	border: 1px solid #9E9E9E;
-	color: #F4EEEE;
-	padding: 2px;
-	margin-top: 2px;
-	margin-bottom: 2px;
-	font-size: 11px;
-	font-family: Verdana;
-	background: rgba(0, 0, 0, 0.51);
-	border-radius: 4px;
-	-webkit-appearance: none;
-}
-
 #hosts_list {
-	position: relative;
-	margin-top: 45px;
+	margin-top: 5px;
 	max-height: 200px;
 	width: 100%;
-	right: 0px;
-	background-color: transparent;
-	display: block;
 	overflow-y: auto;
 }
 
@@ -347,18 +321,18 @@ width: 10px !important;
 #hosts_list .host_in_list {
 	border-radius:5px;
 	padding:2px;
-	background-color:gray;
+	background-color:#E1E7EC;
 	margin-bottom:3px;
-	color:white;
+	color:black;
 	cursor:pointer;
 }
 
 #hosts_list .host_in_list:hover {
-	background-color:rgb(90, 89, 89);
+	background-color:rgba(97, 155, 221, 0.48);
 }
 
 #hosts_list .host_in_list:active {
-	background-color:black;
+	background-color:rgba(97, 155, 221, 1);
 }
 
 .host_crosschair {
@@ -487,4 +461,10 @@ width: 10px !important;
 	background: rgb(228, 228, 228);
 	margin-bottom:1em;
 	padding-bottom:0.5em;
+}
+
+.hosts_list.leaflet-control {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px; 
 }

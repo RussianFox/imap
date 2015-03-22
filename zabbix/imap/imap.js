@@ -1138,35 +1138,79 @@
 		L.control.scale({position:'bottomleft',metric:true}).addTo(_imap.map);
 		L.control.measure({position:'bottomleft'}).addTo(_imap.map);
 	
-		var SearchControl = L.Control.extend({
+		if (_imap.settings.use_search) {
+			var SearchControl = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+
+				onAdd: function (map) {
+					// create the control container with a particular class name
+					var container = L.DomUtil.create('div', 'search-control');
+					container.innerHTML = '<form onsubmit="searchGoogle();return false;"><img class="middle" src="imap/images/logo-google.png"> <input id=search-control-text placeholder="'+locale.Search+'" type=search></form><div id=search-control-list></div>';
+					jQuery(container).mouseleave(function(){
+						  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
+						  _imap.map.scrollWheelZoom.enable();
+					});
+					jQuery(container).mouseenter(function(){
+						  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
+						  _imap.map.scrollWheelZoom.disable();
+					});
+					jQuery(container).click(function(event){ event.stopPropagation(); });
+					jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+					jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+					jQuery(container).scroll(function(event){ event.stopPropagation(); });
+					
+					return container;
+				}
+			});
+			_imap.map.addControl(new SearchControl());
+		};
+	
+		
+		var HostsControl = L.Control.extend({
 			options: {
-				position: 'topleft'
+				position: 'topright'
 			},
 
 			onAdd: function (map) {
 				// create the control container with a particular class name
-				var container = L.DomUtil.create('div', 'search-control');
-				container.innerHTML = '<form onsubmit="searchGoogle();return false;"><img class="middle" src="imap/images/logo-google.png"> <input id=search-control-text placeholder="'+locale.Search+'" type=search></form><div id=search-control-list></div>';
-				jQuery(container).mouseleave(function(){
-					  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
-					  _imap.map.scrollWheelZoom.enable();
+				var container = L.DomUtil.create('div', 'hosts_list');
+				jQuery(container).attr('aria-haspopup','true');
+				jQuery(container).append(
+				'<div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+locale['Search']+'"></div><div id=hosts_list class="nicescroll"></div></div><div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+locale["Hosts"]+'</b></div>'
+				);
+				
+				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
+				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
+				/*
+				
+				jQuery( "#search_hosts_list input" ).on('input',function() {
+					getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
 				});
-				jQuery(container).mouseenter(function(){
-					  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
-					  _imap.map.scrollWheelZoom.disable();
+				*/
+				
+				jQuery(container).click(function(event){ 
+				  event.stopPropagation();
+				  
 				});
-				jQuery(container).click(function(event){ event.stopPropagation(); });
-				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
-				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
-				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){
+				  event.stopPropagation(); 
+				  
+				});
+				jQuery(container).mousemove(function(event){
+				  event.stopPropagation(); 
+				  
+				});
+				jQuery(container).scroll(function(event){
+				  event.stopPropagation(); 
+				  
+				});
 				
 				return container;
 			}
 		});
-		if (_imap.settings.use_search) {
-			_imap.map.addControl(new SearchControl());
-		};
-	
+		
 		
 		var MyLocationControl = L.Control.extend({
 			options: {
@@ -1240,6 +1284,9 @@
 				};
 			};
 		});
+		
+		_imap.map.addControl(new HostsControl());
+		
 	};
 
 	function saveLayersMap() {
