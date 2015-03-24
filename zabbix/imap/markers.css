@@ -195,13 +195,21 @@ div.search-control {
 	border: 2px solid rgba(0,0,0,0.2);
 }
 
-.search-control input {
-    border: 0px;
-    width: 
+#search-control-text{
+	display: block;
+	width: 100%;
+	left: 50px;
+	right: 3px;
+	min-width: 250px;
+	border:0px;
+	padding:2px;
+	padding-left: 50px;
 }
-.search-control input:focus {
-    min-width:20em;
-    outline:none;
+
+#search-control-input img {
+	position: absolute;
+	left: 0px;
+	top: 4px;
 }
 
 div.result {
@@ -211,6 +219,7 @@ div.result {
 }
 
 #search-control-list {
+	border-top: 1px solid rgba(128, 128, 128, 0.72);
 	max-height:20em;
 	overflow-y:auto;
 }
@@ -241,6 +250,7 @@ div.hostcontrol {
 	width: 300px;
 	margin-left: -150px;
 	left: 50%;
+	z-index:1003;
 }
 
 #imapmes div {
@@ -509,4 +519,8 @@ width: 10px !important;
 	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 	background: #fff;
 	border-radius: 5px; 
+}
+
+.leaflet-top {
+	z-index:1002;
 }

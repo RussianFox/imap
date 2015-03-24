@@ -12,6 +12,7 @@
 	_imap.vars = new Object;
 	_imap.vars.it_first = true;
 	_imap.hostsfilter = '';
+	_imap.searchmarkers = L.layerGroup();
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -329,6 +330,7 @@
 	
 	function getHostname(id) {
 		var rr='';
+		if (!_imap.markersList[+id]) return '';
 		if (!_imap.markersList[+id].host_info) return '';
 		rr = _imap.markersList[+id].host_info.name;
 		if (rr == '') rr = _imap.markersList[+id].host_info.host;
@@ -1098,7 +1100,21 @@
 			_imap.map.setView(_imap.markersList[hh].marker._latlng,_imap.map.getMaxZoom());
 	};
 	
-	function searchGoogle() {
+	/* TimerSearchGoogle(jQuery('#search-control-text').val()); */
+	
+	_imap.searchtimer=false;
+	
+	function TimerSearchGoogle(searchval) {
+		if (_imap.searchtimer) {
+			clearTimeout(_imap.searchtimer);
+		};
+		_imap.searchtimer = setTimeout(function(){ searchGoogle(searchval); },1000);
+	};
+	
+	function searchGoogle(searchval) {
+		_imap.searchtimer=false;
+		_imap.searchmarkers.clearLayers();
+		jQuery('#search-control-list').html('');
 		jQuery.get(
 		  "https://maps.googleapis.com/maps/api/geocode/json",
 		  {
@@ -1106,22 +1122,29 @@
 		    language: 'ru',
 		    region: 'ru',
 		    bounds: ''+_imap.map.getBounds()._northEast.lat+','+_imap.map.getBounds()._northEast.lng+'|'+_imap.map.getBounds()._southWest.lat+','+_imap.map.getBounds()._southWest.lng,
-		    address: jQuery('#search-control-text').val()
+		    address: searchval
 		  },
 		  function(text) {
 			if (text.status=='OK') {
 				jQuery('#search-control-list').html('');
-				for (i=0; i<text.results.length; i++)
-					jQuery('#search-control-list').append('<div class="result"> <a class="link google" lat='+text.results[i].geometry.location.lat+' lon='+text.results[i].geometry.location.lng+'><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');
+				for (i=0; i<text.results.length; i++) {
+					
+					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup(text.results[i].formatted_address);
+					_imap.searchmarkers.addLayer(smarker);
+					var smarkerID = _imap.searchmarkers.getLayerId(smarker);
+					jQuery('#search-control-list').append('<div class="result"> <a class="link google" layerid="'+smarkerID+'"><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');
+				};
 				jQuery('#search-control-list').show();
 				jQuery('#search-control-list .link').bind('click',function(event){
-				event.stopPropagation();
-				_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18,{animate:false,pan:{animate:false},zoom:{animate:false}});
-				var searchpopup = L.popup();
-				searchpopup.setLatLng([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')]);
-				searchpopup.setContent(jQuery(this).html());
-				_imap.map.openPopup(searchpopup)
-				/*_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18);*/
+					event.stopPropagation();
+					_imap.map.setView(_imap.searchmarkers.getLayer(jQuery(this).attr('layerid'))._latlng,_imap.map.getMaxZoom(),{animate:false,pan:{animate:false},zoom:{animate:false}});
+					_imap.searchmarkers.getLayer(jQuery(this).attr('layerid')).openPopup();
+					/*_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18,{animate:false,pan:{animate:false},zoom:{animate:false}});
+					var searchpopup = L.popup();
+					searchpopup.setLatLng([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')]);
+					searchpopup.setContent(jQuery(this).html());
+					_imap.map.openPopup(searchpopup)
+					_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18);*/
 				});
 			};
 		  }
@@ -1152,7 +1175,7 @@
 				onAdd: function (map) {
 					// create the control container with a particular class name
 					var container = L.DomUtil.create('div', 'search-control');
-					container.innerHTML = '<form onsubmit="searchGoogle();return false;"><img class="middle" src="imap/images/logo-google.png"> <input id=search-control-text placeholder="'+locale.Search+'" type=search></form><div id=search-control-list></div>';
+					container.innerHTML = '<div id=search-control-input><img class="middle" src="imap/images/logo-google.png"> <input oninput="TimerSearchGoogle(event.target.value);" id=search-control-text placeholder="'+locale.Search+'" type=search></div><div id=search-control-list></div>';
 					jQuery(container).mouseleave(function(){
 						  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
 						  _imap.map.scrollWheelZoom.enable();
@@ -1269,6 +1292,8 @@
 			_imap.map.addLayer(_imap.links);
 		};
 		
+		_imap.map.addLayer(_imap.searchmarkers);
+		
 		_imap.mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
 
 		jQuery('.leaflet-control-layers-selector').bind('change',function(){saveLayersMap()});
@@ -1340,8 +1365,9 @@
 		loadHosts();
 		intervalID = window.setInterval(function(){loadHosts();}, 30000);
 		try { userAdditions(); } catch(e) {} finally {};
+		_imap.settings.exluding_inventory[_imap.settings.exluding_inventory.length] = 'inventory_mode';
 	});
 
-	jQuery(window).resize(function(){if (document.readyState=='complete') mapSize()});
+	jQuery(window).resize(function(){if (document.readyState=='complete') setInterval(function() { mapSize(); },1000);});
 
 	

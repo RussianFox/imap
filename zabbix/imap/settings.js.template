@@ -32,4 +32,4 @@ _imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url
 
 /* true - use hardware icons in markers */
 /* true - использовать иконки оборудования для маркеров */
-_imap.settings.useIconsInMarkers = true;
+_imap.settings.useIconsInMarkers = false;
