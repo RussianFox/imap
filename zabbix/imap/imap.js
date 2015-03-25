@@ -58,9 +58,9 @@
 		};
 		
 		if (bingAPIkey) {
-			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey);
-			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {type: 'AerialWithLabels'});
-			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {type: 'Road'});
+			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Aerial'});
+			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'AerialWithLabels'});
+			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Road'});
 		};
 		
 		try {
@@ -1119,8 +1119,8 @@
 		  "https://maps.googleapis.com/maps/api/geocode/json",
 		  {
 		    sensor: 'true',
-		    language: 'ru',
-		    region: 'ru',
+		    language: _imap.settings.lang.split('_')[0],
+		    region: _imap.settings.lang.split('_')[1],
 		    bounds: ''+_imap.map.getBounds()._northEast.lat+','+_imap.map.getBounds()._northEast.lng+'|'+_imap.map.getBounds()._southWest.lat+','+_imap.map.getBounds()._southWest.lng,
 		    address: searchval
 		  },
@@ -1129,7 +1129,7 @@
 				jQuery('#search-control-list').html('');
 				for (i=0; i<text.results.length; i++) {
 					
-					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup(text.results[i].formatted_address);
+					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup('<span class=coordinates>'+text.results[i].geometry.location.lat+','+text.results[i].geometry.location.lng+'</span><br>'+text.results[i].formatted_address);
 					_imap.searchmarkers.addLayer(smarker);
 					var smarkerID = _imap.searchmarkers.getLayerId(smarker);
 					jQuery('#search-control-list').append('<div class="result"> <a class="link google" layerid="'+smarkerID+'"><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');

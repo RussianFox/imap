@@ -425,10 +425,10 @@ foreach ($needThisFiles as $file) {
 
 <script src="imap/leaflet/plugins/layer/tile/Bing.js"></script>
 
-<script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=en-UA" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=<?php echo CWebUser::$data['lang']; ?>" type="text/javascript"></script>
 <script src="imap/leaflet/plugins/layer/tile/Yandex.js"></script>
 
-<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+<script src="https://maps.google.com/maps/api/js?v=3&sensor=false&language=<?php echo CWebUser::$data['lang']; ?>"></script>
 <script src="imap/leaflet/plugins/layer/tile/Google.js"></script>
 
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>
@@ -455,6 +455,8 @@ foreach ($needThisFiles as $file) {
 	var _imap = new Object;
 
 	_imap.settings = new Object;
+	_imap.settings.lang = "<?php echo CWebUser::$data['lang']; ?>";
+	
 	
 	/* This settings changing in interactive mode */
 	_imap.settings.do_map_control = <?php echo $control_map; ?>;
