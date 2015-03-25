@@ -1,33 +1,38 @@
 # imap
 Interactive map for Zabbix
 
+Данная версия разработана для Zabbix версий 2.2 и 2.4
+
+На старых версиях работоспособность не гарантирована и дорабатываться не будет.
+
+Для новых версий разработка будет проводиться по мере выходов официальных релизов.
+
+
+
+ВНИМАНИЕ! Пользователи предыдущих бета-версий должны отменить изменения, внесенные в файлы include/menu.inc.php и include/classes/db/DB.php
+
+
+
 Для установки скопируйте содержимое папки zabbix в директорию вашего zabbix (/usr/share/zabbix для Debian, например).
 
 Чтобы подключить imap в стандартный интерфейс, отредактируйте include/menu.inc.php
-Пример правки:
+В самый конец файла вставьте:
 
-	array(
-		'url' => 'srv_status.php',
-		'label' => _('IT services'),
-		'force_disable_all_nodes' => true,
-		'sub_pages' => array('report3.php', 'chart5.php')
-	),
-	array(
-		'url'=>'imap.php',
-		'label'=>_('Interactive map')
-	),
-	array(
-
-		'url' => 'chart3.php'
-	),
+	require_once dirname(__FILE__).'/../imap/menu.inc.php';
 
 Теперь основной функционал работоспособен. Зайдите в ваш Zabbix и вы увидите новый пункт меню.
 
 Для дополнительных настроек найдите в папке imap файл settings.js.template, переименуйте в settings.js и поменяйте настройки по своему вкусу.
 
+Для собственных дополнений кода (например, добавления своих слоев на карту), переименуйте файл additions.js.template в additions.js и добавьте там свой код.
+
 Для получения ключа API для Bing вам надо получить учетную запись Microsoft и создать новый ключ. Подробности тут http://msdn.microsoft.com/ru-ru/library/ff428642.aspx
 
 Для того, чтобы работали иконки оборудования, вам надо набросать в папку imap/hardware картинок в формате png. Названием будет тип оборудования (modem.png, server.png). Не забудьте дать права на чтение этих файлов веб-сервером. Не удаляйте и не заменяйте файл none.png
+
+
+
+
 
 Для работы связей между хостами нам нужно добавить две таблицы в базу данных Zabbix.
 
@@ -39,61 +44,3 @@ Interactive map for Zabbix
 
 Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
 
-Теперь надо добавить схему таблиц в файл в директории установки zabbix include/schema.inc.php
-
-	'hosts_links' => array(
-		'key' => 'host1,host2',
-		'fields' => array(
-			'id' => array(
-				'null' => false,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-			'name' => array(
-				'null' => true,
-				'type' => DB::FIELD_TYPE_CHAR,
-				'length' => 255,
-				'default' => '',
-			),
-			'host1' => array(
-				'null' => false,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-			'host2' => array(
-				'null' => false,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-		),
-	),
-	'hosts_links_settings' => array(
-		'key' => 'host1,host2',
-		'fields' => array(
-			'ids' => array(
-				'null' => false,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-			'color' => array(
-				'null' => true,
-				'type' => DB::FIELD_TYPE_CHAR,
-				'length' => 30,
-			),
-			'weight' => array(
-				'null' => true,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-			'opacity' => array(
-				'null' => true,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
-			),
-			'dash' => array(
-				'null' => true,
-				'type' => DB::FIELD_TYPE_CHAR,
-				'length' => 100,
-			),
-		),
-	),

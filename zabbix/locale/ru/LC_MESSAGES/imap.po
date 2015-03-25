@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imap v.0.0.1\n"
 "POT-Creation-Date: 2014-11-30 23:31+0300\n"
-"PO-Revision-Date: 2015-03-08 18:26+0300\n"
+"PO-Revision-Date: 2015-03-19 18:38+0300\n"
 "Last-Translator: RusFox <horonitel@gmail.com>\n"
 "Language-Team:  <horonitel@gmail.com>\n"
 "Language: ru\n"
@@ -21,6 +21,9 @@ msgid ""
 msgstr ""
 "Если вы видите это сообщение, значит у скрипта возникли проблемы с доступом "
 "к файлам. Попробуйте выставить права на чтение для web-сервера на папку imap."
+
+msgid "Delete confirm"
+msgstr "Подтверждение удаления"
 
 msgid "Delete link"
 msgstr "Удалить связь"
@@ -69,6 +72,9 @@ msgstr "Ошибка"
 
 msgid "Failed to update data"
 msgstr "Обновление данных завершилось неудачно"
+
+msgid "Failed to get data"
+msgstr "Ошибка получения данных"
 
 msgid "Select a new position"
 msgstr "Выберите новое местоположение"

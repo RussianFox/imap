@@ -25,3 +25,11 @@ _imap.settings.hardware_field = 'type';
 /* How many markers can spiderfy on non-max zoom map */
 /* Ограничение количества маркеров при раскрытии кластера на немаксимальном зуме карты*/
 _imap.settings.maxMarkersSpiderfy = 50;
+
+/* Excluding inventory fields in popup of hosts on map */
+/* Поля инвентарных данных, которые не нужно показывать в сплывающем окне хоста на карте */
+_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
+
+/* true - use hardware icons in markers */
+/* true - использовать иконки оборудования для маркеров */
+_imap.settings.useIconsInMarkers = false;

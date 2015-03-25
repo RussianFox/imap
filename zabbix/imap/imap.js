@@ -1,23 +1,35 @@
 
-	_zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	jQuery('#imapworkarea').show();
 	jQuery('#imapworkareaError').hide();
 
-	function escapeHtml(text) {
-	  if (text == undefined) return '';
-	  var map = {
-	    '&': '&amp;',
-	    '<': '&lt;',
-	    '>': '&gt;',
-	    '"': '&quot;',
-	    "'": '&#039;'
-	  };
+	_imap.links = L.layerGroup();
+	
+	_imap.markersList = new Object;
+	_imap.map = false;
+	_imap.bbox = false;
+	_imap.searchpopup;
+	_imap.lines = new Object;
+	_imap.vars = new Object;
+	_imap.vars.it_first = true;
+	_imap.hostsfilter = '';
+	_imap.searchmarkers = L.layerGroup();
 
-	  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
+	
+	function escapeHtml(text) {
+		if (text == undefined) return '';
+		var map = {
+		  '&': '&amp;',
+		  '<': '&lt;',
+		  '>': '&gt;',
+		  '"': '&quot;',
+		  "'": '&#039;'
+		};
+
+		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
 	
 	function getLayers() {
-	  
 		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
 		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
 		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
@@ -46,25 +58,27 @@
 		};
 		
 		if (bingAPIkey) {
-			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey);
-			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {type: 'AerialWithLabels'});
-			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {type: 'Road'});
+			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Aerial'});
+			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'AerialWithLabels'});
+			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Road'});
 		};
 		
 		try {
 			baseMaps["Yandex"] = new L.Yandex();
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
-		} finally {};
+		}  catch(e) {} finally {};
 		
 		try {
 			baseMaps["Google Satellite"] = new L.Google();
 			baseMaps["Google"] = new L.Google('TERRAIN');
 			baseMaps["Google Hybrid"] = new L.Google('HYBRID');
-		} finally {};		
+		}  catch(e) {} finally {};		
 		
 		return([baseMaps,overlayMaps]);
-	}
+	};
+	
+	
 	_imap.markers = new L.MarkerClusterGroup({
 		maxClusterRadius: 30,
 		iconCreateFunction: function (cluster) {
@@ -89,7 +103,7 @@
 			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
 		}
 	});
-		
+	
 	_imap.markers.on('clustercontextmenu',function(tt){ 
 		if ( (tt.layer._childCount<_imap.settings.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
 			tt.layer.spiderfy();
@@ -98,16 +112,7 @@
 		}
 	});
 	
-	_imap.links = L.layerGroup();
-	
-	_imap.markersList = new Object;
-	_imap.map = false;
-	_imap.it_first = true;
-	_imap.bbox = false;
-	_imap.searchpopup;
-	_imap.lines = new Object;
-	_imap.hostsfilter = '';
-	
+	/* Изменение свойств линии связи */
 	function linkOptions(hl) {
 		var ttx='';
 		ttx = ttx + '<div class="item"><button onClick="jQuery(\'.dellinkconfirm\').show();"><span class=delbutton>X</span> '+locale['Delete link']+'</button>  </div>';
@@ -181,11 +186,13 @@
 		
 	};
 	
+	/* Ошибка ajax-запроса */
 	function ajaxError(mmes,cr) {
 		if (mmes == undefined) mmes = locale['Failed to update data'];
 		showMes('<b><font color=red>'+locale['Error']+'</font></b>: '+mmes,cr);
 	};
 	
+	/* удаляем линию связи */
 	function deleteLink(linkid) {
 		jQuery.ajax({
 			url: 'imap.php',
@@ -210,6 +217,7 @@
 		});
 	};
 	
+	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
 		if (ff == undefined) return true;
 		if (ff == '') return true;
@@ -218,7 +226,7 @@
 		var res = false;
 		res = ((res) || (_imap.markersList[hh].host_info.name.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.host.toLowerCase().indexOf(ff.toLowerCase())>-1));
-		res = ((res) || (_imap.markersList[hh].host_info.description.toLowerCase().indexOf(ff.toLowerCase())>-1));
+		if (_imap.markersList[hh].host_info.description) res = ((res) || (_imap.markersList[hh].host_info.description.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.inventory[_imap.settings.hardware_field].toLowerCase().indexOf(ff.toLowerCase())>-1));
 		
 		var ob = jQuery.makeArray( _imap.markersList[hh].host_info.interfaces );
@@ -229,13 +237,15 @@
 		return res;
 	};
 	
-	var timeoutHostSearch1;
+	_imap.vars.timeoutHostSearch1 = false;
 
+	/* задержка поиска в списке хостов на карте */
 	function getHostsFilter1T(tx) {
-		if (timeoutHostSearch1) clearTimeout(timeoutHostSearch1);
-		timeoutHostSearch1=setTimeout(function(){ getHostsFilter1(tx) },1000);
+		if (_imap.vars.timeoutHostSearch1) clearTimeout(_imap.vars.timeoutHostSearch1);
+		_imap.vars.timeoutHostSearch1=setTimeout(function(){ getHostsFilter1(tx) },1000);
 	};
 
+	/* поиск в списке хостов на карте */
 	function getHostsFilter1(tx) {
 		_imap.hostsfilter = tx.toLowerCase();
 		if (_imap.hostsfilter=='') {
@@ -254,13 +264,15 @@
 		};
 	};
 	
-	var timeoutHostSearch2;
+	_imap.vars.timeoutHostSearch2 = false;
 	
+	/* задержка поиска в списке хостов выбора связи */
 	function getHostsFilter2T(tx) {
-		if (timeoutHostSearch2) clearTimeout(timeoutHostSearch2);
-		timeoutHostSearch2=setTimeout(function(){ getHostsFilter2(tx) },1000);
+		if (_imap.vars.timeoutHostSearch2) clearTimeout(_imap.vars.timeoutHostSearch2);
+		_imap.vars.timeoutHostSearch2=setTimeout(function(){ getHostsFilter2(tx) },1000);
 	};
 	
+	/* поиск в списке хостов выбора связи */
 	function getHostsFilter2() {
 		var tx = jQuery('.links_filter input').val();
 		if (tx==='') {
@@ -276,6 +288,7 @@
 		
 	};
 	
+	/* обновляем линию связи */
 	function updateLine(nn) {
 		if (!_imap.settings.links_enabled) return;
 		if ( (_imap.markersList[_imap.lines[nn][0]]) && (_imap.markersList[_imap.lines[nn][1]]) ) {
@@ -286,7 +299,7 @@
 						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][0]].marker._latlng);
 						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][1]].marker._latlng);
 						
-						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_zoom_meters[_imap.map.getZoom()]) {
+						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_imap.settings._zoom_meters[_imap.map.getZoom()]) {
 							if (!_imap.links.hasLayer(_imap.lines[nn][2])) {
 								_imap.links.addLayer(_imap.lines[nn][2]);
 							};
@@ -315,6 +328,15 @@
 		};
 	};
 	
+	function getHostname(id) {
+		var rr='';
+		if (!_imap.markersList[+id]) return '';
+		if (!_imap.markersList[+id].host_info) return '';
+		rr = _imap.markersList[+id].host_info.name;
+		if (rr == '') rr = _imap.markersList[+id].host_info.host;
+		return rr;
+	};
+	
 	function loadLine(nl) {
 		if (!_imap.settings.links_enabled) return;
 		if (_imap.lines[nl.id]) {
@@ -325,12 +347,12 @@
 		if (nl.color == '0') nl.color = '#0034ff';
 		if (nl.opacity == '0') nl.opacity = 50;
 		nl.opacity = nl.opacity/100;
-		if (nl.weight == '0') nl.weight = 2;
+		if (nl.weight == '0') nl.weight = 5;
 		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 2:L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8})};
-		if ((nl.name !== undefined) & (nl.name !== '0')) {
-			_imap.lines[nl.id][2].bindLabel(escapeHtml(nl.name));
-			_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
-		};
+		if (nl.name == '0') nl.name = '';
+		_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
+		_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
+		
 		_imap.lines[nl.id][2].on('click',function(){linkOptions(nl.id);});
 		updateLine(nl.id);
 		return true;
@@ -372,7 +394,10 @@
 		el = jQuery('<div/>');
 		el.html(locale['Select a new position']+' <a style="color:red;" onClick="setHostLocation();" href="#">'+locale['Cancel']+'</a>').attr("id",'mesGetHostLocation').appendTo('#imapmes');
 		jQuery(_imap.map._container).css('cursor','crosshair');
-		_imap.map.on('click',function(e){ setHostLocation(hh,e.latlng.lat,e.latlng.lng); return false; });
+		_imap.map.on('click',function(e){ 
+			setHostLocation(hh,e.latlng.lat,e.latlng.lng);
+			return false;
+		});
 	};
 	
 	function getHardware(hh,event) {
@@ -472,10 +497,10 @@
 			},
 			success: function(data){
 				if (data.result) {
-					if (!_imap.markersList[hh]) {
+					if (!_imap.markersList[hh].marker) {
 						jQuery('.host_in_list').filter('[hostid='+hh+']').remove();
 						loadHosts();
-						return;						
+						return;
 					};
 					_imap.markers.removeLayer(_imap.markersList[hh].marker);
 					_imap.markersList[hh].marker.setLatLng([lat,lng]);
@@ -603,7 +628,8 @@
 	};
 
 	function updateIcon(e,first) {
-		vMarker = e;
+		vMarker = _imap.markersList[+e].marker;
+		if (!vMarker) return;
 		while (vMarker) {
 			vMarker = vMarker.__parent;
 			if (vMarker) {
@@ -679,18 +705,20 @@
 	};
 
 	function showMarker(nn) {
+		if (!_imap.markersList[+nn].marker) return;
 		if (_imap.markersList[+nn].marker.options.show) return;
 		_imap.markers.addLayer(_imap.markersList[+nn].marker);
 		_imap.markersList[+nn].marker.options.del = false;
 		_imap.markersList[+nn].marker.options.show = true;
-		updateIcon(_imap.markersList[+nn]);
+		updateIcon(+nn);
 		updateLinesMarker(nn);
 	};
 	
 	function unshowMarker(nn) {
+		if (!_imap.markersList[+nn].marker) return;
 		if (!_imap.markersList[+nn].marker.options.show) return;
 		_imap.markersList[+nn].marker.options.del = true;
-		updateIcon(_imap.markersList[+nn]);
+		updateIcon(+nn);
 		_imap.markers.removeLayer(_imap.markersList[+nn].marker);
 		_imap.markersList[+nn].marker.options.del = false;
 		_imap.markersList[+nn].marker.options.show = false;
@@ -746,7 +774,8 @@
 					};
 				};
 				for (var nn in _imap.markersList) {
-					updateMarker(_imap.markersList[+nn].marker.options.host_id);
+					if (!_imap.markersList[+nn].marker) continue;
+					updateMarker(+nn);
 					if (_imap.settings.show_with_triggers_only) {
 						if (_imap.markersList[+nn].marker.options.status>=_imap.settings.min_status) {
 							if (hostsFilter(+nn)) showMarker(+nn);
@@ -754,18 +783,18 @@
 							unshowMarker(+nn);
 						};
 					};
-					if (_imap.markersList[+nn].marker.options.show) updateIcon(_imap.markersList[+nn].marker);
+					if (_imap.markersList[+nn].marker.options.show) updateIcon(+nn);
 					if (_imap.markersList[+nn].marker.options.status>=_imap.settings.min_status) {
 						_imap.bbox = addBbox(_imap.markersList[+nn].marker._latlng.lat,_imap.markersList[+nn].marker._latlng.lng,_imap.bbox);
 					};
 				};
-				if (_imap.settings.do_map_control | _imap.it_first) {
+				if (_imap.settings.do_map_control | _imap.vars.it_first) {
 					mapBbox(_imap.bbox);
 				};
 				
-				if (_imap.it_first) {
+				if (_imap.vars.it_first) {
 					jQuery('#mesLoading').slideUp('fast');
-					_imap.it_first = false;
+					_imap.vars.it_first = false;
 				};
 			},
 			error: function(data){
@@ -838,14 +867,19 @@
 
 	
 	function updateMarker(host_id) {
+		if (!_imap.markersList[host_id].marker) return;
 		var status=0;
 		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
 		var rstr = '';
 		
+		
+		
 		if (_imap.markersList[host_id].host_info) {
 			if (_imap.markersList[host_id].host_info.error) rstr = rstr +'<div class=hosterror> Error: '+ _imap.markersList[host_id].host_info.error+'</div>';
 		};
+		
+		
 		
 		rstr = rstr + '<div>';
 		var shh = '';
@@ -855,6 +889,9 @@
 		var hardware = ((_imap.markersList[host_id].marker.options.hardware && _imap.settings.show_icons)?'<img onerror="this.src=\'imap/hardware/none.png\';" title="'+_imap.markersList[host_id].marker.options.hardware+'" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\' class=hardwareIcon>':'');
 		rstr = rstr + hardware;
 		rstr = rstr + ' '+hh+'</div>';
+		
+		
+		
 		rstr = rstr + '<div class=hostcontrol>';
 		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+locale['Change location']+'"><img src="imap/images/target.png"></a>';
 		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+locale['Delete location']+'"><img src="imap/images/target-del.png"></a>';
@@ -863,14 +900,45 @@
 		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+locale['Show debug information']+'"><img src="imap/images/debug.png"></a>';
 		rstr = rstr + '</div>';
 		
+		
+		
+		var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
+		rstr = rstr + '<div class=host_interfaces>';
+		_imap.markersList[host_id].host_info.interfaces.each(function(el) {
+				rstr = rstr + '<div class=host_interfaces_line>';
+				var addr = el.dns;
+				if ( (el.useip=='1') && (el.ip!=='') ) 
+					addr = el.ip;
+				rstr = rstr + '<b>' + intftype[el.type] + '</b> ' + addr + ':' + el.port;
+				rstr = rstr + '</div>';
+		});
+		rstr = rstr + '</div>';
+		
+		
+		rstr = rstr + '<div class=host_des>';
+			rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre></div>';
+			
+			rstr = rstr + '<div class=host_inventory>';
+			for (nn in _imap.markersList[host_id].host_info.inventory) {
+				if (("#" + _imap.settings.exluding_inventory.join("#,#") + "#").search("#"+nn+"#") == -1)
+					if (_imap.markersList[host_id].host_info.inventory[nn].length)
+						rstr = rstr + '<div class=host_inventory_line><div class=host_inventory_line_l>'+locale.inventoryfields[nn]+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
+			};
+			rstr = rstr + '</div>';
+		rstr = rstr + '</div>';
+		
+
+		
+		
 		var lhh = '';
 		if (_imap.markersList[host_id].host_info) {
 			if (_imap.markersList[host_id].host_info.inventory.url_a) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_a+'" target=_blank>URL A</a></div>';
 			if (_imap.markersList[host_id].host_info.inventory.url_b) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_b+'" target=_blank>URL B</a></div>';
 			if (_imap.markersList[host_id].host_info.inventory.url_c) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
 		};
+		rstr = rstr + '<div class=host_links>'+lhh+' </div>';
 		
-		rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre> '+lhh+' </div>';
+		
 		rstr = rstr + '<div class=triggers>';
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
 			for (var nn in _imap.markersList[host_id].triggers) {
@@ -889,7 +957,11 @@
 		};
 		_imap.markersList[host_id].marker.label.setContent(hardware+' '+escapeHtml(_imap.markersList[host_id].marker.options.host_name));
 		_imap.markersList[host_id].marker.bindPopup(rstr);
-		_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
+		if (_imap.settings.useIconsInMarkers) {
+			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status3.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
+		} else {
+			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+_imap.markersList[host_id].marker.options.status + ' icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
+		};
 	};
 	
 	function loadLinks(hl) {
@@ -942,6 +1014,7 @@
 					_imap.markersList[+nn].del = true;
 				};
 				for (var nn in data) {
+					var new_host = false;
 					var host = data[+nn];
 					if (!host) continue;
 					var host_id = host.hostid;
@@ -953,48 +1026,53 @@
 						};
 					};
 					if ((host.inventory.location_lat=='') || (host.inventory.location_lat=='')) {
-						continue;
+						var host_lat = false;
+						var host_lon = false;
+					} else {
+						var host_lat = +(host.inventory.location_lat).replace(',', '.');
+						var host_lon = +(host.inventory.location_lon).replace(',', '.');
 					};
-					var host_lat = +(host.inventory.location_lat).replace(',', '.');
-					var host_lon = +(host.inventory.location_lon).replace(',', '.');
+
 					var hardware = host.inventory[_imap.settings.hardware_field];
-					
 					var maintenance = (host.maintenance_status === '1' ? true:false);
 					var maintenance_t = (maintenance?'maintenance ':'');
 					var nottrigger = (host.maintenance_type === '1' ? true:false);
 					var nottrigger_t = (nottrigger?'nottrigger ':'');
 					var description = host.description;
 					
-					if (_imap.markersList[host_id]) {
-						/*обновляем хост*/
-						host_status = _imap.markersList[host_id].marker.options.status;
+					if (!_imap.markersList[host_id]) {
+						_imap.markersList[host_id] = {marker: false, triggers: new Object, del:false, clust:false};
+					};
+					
+					_imap.markersList[host_id].host_info = host;
+					
+					if ( (host_lat) && (host_lon) ) {
+						if (!_imap.markersList[host_id].marker) {
+							_imap.markersList[host_id].marker = L.marker([host_lat,host_lon],{status:0, host_id:host_id});
+							_imap.markersList[host_id].marker.on('move',function(){ updateLinesMarker(this.options.host_id); });
+							new_host = true;
+						} else {
+							_imap.markersList[host_id].marker.setLatLng([host_lat,host_lon]);
+						};
+					};
+			
+					if (_imap.markersList[host_id].marker) {
 						_imap.markersList[host_id].marker.options.maintenance = maintenance;
 						_imap.markersList[host_id].marker.options.nottrigger = nottrigger;
 						_imap.markersList[host_id].marker.options.hardware = hardware;
 						_imap.markersList[host_id].marker.options.description = description;
-						_imap.markersList[host_id].del = false;
-					} else {
-						/*новый хост*/
-						var host_status = 0;
-						var host_marker = L.marker([host_lat,host_lon],{host_id:host_id, host_name:host_name, status:host_status, maintenance:maintenance, nottrigger:nottrigger})
-						_imap.markersList[host_id] = {marker: host_marker, triggers: new Object, del:false, clust:false};
-						_imap.markersList[host_id].marker.on('move',function(){ updateLinesMarker(this.options.host_id); });
-						_imap.markersList[host_id].marker.options.hardware = hardware;
-						_imap.markersList[host_id].marker.options.description = description;
+						_imap.markersList[host_id].marker.options.host_name = host_name;
+					};
+					_imap.markersList[host_id].del = false;
+					
+					if (new_host) {
 						if (!_imap.settings.show_with_triggers_only) {
 							updateMarker(host_id);
 							if (hostsFilter(host_id)) showMarker(host_id);
 						};
-						
-						
-						/*for (var nn in _imap.markersList) {
-							cLines++;
-							loadLine({'id':cLines, 'host1':+nn, 'host2':host_id});
-						};*/
 					};
-					_imap.markersList[host_id].host_info = host;
-
 				};
+
 				sortingHosts();
 				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
 				
@@ -1018,34 +1096,61 @@
 	};
 
 	function viewHostOnMap(hh) {
-		if (_imap.markersList[hh])
+		if (_imap.markersList[hh].marker)
 			_imap.map.setView(_imap.markersList[hh].marker._latlng,_imap.map.getMaxZoom());
 	};
 	
-	function searchGoogle() {
+	/* TimerSearchGoogle(jQuery('#search-control-text').val()); */
+	
+	_imap.searchtimer=false;
+	
+	function TimerSearchGoogle(searchval) {
+		if (_imap.searchtimer) {
+			clearTimeout(_imap.searchtimer);
+		};
+		_imap.searchtimer = setTimeout(function(){ searchGoogle(searchval); },1000);
+	};
+	
+	function searchGoogle(searchval) {
+		_imap.searchtimer=false;
+		_imap.searchmarkers.clearLayers();
+		jQuery('#search-control-list').html('');
 		jQuery.get(
 		  "https://maps.googleapis.com/maps/api/geocode/json",
 		  {
 		    sensor: 'true',
-		    language: 'ru',
-		    region: 'ru',
+		    language: _imap.settings.lang.split('_')[0],
+		    region: _imap.settings.lang.split('_')[1],
 		    bounds: ''+_imap.map.getBounds()._northEast.lat+','+_imap.map.getBounds()._northEast.lng+'|'+_imap.map.getBounds()._southWest.lat+','+_imap.map.getBounds()._southWest.lng,
-		    address: jQuery('#search-control-text').val()
+		    address: searchval
 		  },
 		  function(text) {
 			if (text.status=='OK') {
 				jQuery('#search-control-list').html('');
-				for (i=0; i<text.results.length; i++)
-					jQuery('#search-control-list').append('<div class="result"> <a class="link google" lat='+text.results[i].geometry.location.lat+' lon='+text.results[i].geometry.location.lng+'><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');
+				var sbbox = new Array;
+				sbbox['lat'] = new Array;
+				sbbox['lng'] = new Array;
+				
+				for (i=0; i<text.results.length; i++) {
+					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup('<span class=coordinates>'+text.results[i].geometry.location.lat+', '+text.results[i].geometry.location.lng+'</span><br>'+text.results[i].formatted_address);
+					_imap.searchmarkers.addLayer(smarker);
+					var smarkerID = _imap.searchmarkers.getLayerId(smarker);
+					jQuery('#search-control-list').append('<div class="result"> <a class="link google" layerid="'+smarkerID+'"><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');
+					sbbox['lat'].push(+text.results[i].geometry.location.lat);
+					sbbox['lng'].push(+text.results[i].geometry.location.lng);
+				};
+				_imap.map.fitBounds(L.latLngBounds(L.latLng(Math.min.apply(null, sbbox['lat']), Math.max.apply(null, sbbox['lng'])), L.latLng(Math.max.apply(null, sbbox['lat']), Math.min.apply(null, sbbox['lng']))));
 				jQuery('#search-control-list').show();
 				jQuery('#search-control-list .link').bind('click',function(event){
-				event.stopPropagation();
-				_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18,{animate:false,pan:{animate:false},zoom:{animate:false}});
-				var searchpopup = L.popup();
-				searchpopup.setLatLng([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')]);
-				searchpopup.setContent(jQuery(this).html());
-				_imap.map.openPopup(searchpopup)
-				/*_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18);*/
+					event.stopPropagation();
+					_imap.map.setView(_imap.searchmarkers.getLayer(jQuery(this).attr('layerid'))._latlng,_imap.map.getMaxZoom(),{animate:false,pan:{animate:false},zoom:{animate:false}});
+					_imap.searchmarkers.getLayer(jQuery(this).attr('layerid')).openPopup();
+					/*_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18,{animate:false,pan:{animate:false},zoom:{animate:false}});
+					var searchpopup = L.popup();
+					searchpopup.setLatLng([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')]);
+					searchpopup.setContent(jQuery(this).html());
+					_imap.map.openPopup(searchpopup)
+					_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18);*/
 				});
 			};
 		  }
@@ -1067,35 +1172,79 @@
 		L.control.scale({position:'bottomleft',metric:true}).addTo(_imap.map);
 		L.control.measure({position:'bottomleft'}).addTo(_imap.map);
 	
-		var SearchControl = L.Control.extend({
+		if (_imap.settings.use_search) {
+			var SearchControl = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+
+				onAdd: function (map) {
+					// create the control container with a particular class name
+					var container = L.DomUtil.create('div', 'search-control');
+					container.innerHTML = '<div id=search-control-input><img class="middle" src="imap/images/logo-google.png"> <input oninput="TimerSearchGoogle(event.target.value);" id=search-control-text placeholder="'+locale.Search+'" type=search></div><div id=search-control-list></div>';
+					jQuery(container).mouseleave(function(){
+						  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
+						  _imap.map.scrollWheelZoom.enable();
+					});
+					jQuery(container).mouseenter(function(){
+						  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
+						  _imap.map.scrollWheelZoom.disable();
+					});
+					jQuery(container).click(function(event){ event.stopPropagation(); });
+					jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+					jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+					jQuery(container).scroll(function(event){ event.stopPropagation(); });
+					
+					return container;
+				}
+			});
+			_imap.map.addControl(new SearchControl());
+		};
+	
+		
+		var HostsControl = L.Control.extend({
 			options: {
-				position: 'topleft'
+				position: 'topright'
 			},
 
 			onAdd: function (map) {
 				// create the control container with a particular class name
-				var container = L.DomUtil.create('div', 'search-control');
-				container.innerHTML = '<form onsubmit="searchGoogle();return false;"><img class="middle" src="imap/images/logo-google.png"> <input id=search-control-text placeholder="'+locale.Search+'" type=search></form><div id=search-control-list></div>';
-				jQuery(container).mouseleave(function(){
-					  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
-					  _imap.map.scrollWheelZoom.enable();
+				var container = L.DomUtil.create('div', 'hosts_list');
+				jQuery(container).attr('aria-haspopup','true');
+				jQuery(container).append(
+				'<div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+locale['Search']+'"></div><div id=hosts_list class="nicescroll"></div></div><div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+locale["Hosts"]+'</b></div>'
+				);
+				
+				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
+				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
+				/*
+				
+				jQuery( "#search_hosts_list input" ).on('input',function() {
+					getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
 				});
-				jQuery(container).mouseenter(function(){
-					  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
-					  _imap.map.scrollWheelZoom.disable();
+				*/
+				
+				jQuery(container).click(function(event){ 
+				  event.stopPropagation();
+				  
 				});
-				jQuery(container).click(function(event){ event.stopPropagation(); });
-				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
-				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
-				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){
+				  event.stopPropagation(); 
+				  
+				});
+				jQuery(container).mousemove(function(event){
+				  event.stopPropagation(); 
+				  
+				});
+				jQuery(container).scroll(function(event){
+				  event.stopPropagation(); 
+				  
+				});
 				
 				return container;
 			}
 		});
-		if (_imap.settings.use_search) {
-			_imap.map.addControl(new SearchControl());
-		};
-	
+		
 		
 		var MyLocationControl = L.Control.extend({
 			options: {
@@ -1149,7 +1298,9 @@
 			_imap.map.addLayer(_imap.links);
 		};
 		
-		mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
+		_imap.map.addLayer(_imap.searchmarkers);
+		
+		_imap.mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
 
 		jQuery('.leaflet-control-layers-selector').bind('change',function(){saveLayersMap()});
 		_imap.map.on('moveend',function(){ updateLines(); });
@@ -1169,6 +1320,9 @@
 				};
 			};
 		});
+		
+		_imap.map.addControl(new HostsControl());
+		
 	};
 
 	function saveLayersMap() {
@@ -1216,10 +1370,10 @@
 		setInterval(function() { timeUpdate(); },1000);
 		loadHosts();
 		intervalID = window.setInterval(function(){loadHosts();}, 30000);
-		
-		
+		try { userAdditions(); } catch(e) {} finally {};
+		_imap.settings.exluding_inventory[_imap.settings.exluding_inventory.length] = 'inventory_mode';
 	});
 
-	jQuery(window).resize(function(){if (document.readyState=='complete') mapSize()});
+	jQuery(window).resize(function(){if (document.readyState=='complete') setInterval(function() { mapSize(); },1000);});
 
 	

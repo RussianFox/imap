@@ -4,6 +4,7 @@ bindtextdomain('imap', 'locale');
 bind_textdomain_codeset('imap', 'UTF-8');
 
 require_once dirname(__FILE__).'/include/config.inc.php';
+require_once dirname(__FILE__).'/imap/DB.php';
 
 textdomain("imap");
 $page['title'] = _('Interactive map');
@@ -183,8 +184,9 @@ if ($output=='ajax') {
 		$options['monitored_hosts'] = true;
 		$options['withInventory'] = true;
 		$options['selectInterfaces'] = 'extend';
-		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
-		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
+		//$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
+		$options['selectInventory'] = 'extend';
+		//if ($hardwareField) $options['selectInventory'][] = $hardwareField;
 		$options['selectMaintenances'] = 'extend';
 		$hosts = API::Host()->get($options);
 		
@@ -259,8 +261,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_link') {
 		
-		$res1 = DB::find('hosts_links', array('id' => $linkid));
-		$res2 = DB::find('hosts_links_settings', array('ids' => $linkid));
+		$res1 = DBimap::find('hosts_links', array('id' => $linkid));
+		$res2 = DBimap::find('hosts_links_settings', array('ids' => $linkid));
 		
 		$res = array();
 		
@@ -284,8 +286,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_links') {
 		
-		$res1 = DB::find('hosts_links');
-		$res2 = DB::find('hosts_links_settings');
+		$res1 = DBimap::find('hosts_links');
+		$res2 = DBimap::find('hosts_links_settings');
 		
 		$res = array();
 		
@@ -314,7 +316,7 @@ if ($output=='ajax') {
 			foreach ($thostid as $thost) {
 				if (API::Host()->isWritable(array($hostid))) {
 					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
-					$res = DB::insert('hosts_links', array($newlink));
+					$res = DBimap::insert('hosts_links', array($newlink));
 				};
 			};
 
@@ -329,11 +331,11 @@ if ($output=='ajax') {
 		$link=$linkid;
 		
 		$newlink = array( 'values' => array('name' => $linkoptions['linkname'] ), 'where' => array( 'id' => $link ) );
-		$res = DB::update('hosts_links', array($newlink));
+		$res = DBimap::update('hosts_links', array($newlink));
 		
-		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
 		
-		$res = DB::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
+		$res = DBimap::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
 		
 		$responseData = json_encode(array('result'=>htmlspecialchars($res),'linkoptions'=>$linkoptions), FALSE);
 		echo $responseData;
@@ -344,8 +346,8 @@ if ($output=='ajax') {
 		
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
-		$res = DB::delete('hosts_links_settings', array('ids'=>array($link)));
-		$res = DB::delete('hosts_links', array('id'=>array($link)));
+		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('hosts_links', array('id'=>array($link)));
 		
 		$responseData = json_encode(array('result'=>TRUE), FALSE);
 		echo $responseData;
@@ -374,8 +376,8 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
-	$rightForm->addItem(array(SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
-	$rightForm->addItem(array(SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
+	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
+	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
 	textdomain("frontend");
 	
 	$rightForm->addVar('fullscreen', $_REQUEST['fullscreen']);
@@ -389,11 +391,11 @@ if ($output!='block') {
 	textdomain("imap");
 };
 //проверяем наличие таблиц в БД
- $check_links = true;
-// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
-// if (count($glinks)==0) $check_links = false;
-// $glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
-// if (count($glinks)==0) $check_links = false;
+$check_links = true;
+$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
+if (count($glinks)==0) $check_links = false;
+$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
+if (count($glinks)==0) $check_links = false;
 
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
@@ -402,6 +404,7 @@ foreach ($needThisFiles as $file) {
 		break;
 	};
 };
+
 ?>
 
 
@@ -409,12 +412,6 @@ foreach ($needThisFiles as $file) {
 	<div id=mapdiv style="width:100%; height:300px;"></div>
 	<div id=ajax></div>
 	<div id=imapmes><div id=mesLoading><div><?php echo _('Loading...'); ?></div></div></div>
-	<div id="out_hosts_list">
-		<div id=close_hosts_list><?php echo _('Close'); ?> <b>X</b></div>
-		<div id=search_hosts_list><input type=search placeholder="<?php echo _('Search'); ?>"></div>
-		<div id=hosts_list class="nicescroll"></div>
-	</div>
-	<div id=show_hosts_list><div id=filter-indicator><img src="imap/images/filter.png"></div> <b><?php echo _('Hosts'); ?></b></div>
 </div>
 
 <link rel="stylesheet" href="imap/leaflet/leaflet.css" />
@@ -428,10 +425,10 @@ foreach ($needThisFiles as $file) {
 
 <script src="imap/leaflet/plugins/layer/tile/Bing.js"></script>
 
-<script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=en-UA" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=<?php echo CWebUser::$data['lang']; ?>" type="text/javascript"></script>
 <script src="imap/leaflet/plugins/layer/tile/Yandex.js"></script>
 
-<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+<script src="https://maps.google.com/maps/api/js?v=3&sensor=false&language=<?php echo CWebUser::$data['lang']; ?>"></script>
 <script src="imap/leaflet/plugins/layer/tile/Google.js"></script>
 
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>
@@ -447,16 +444,19 @@ foreach ($needThisFiles as $file) {
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
 <script type="text/javascript">
-	jQuery('#out_hosts_list').hide();
+	/*
 	jQuery('#filter-indicator').hide();
-	jQuery('#show_hosts_list').click(function(){jQuery(this).hide(); jQuery('#out_hosts_list').animate({width:'toggle'},200);});
-	jQuery('#close_hosts_list').click(function(){jQuery('#out_hosts_list').animate({width:'toggle'},200); jQuery('#show_hosts_list').show(); });
+	jQuery('#show_hosts_list').mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery(this).hide(); });
+	jQuery('#out_hosts_list').mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); });
 	jQuery( "#search_hosts_list input" ).on('input',function() {
 		getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
 	});
+	*/
 	var _imap = new Object;
 
 	_imap.settings = new Object;
+	_imap.settings.lang = "<?php echo CWebUser::$data['lang']; ?>";
+	
 	
 	/* This settings changing in interactive mode */
 	_imap.settings.do_map_control = <?php echo $control_map; ?>;
@@ -472,6 +472,8 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
 	_imap.settings.maxMarkersSpiderfy = 50;
+	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
+	_imap.settings.useIconsInMarkers = false;
 	bingAPIkey=false;
 	
 	
@@ -488,7 +490,7 @@ foreach ($needThisFiles as $file) {
 	locale['Hosts'] = '<?php echo _('Hosts'); ?>';
 	locale['This host does not have coordinates'] = '<?php echo _('This host does not have coordinates'); ?>';
 	locale['Set a hardware type'] = '<?php echo _('Set a hardware type'); ?>';
-	locale["Host's links"] = "<?php echo _('Host\'s links'); ?>";
+	locale["Host's links"] = "<?php echo _("Host\'s links"); ?>";
 	locale['Show debug information'] = "<?php echo _("Show debug information"); ?>";
 	locale['Debug information'] = "<?php echo _("Debug information"); ?>";
 	locale['Select hosts for links'] = "<?php echo _("Select hosts for links"); ?>";
@@ -506,6 +508,14 @@ foreach ($needThisFiles as $file) {
 	
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
 	
+	locale.inventoryfields = new Object;
+	
+	<?php textdomain("frontend");
+	foreach (getHostInventories() as $field): ?>
+		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
+	<?php endforeach;
+	textdomain("imap");?>
+	
 	_imap.filter = {
 		show_severity: <?php echo $pageFilter->severityMin; ?>,
 		hostid: <?php echo $pageFilter->hostid; ?>,
@@ -519,6 +529,7 @@ foreach ($needThisFiles as $file) {
 <?php
 
 	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js"></script>';
+	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
 

@@ -1,0 +1,20 @@
+function userAdditions() {
+	
+  /*
+	Дополнения, которые вы делаете на свой страх и риск
+	Для работы файла переименуйте его в additions.js и дайте права на чтение web-серверу
+	
+	Сам файл включается при загрузке страницы, функция userAdditions выполняется после инициализации всего дополнения.
+	
+	Если после включения файла у вас что-то сломалось, значит в этом файле вы что-то сделали не так, и это не глюк самого дополнения.
+	Если вы хотите что-то спросить у разработчика по поводу этого файла, приложите ВЕСЬ файл, а не кусок его.
+	
+	Например, добавить новый слой на карту:
+	_imap.mapControl.addBaseLayer(L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),'OpenStreetMap.Mapnik');
+	
+	Например, добавить прозрачный слой на карту:
+	_imap.mapControl.addOverlay(L.tileLayer('http://openfiremap.org/hytiles/{z}/{x}/{y}.png', {attribution: '© OpenFireMap contributors - © OpenStreetMap contributors'}),'OpenFireMap');
+	 
+  */	
+  
+};

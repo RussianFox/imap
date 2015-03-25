@@ -9,16 +9,6 @@ img.hardwareIcon {
 	max-height:18px;
 }
 
-.icon_status {
-	background-repeat: no-repeat !important;
-	border-radius:8px;
-	width:18px !important;
-	height:18px !important;
-	background-position: center center;
-	box-shadow: none !important;
-	border-width:0px !important;
-}
-
 span.st_maintenance {
 	color:gray;
 	font-weight:bold;
@@ -66,42 +56,94 @@ span.st_ok {
 	font-size:8px;
 }
 
+.icon_status_img {
+	background-repeat: no-repeat !important;
+	border-radius:10px;
+	width:24px !important;
+	height:24px !important;
+	background-position: center center;
+	box-shadow: none !important;
+	border-width:0px !important;
+	padding:0px;
+	margin:0px;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.icon_status {
+	background-repeat: no-repeat !important;
+	border-radius:8px;
+	width:18px !important;
+	height:18px !important;
+	background-position: center center;
+	box-shadow: none !important;
+	border-width:0px !important;
+	padding:0px;
+	margin:0px;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.icon_status_img img {
+	max-width:18px !important;
+	max-height:18px !important;
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 auto;
+}
+
 .icon_status_0 {
 	background-color:#58F500;
-	background-image:url(images/status1.gif);
-	box-shadow: 0 0 15px #58F500;
 	z-index: 400 !important;
 }
 
 .icon_status_1 {
 	background-color:#D6F6FF;
-	background-image:url(images/status1.gif);
 	z-index: 401 !important;
 }
 
 .icon_status_2 {
 	background-color:#FFF6A5;
-	background-image:url(images/status3.gif);
 	z-index: 402 !important;
 }
 
 .icon_status_3 {
 	background-color:#FFB689;
-	background-image:url(images/status5.gif);
 	z-index: 403 !important;
 }
 
 .icon_status_4 {
 	background-color:#FF9999;
-	background-image:url(images/status5.gif);
 	z-index: 404 !important;
 }
 
 .icon_status_5 {
 	background-color:#FF3838;
-	background-image:url(images/status5.gif);
 	z-index: 405 !important;
-	box-shadow: 0 0 15px #FF3838;
+}
+
+.icon_status_smile_0 {
+	background-image:url(images/status1.gif);
+}
+
+.icon_status_smile_1 {
+	background-image:url(images/status1.gif);
+}
+
+.icon_status_smile_2 {
+	background-image:url(images/status3.gif);
+}
+
+.icon_status_smile_3 {
+	background-image:url(images/status5.gif);
+}
+
+.icon_status_smile_4 {
+	background-image:url(images/status5.gif);
+}
+
+.icon_status_smile_5 {
+	background-image:url(images/status5.gif);
 }
 
 .maintenance {
@@ -153,13 +195,21 @@ div.search-control {
 	border: 2px solid rgba(0,0,0,0.2);
 }
 
-.search-control input {
-    border: 0px;
-    width: 
+#search-control-text{
+	display: block;
+	width: 100%;
+	left: 50px;
+	right: 3px;
+	min-width: 250px;
+	border:0px;
+	padding:2px;
+	padding-left: 50px;
 }
-.search-control input:focus {
-    min-width:20em;
-    outline:none;
+
+#search-control-input img {
+	position: absolute;
+	left: 0px;
+	top: 4px;
 }
 
 div.result {
@@ -169,6 +219,7 @@ div.result {
 }
 
 #search-control-list {
+	border-top: 1px solid rgba(128, 128, 128, 0.72);
 	max-height:20em;
 	overflow-y:auto;
 }
@@ -199,6 +250,7 @@ div.hostcontrol {
 	width: 300px;
 	margin-left: -150px;
 	left: 50%;
+	z-index:1003;
 }
 
 #imapmes div {
@@ -234,29 +286,26 @@ div.hostcontrol {
 }
 
 #show_hosts_list {
-	position:absolute;
-	top:80px;
-	right:0px;
-	background-color:rgba(0, 0, 0, 0.59);
-	display:block;
-	border-top-left-radius:20px;
-	border-bottom-left-radius:20px;
+
+}
+
+#under_hosts_list {
 	padding:5px;
-	cursor:pointer;
-	color:white;
 }
 
 #out_hosts_list {
-	width:200px;
-	position:absolute;
 	top:80px;
 	right:0px;
-	height:50%;
-	background-color:rgba(0, 0, 0, 0.59);
+	background-color:#fff;
 	display:block;
 	border-top-left-radius:20px;
 	border-bottom-left-radius:20px;
-	z-index:1001;
+	z-index:999;
+}
+
+#show_hosts_list {
+	padding: 10px;
+	font-size: 1.1em;
 }
 
 #close_hosts_list {
@@ -269,42 +318,22 @@ div.hostcontrol {
 	cursor:pointer;
 }
 
-#search_hosts_list {
-	position:absolute;
-	top:15px;
-	left:5px;
-	right:10px;
-	background-color:transparent;
-	display:block;
-}
-
 #search_hosts_list input {
+	border: 1px solid #9E9E9E;
+	color: #000000;
+	padding: 2px;
+	background: rgba(239, 239, 239, 0.51);
+	border-radius: 4px;
+	-webkit-appearance: none;
 	width:100%;
 	box-sizing: border-box;
 }
 
-#search_hosts_list input {
-	border: 1px solid #9E9E9E;
-	color: #F4EEEE;
-	padding: 2px;
-	margin-top: 2px;
-	margin-bottom: 2px;
-	font-size: 11px;
-	font-family: Verdana;
-	background: rgba(0, 0, 0, 0.51);
-	border-radius: 4px;
-	-webkit-appearance: none;
-}
-
 #hosts_list {
-	position:absolute;
-	top:40px;
-	bottom:20px;
-	right:0px;
-	left:5px;
-	background-color:transparent;
-	display:block;
-	overflow-y:auto;
+	margin-top: 5px;
+	max-height: 200px;
+	width: 100%;
+	overflow-y: auto;
 }
 
 .nicescroll {
@@ -344,18 +373,18 @@ width: 10px !important;
 #hosts_list .host_in_list {
 	border-radius:5px;
 	padding:2px;
-	background-color:gray;
+	background-color:#E1E7EC;
 	margin-bottom:3px;
-	color:white;
+	color:black;
 	cursor:pointer;
 }
 
 #hosts_list .host_in_list:hover {
-	background-color:rgb(90, 89, 89);
+	background-color:rgba(97, 155, 221, 0.48);
 }
 
 #hosts_list .host_in_list:active {
-	background-color:black;
+	background-color:rgba(97, 155, 221, 1);
 }
 
 .host_crosschair {
@@ -431,7 +460,7 @@ width: 10px !important;
 	right:2px;
 }
 
-.hostdescription .link {
+.host_links .link {
 	display:inline-block;
 	margin-right:2em;
 	padding:0.1em;
@@ -456,4 +485,46 @@ width: 10px !important;
 	word-wrap: break-word;
 	white-space: pre;
 	white-space: pre-wrap; 
+}
+
+.host_inventory {
+	display:table;
+}
+
+.host_inventory_line {
+	display:table-row;
+}
+
+.host_inventory_line_l {
+	display:table-cell;
+	text-align:right;
+	border-bottom:1px dotted grey;
+}
+
+.host_inventory_line_r {
+	display:table-cell;
+	padding-left:0.5em;
+	border-bottom:1px dotted grey;
+}
+
+.host_des {
+	max-height:150px;
+	overflow-y:auto;
+	background: rgb(228, 228, 228);
+	margin-bottom:1em;
+	padding-bottom:0.5em;
+}
+
+.hosts_list.leaflet-control {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px; 
+}
+
+.leaflet-top {
+	z-index:1002;
+}
+
+span.coordinates {
+	  color: rgb(140, 140, 140);
 }
