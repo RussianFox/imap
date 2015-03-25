@@ -524,3 +524,7 @@ width: 10px !important;
 .leaflet-top {
 	z-index:1002;
 }
+
+span.coordinates {
+	  color: rgb(140, 140, 140);
+}
