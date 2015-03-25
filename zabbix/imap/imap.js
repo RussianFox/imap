@@ -226,7 +226,7 @@
 		var res = false;
 		res = ((res) || (_imap.markersList[hh].host_info.name.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.host.toLowerCase().indexOf(ff.toLowerCase())>-1));
-		res = ((res) || (_imap.markersList[hh].host_info.description.toLowerCase().indexOf(ff.toLowerCase())>-1));
+		if (_imap.markersList[hh].host_info.description) res = ((res) || (_imap.markersList[hh].host_info.description.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		res = ((res) || (_imap.markersList[hh].host_info.inventory[_imap.settings.hardware_field].toLowerCase().indexOf(ff.toLowerCase())>-1));
 		
 		var ob = jQuery.makeArray( _imap.markersList[hh].host_info.interfaces );
@@ -1127,13 +1127,19 @@
 		  function(text) {
 			if (text.status=='OK') {
 				jQuery('#search-control-list').html('');
+				var sbbox = new Array;
+				sbbox['lat'] = new Array;
+				sbbox['lng'] = new Array;
+				
 				for (i=0; i<text.results.length; i++) {
-					
 					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup('<span class=coordinates>'+text.results[i].geometry.location.lat+', '+text.results[i].geometry.location.lng+'</span><br>'+text.results[i].formatted_address);
 					_imap.searchmarkers.addLayer(smarker);
 					var smarkerID = _imap.searchmarkers.getLayerId(smarker);
 					jQuery('#search-control-list').append('<div class="result"> <a class="link google" layerid="'+smarkerID+'"><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');
+					sbbox['lat'].push(+text.results[i].geometry.location.lat);
+					sbbox['lng'].push(+text.results[i].geometry.location.lng);
 				};
+				_imap.map.fitBounds(L.latLngBounds(L.latLng(Math.min.apply(null, sbbox['lat']), Math.max.apply(null, sbbox['lng'])), L.latLng(Math.max.apply(null, sbbox['lat']), Math.min.apply(null, sbbox['lng']))));
 				jQuery('#search-control-list').show();
 				jQuery('#search-control-list .link').bind('click',function(event){
 					event.stopPropagation();
