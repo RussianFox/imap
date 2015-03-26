@@ -958,7 +958,7 @@
 		_imap.markersList[host_id].marker.label.setContent(hardware+' '+escapeHtml(_imap.markersList[host_id].marker.options.host_name));
 		_imap.markersList[host_id].marker.bindPopup(rstr);
 		if (_imap.settings.useIconsInMarkers) {
-			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status3.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
+			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
 		} else {
 			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+_imap.markersList[host_id].marker.options.status + ' icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
 		};
@@ -1132,7 +1132,7 @@
 				sbbox['lng'] = new Array;
 				
 				for (i=0; i<text.results.length; i++) {
-					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup('<span class=coordinates>'+text.results[i].geometry.location.lat+', '+text.results[i].geometry.location.lng+'</span><br>'+text.results[i].formatted_address);
+					var smarker = L.marker([text.results[i].geometry.location.lat,text.results[i].geometry.location.lng],{search:'' }).bindPopup('<span class=coordinates>'+text.results[i].geometry.location.lat+', '+text.results[i].geometry.location.lng+'</span><br>'+text.results[i].formatted_address+'<br><a href=# onClick="_imap.map.setView(['+text.results[i].geometry.location.lat+', '+text.results[i].geometry.location.lng+'],_imap.map.getMaxZoom()); return false;">'+locale['Zoom in']+'</a>');
 					_imap.searchmarkers.addLayer(smarker);
 					var smarkerID = _imap.searchmarkers.getLayerId(smarker);
 					jQuery('#search-control-list').append('<div class="result"> <a class="link google" layerid="'+smarkerID+'"><span class=searchname>'+text.results[i].formatted_address+'</span></a></div>');

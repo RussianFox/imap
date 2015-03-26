@@ -495,7 +495,6 @@ foreach ($needThisFiles as $file) {
 	locale['Debug information'] = "<?php echo _("Debug information"); ?>";
 	locale['Select hosts for links'] = "<?php echo _("Select hosts for links"); ?>";
 	locale['Name'] = "<?php echo _("Name"); ?>";
-	
 	locale['Delete link'] = "<?php echo _("Delete link"); ?>";
 	locale['Link options'] = "<?php echo _("Link options"); ?>";
 	locale['Link name'] = "<?php echo _("Link name"); ?>";
@@ -503,10 +502,10 @@ foreach ($needThisFiles as $file) {
 	locale['Link width'] = "<?php echo _("Link width"); ?>";
 	locale['Link opacity'] = "<?php echo _("Link opacity"); ?>";
 	locale['Link dash'] = "<?php echo _("Link dash"); ?>";
-	
 	locale['Delete confirm'] = "<?php echo _("Delete confirm"); ?>";
-	
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
+	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
+	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
 	
 	locale.inventoryfields = new Object;
 	
