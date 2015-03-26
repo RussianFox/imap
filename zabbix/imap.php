@@ -477,7 +477,15 @@ foreach ($needThisFiles as $file) {
 	bingAPIkey=false;
 	
 	
+	
+	/* Перевод для текущего языка */
 	locale.Search = '<?php echo _('Search'); ?>';
+	
+	
+	locale.inventoryfields = new Object;
+	<?php foreach (getHostInventories() as $field): ?>
+		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
+	<?php endforeach; ?>
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -507,14 +515,8 @@ foreach ($needThisFiles as $file) {
 	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
 	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
 	
-	locale.inventoryfields = new Object;
 	
-	<?php textdomain("frontend");
-	foreach (getHostInventories() as $field): ?>
-		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
-	<?php endforeach;
-	textdomain("imap");?>
-	
+	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
 		show_severity: <?php echo $pageFilter->severityMin; ?>,
 		hostid: <?php echo $pageFilter->hostid; ?>,
