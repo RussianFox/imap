@@ -33,3 +33,27 @@ _imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url
 /* true - use hardware icons in markers */
 /* true - использовать иконки оборудования для маркеров */
 _imap.settings.useIconsInMarkers = false;
+
+/* Zoom on map initialize */
+/* Уровень увеличения карты при инициализации */
+_imap.settings.startZoom = 4;
+
+/* Coordinates on map initialize */
+/* Координаты карты при инициализации */
+_imap.settings.startCoordinates = [59.95, 30.29];
+
+/* false - map animation is disabled */
+/* false - отключает анимацию на карте */
+_imap.settings.mapAnimation = true;
+
+/* Interval hosts update */
+/* Интервал обновления хостов */
+_imap.settings.intervalLoadHosts = 60;
+
+/* Interval links update */
+/* Интервал обновления связей */
+_imap.settings.intervalLoadLinks = 60;
+
+/* Interval triggers update */
+/* Интервал обновления триггеров */
+_imap.settings.intervalLoadTriggers = 30;

@@ -1083,10 +1083,11 @@
 						delete _imap.markersList[+nn];
 					};
 				};
-				/*if (bbox) { mapBbox(bbox) }; 
-				updateLines();*/
-				loadLinks();
-				loadTriggers();
+
+				if (_imap.vars.it_first) {
+					loadLinks();
+					loadTriggers();
+				};
 				
 			},
 			error: function(data){
@@ -1166,7 +1167,7 @@
 	};
 	
 	function iniMap() {
-		_imap.map = new L.Map('mapdiv',{ zoomControl:false, attributionControl:false }).setView([59.95, 30.29], 4);
+		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
 		
 		L.control.attribution({position:'bottomleft'}).addTo(_imap.map);
 		L.control.scale({position:'bottomleft',metric:true}).addTo(_imap.map);
@@ -1369,7 +1370,9 @@
 		mapSize();
 		setInterval(function() { timeUpdate(); },1000);
 		loadHosts();
-		intervalID = window.setInterval(function(){loadHosts();}, 30000);
+		_imap.vars.intervalHostsID = window.setInterval(function(){loadHosts();}, _imap.settings.intervalLoadHosts*1000);
+		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadLinks(); }, _imap.settings.intervalLoadLinks*1000);
+		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadTriggers(); }, _imap.settings.intervalLoadTriggers*1000);
 		try { userAdditions(); } catch(e) {} finally {};
 		_imap.settings.exluding_inventory[_imap.settings.exluding_inventory.length] = 'inventory_mode';
 	});

@@ -444,14 +444,7 @@ foreach ($needThisFiles as $file) {
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
 <script type="text/javascript">
-	/*
-	jQuery('#filter-indicator').hide();
-	jQuery('#show_hosts_list').mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery(this).hide(); });
-	jQuery('#out_hosts_list').mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); });
-	jQuery( "#search_hosts_list input" ).on('input',function() {
-		getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
-	});
-	*/
+
 	var _imap = new Object;
 
 	_imap.settings = new Object;
@@ -474,6 +467,12 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.maxMarkersSpiderfy = 50;
 	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
 	_imap.settings.useIconsInMarkers = false;
+	_imap.settings.startCoordinates = [59.95, 30.29];
+	_imap.settings.startZoom = 4;
+	_imap.settings.mapAnimation = true;
+	_imap.settings.intervalLoadHosts = 60;
+	_imap.settings.intervalLoadTriggers = 30;
+	_imap.settings.intervalLoadLinks = 60;
 	bingAPIkey=false;
 	
 	
