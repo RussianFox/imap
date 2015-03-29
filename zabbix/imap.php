@@ -59,37 +59,33 @@ if (function_exists('GetCurrentNodeId')) {
     $nodeids = getCurrentNodeId();
 };
 
-
 if ($output!='ajax') {
 	require_once dirname(__FILE__).'/include/page_header.php';
 };
 
-
-
 $fields = array(
-	'groupid' =>	array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'hostid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'thostid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'linkid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'severity_min' =>	array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
-	'fullscreen' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
+	'groupid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'hostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'thostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'linkid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'severity_min' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
+	'fullscreen' =>			array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
 	'control_map' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
 	'with_triggers_only' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'output' =>		array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'jsscriptid' =>	array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'output' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'jsscriptid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
 	// ajax
-	'favobj' =>		array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favref' =>		array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favid' =>		array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
-	'favcnt' =>		array(T_ZBX_INT, O_OPT, null,	null,		null),
-	'pmasterid' =>	array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'favaction' =>	array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
-	'favstate' =>	array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
-	'favdata' =>	array(T_ZBX_STR, O_OPT, null,	null,		null),
-	'hardwareField' =>	array(T_ZBX_STR, O_OPT, null,	null,		null)
+	'favobj' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favref' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favid' =>			array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
+	'favcnt' =>			array(T_ZBX_INT, O_OPT, null,	null,		null),
+	'pmasterid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'favaction' =>			array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
+	'favstate' =>			array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
+	'favdata' =>			array(T_ZBX_STR, O_OPT, null,	null,		null),
+	'hardwareField' =>		array(T_ZBX_STR, O_OPT, null,	null,		null)
 );
 check_fields($fields);
-
 
 /*
  * Filter
@@ -98,12 +94,11 @@ $config = select_config();
 
 $pageFilter = new CPageFilter(array(
 	'groups' => array(
-		'monitored_hosts' => true,
-		'with_monitored_triggers' => true
+		'monitored_hosts' => true
 	),
 	'hosts' => array(
 		'monitored_hosts' => true,
-		'with_monitored_triggers' => true
+		'withInventory' => true
 	),
 	'hostid' => $hostid,
 	'groupid' => $groupid,
@@ -406,7 +401,6 @@ foreach ($needThisFiles as $file) {
 };
 
 ?>
-
 
 <div id=imapworkarea style="display:none; position:relative;">
 	<div id=mapdiv style="width:100%; height:300px;"></div>
