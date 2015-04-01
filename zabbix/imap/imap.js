@@ -1204,46 +1204,54 @@
 		_imap.map.setView([position.coords.latitude, position.coords.longitude], _imap.map.getMaxZoom());
 	};
 	
+	function setMapCorner(nn) {
+		var mapcorners = {0: 'topleft', 1: 'topright', 2: 'bottomright', 3: 'bottomleft'};
+		var df = mapcorners[+nn];
+		if (df) return df;
+		return 'topright';
+	};
+	
 	function iniMap() {
 		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
 		
-		L.control.attribution({position:'bottomleft'}).addTo(_imap.map);
-		L.control.scale({position:'bottomleft',metric:true}).addTo(_imap.map);
-		L.control.measure({position:'bottomleft'}).addTo(_imap.map);
+		_imap.Controls = new Object;
+		
+		_imap.Controls['attribution'] = L.control.attribution({position:setMapCorner(_imap.mapcorners['attribution'])});
+		
+		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
+		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
-		if (_imap.settings.use_search) {
-			var SearchControl = L.Control.extend({
-				options: {
-					position: 'topleft'
-				},
+		var SearchControl = L.Control.extend({
+			options: {
+				position: setMapCorner(_imap.mapcorners['googlesearch'])
+			},
 
-				onAdd: function (map) {
-					// create the control container with a particular class name
-					var container = L.DomUtil.create('div', 'search-control');
-					container.innerHTML = '<div id=search-control-input><img class="middle" src="imap/images/logo-google.png"> <input oninput="TimerSearchGoogle(event.target.value);" id=search-control-text placeholder="'+locale.Search+'" type=search></div><div id=search-control-list></div>';
-					jQuery(container).mouseleave(function(){
-						  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
-						  _imap.map.scrollWheelZoom.enable();
-					});
-					jQuery(container).mouseenter(function(){
-						  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
-						  _imap.map.scrollWheelZoom.disable();
-					});
-					jQuery(container).click(function(event){ event.stopPropagation(); });
-					jQuery(container).dblclick(function(event){ event.stopPropagation(); });
-					jQuery(container).mousemove(function(event){ event.stopPropagation(); });
-					jQuery(container).scroll(function(event){ event.stopPropagation(); });
-					
-					return container;
-				}
-			});
-			_imap.map.addControl(new SearchControl());
-		};
+			onAdd: function (map) {
+				// create the control container with a particular class name
+				var container = L.DomUtil.create('div', 'search-control');
+				container.innerHTML = '<div id=search-control-input><img class="middle" src="imap/images/logo-google.png"> <input oninput="TimerSearchGoogle(event.target.value);" id=search-control-text placeholder="'+locale.Search+'" type=search></div><div id=search-control-list></div>';
+				jQuery(container).mouseleave(function(){
+					  jQuery('#search-control-list').animate({height: 'hide'}, 'fast');
+					  _imap.map.scrollWheelZoom.enable();
+				});
+				jQuery(container).mouseenter(function(){
+					  jQuery('#search-control-list').animate({height: 'show'}, 'fast');
+					  _imap.map.scrollWheelZoom.disable();
+				});
+				jQuery(container).click(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				
+				return container;
+			}
+		});
+		_imap.Controls['googlesearch'] = new SearchControl();
 	
 		
 		var HostsControl = L.Control.extend({
 			options: {
-				position: 'topright'
+				position: setMapCorner(_imap.mapcorners['hosts'])
 			},
 
 			onAdd: function (map) {
@@ -1284,10 +1292,11 @@
 			}
 		});
 		
+		_imap.Controls['hosts'] = new HostsControl;
 		
 		var MyLocationControl = L.Control.extend({
 			options: {
-				position: 'bottomright'
+				position: setMapCorner(_imap.mapcorners['mylocationbutton'])
 			},
 
 			onAdd: function (map) {
@@ -1298,12 +1307,12 @@
 			}
 		});
 		
-		_imap.map.addControl(new MyLocationControl());
+		_imap.Controls['mylocationbutton'] = new MyLocationControl();
 
 		if (_imap.settings.use_zoom_slider) {
-			_imap.map.addControl(new L.Control.Zoomslider({position:'bottomright'}));
+			_imap.Controls['zoom'] = new L.Control.Zoomslider({position:setMapCorner(_imap.mapcorners['zoom'])});
 		} else {
-			L.control.zoom({position:'bottomright'}).addTo(_imap.map);
+			_imap.Controls['zoom'] = L.control.zoom({position:setMapCorner(_imap.mapcorners['zoom'])});
 		};
 		
 		
@@ -1339,7 +1348,7 @@
 		
 		_imap.map.addLayer(_imap.searchmarkers);
 		
-		_imap.mapControl = L.control.layers(baseMaps, overlayMaps).addTo(_imap.map);
+		_imap.Controls['layers'] = L.control.layers(baseMaps, overlayMaps, {position: setMapCorner(_imap.mapcorners['layers'])});
 
 		jQuery('.leaflet-control-layers-selector').bind('change',function(){saveLayersMap()});
 		_imap.map.on('moveend',function(){ updateLines(); });
@@ -1360,7 +1369,9 @@
 			};
 		});
 		
-		_imap.map.addControl(new HostsControl());
+		for (var nn in _imap.mapcorners) {
+			if (_imap.Controls[nn]) _imap.Controls[nn].addTo(_imap.map);
+		};
 		
 	};
 

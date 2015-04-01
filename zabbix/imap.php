@@ -450,6 +450,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.pause_map_control = false;
 	_imap.settings.show_with_triggers_only = <?php echo $with_triggers_only; ?>;
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
+	_imap.mapcorners = new Object;
 
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
@@ -469,6 +470,14 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.intervalLoadLinks = 60;
 	bingAPIkey=false;
 	
+	_imap.mapcorners['googlesearch'] = 0;
+	_imap.mapcorners['layers'] = 1;
+	_imap.mapcorners['hosts'] = 1;
+	_imap.mapcorners['attribution'] = 3;
+	_imap.mapcorners['scale'] = 3;
+	_imap.mapcorners['measure'] = 3;
+	_imap.mapcorners['mylocationbutton'] = 2;
+	_imap.mapcorners['zoom'] = 2;
 	
 	
 	/* Перевод для текущего языка */
