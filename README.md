@@ -1,46 +1,42 @@
 # imap
-Interactive map for Zabbix
+## Interactive map for Zabbix
 
-Данная версия разработана для Zabbix версий 2.2 и 2.4
+Screenshots: http://zabbiximap.lisss.ru/
 
-На старых версиях работоспособность не гарантирована и дорабатываться не будет.
+This version is designed for Zabbix versions 2.2 and 2.4
 
-Для новых версий разработка будет проводиться по мере выходов официальных релизов.
+In old versions of efficiency is not guaranteed and will not be further developed.
 
-
-
-ВНИМАНИЕ! Пользователи предыдущих бета-версий должны отменить изменения, внесенные в файлы include/menu.inc.php и include/classes/db/DB.php
+For new versions the development will be output as the official release.
 
 
+## Installation
 
-Для установки скопируйте содержимое папки zabbix в директорию вашего zabbix (/usr/share/zabbix для Debian, например).
+For install copy the contents of a folder zabbix in the directory of your Zabbix Server (Example, /usr/share/zabbix for Debian).
 
-Чтобы подключить imap в стандартный интерфейс, отредактируйте include/menu.inc.php
-В самый конец файла вставьте:
+Edit include/menu.inc.php to connect Interactive Map at standard interface
+Add this to the end of file:
 
 	require_once dirname(__FILE__).'/../imap/menu.inc.php';
 
-Теперь основной функционал работоспособен. Зайдите в ваш Zabbix и вы увидите новый пункт меню.
+Now, the basic functionality is efficient. Go to your Zabbix and you'll see a new menu item.
 
-Для дополнительных настроек найдите в папке imap файл settings.js.template, переименуйте в settings.js и поменяйте настройки по своему вкусу.
+For additional settings, locate file settings.js.template in the folder imap, rename it in settings.js and change settings to your liking.
 
-Для собственных дополнений кода (например, добавления своих слоев на карту), переименуйте файл additions.js.template в additions.js и добавьте там свой код.
+To get an API key for Bing you need to get a Microsoft account and create a new key. Look it for details: http://msdn.microsoft.com/ru-ru/library/ff428642.aspx
 
-Для получения ключа API для Bing вам надо получить учетную запись Microsoft и создать новый ключ. Подробности тут http://msdn.microsoft.com/ru-ru/library/ff428642.aspx
-
-Для того, чтобы работали иконки оборудования, вам надо набросать в папку imap/hardware картинок в формате png. Названием будет тип оборудования (modem.png, server.png). Не забудьте дать права на чтение этих файлов веб-сервером. Не удаляйте и не заменяйте файл none.png
+For work hardware icons, put png-images in folder imap/hardware. Look at file imap/hardware/readme.md for details.
 
 
+## BD-additions
 
+For working host's links, we need to add two tables in the database Zabbix.
 
+Look at file imap/tables.sql You can open phpmyadmin, select the database Zabbix, and select this file in the Import section
 
-Для работы связей между хостами нам нужно добавить две таблицы в базу данных Zabbix.
-
-В папке imap лежит файл tables.sql Вы можете открыть phpmyadmin, выбрать базу данных Zabbix, и выбрать этот файл в разделе Import
-
-Второй способ для любителей командной строки:
+The second way for fans of the command line:
 
 `mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables.sql`
 
-Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
+Replace zabbixbd the name of the table with the data zabbix, username for a user with the addition of tables in the database and enter the password.
 

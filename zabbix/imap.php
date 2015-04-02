@@ -59,37 +59,33 @@ if (function_exists('GetCurrentNodeId')) {
     $nodeids = getCurrentNodeId();
 };
 
-
 if ($output!='ajax') {
 	require_once dirname(__FILE__).'/include/page_header.php';
 };
 
-
-
 $fields = array(
-	'groupid' =>	array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'hostid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'thostid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'linkid' =>				array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'severity_min' =>	array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
-	'fullscreen' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
+	'groupid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'hostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'thostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'linkid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'severity_min' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
+	'fullscreen' =>			array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
 	'control_map' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
 	'with_triggers_only' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'output' =>		array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'jsscriptid' =>	array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'output' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'jsscriptid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
 	// ajax
-	'favobj' =>		array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favref' =>		array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favid' =>		array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
-	'favcnt' =>		array(T_ZBX_INT, O_OPT, null,	null,		null),
-	'pmasterid' =>	array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'favaction' =>	array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
-	'favstate' =>	array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
-	'favdata' =>	array(T_ZBX_STR, O_OPT, null,	null,		null),
-	'hardwareField' =>	array(T_ZBX_STR, O_OPT, null,	null,		null)
+	'favobj' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favref' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favid' =>			array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
+	'favcnt' =>			array(T_ZBX_INT, O_OPT, null,	null,		null),
+	'pmasterid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'favaction' =>			array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
+	'favstate' =>			array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
+	'favdata' =>			array(T_ZBX_STR, O_OPT, null,	null,		null),
+	'hardwareField' =>		array(T_ZBX_STR, O_OPT, null,	null,		null)
 );
 check_fields($fields);
-
 
 /*
  * Filter
@@ -98,12 +94,11 @@ $config = select_config();
 
 $pageFilter = new CPageFilter(array(
 	'groups' => array(
-		'monitored_hosts' => true,
-		'with_monitored_triggers' => true
+		'monitored_hosts' => true
 	),
 	'hosts' => array(
 		'monitored_hosts' => true,
-		'with_monitored_triggers' => true
+		'withInventory' => true
 	),
 	'hostid' => $hostid,
 	'groupid' => $groupid,
@@ -407,7 +402,6 @@ foreach ($needThisFiles as $file) {
 
 ?>
 
-
 <div id=imapworkarea style="display:none; position:relative;">
 	<div id=mapdiv style="width:100%; height:300px;"></div>
 	<div id=ajax></div>
@@ -444,14 +438,7 @@ foreach ($needThisFiles as $file) {
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
 <script type="text/javascript">
-	/*
-	jQuery('#filter-indicator').hide();
-	jQuery('#show_hosts_list').mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery(this).hide(); });
-	jQuery('#out_hosts_list').mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); });
-	jQuery( "#search_hosts_list input" ).on('input',function() {
-		getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
-	});
-	*/
+
 	var _imap = new Object;
 
 	_imap.settings = new Object;
@@ -463,6 +450,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.pause_map_control = false;
 	_imap.settings.show_with_triggers_only = <?php echo $with_triggers_only; ?>;
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
+	_imap.mapcorners = new Object;
 
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
@@ -474,10 +462,32 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.maxMarkersSpiderfy = 50;
 	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
 	_imap.settings.useIconsInMarkers = false;
+	_imap.settings.startCoordinates = [59.95, 30.29];
+	_imap.settings.startZoom = 4;
+	_imap.settings.mapAnimation = true;
+	_imap.settings.intervalLoadHosts = 60;
+	_imap.settings.intervalLoadTriggers = 30;
+	_imap.settings.intervalLoadLinks = 60;
 	bingAPIkey=false;
 	
+	_imap.mapcorners['googlesearch'] = 0;
+	_imap.mapcorners['layers'] = 1;
+	_imap.mapcorners['hosts'] = 1;
+	_imap.mapcorners['attribution'] = 3;
+	_imap.mapcorners['scale'] = 3;
+	_imap.mapcorners['measure'] = 3;
+	_imap.mapcorners['mylocationbutton'] = 2;
+	_imap.mapcorners['zoom'] = 2;
 	
+	
+	/* Перевод для текущего языка */
 	locale.Search = '<?php echo _('Search'); ?>';
+	
+	
+	locale.inventoryfields = new Object;
+	<?php foreach (getHostInventories() as $field): ?>
+		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
+	<?php endforeach; ?>
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -495,7 +505,6 @@ foreach ($needThisFiles as $file) {
 	locale['Debug information'] = "<?php echo _("Debug information"); ?>";
 	locale['Select hosts for links'] = "<?php echo _("Select hosts for links"); ?>";
 	locale['Name'] = "<?php echo _("Name"); ?>";
-	
 	locale['Delete link'] = "<?php echo _("Delete link"); ?>";
 	locale['Link options'] = "<?php echo _("Link options"); ?>";
 	locale['Link name'] = "<?php echo _("Link name"); ?>";
@@ -503,19 +512,13 @@ foreach ($needThisFiles as $file) {
 	locale['Link width'] = "<?php echo _("Link width"); ?>";
 	locale['Link opacity'] = "<?php echo _("Link opacity"); ?>";
 	locale['Link dash'] = "<?php echo _("Link dash"); ?>";
-	
 	locale['Delete confirm'] = "<?php echo _("Delete confirm"); ?>";
-	
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
+	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
+	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
 	
-	locale.inventoryfields = new Object;
 	
-	<?php textdomain("frontend");
-	foreach (getHostInventories() as $field): ?>
-		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
-	<?php endforeach;
-	textdomain("imap");?>
-	
+	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
 		show_severity: <?php echo $pageFilter->severityMin; ?>,
 		hostid: <?php echo $pageFilter->hostid; ?>,

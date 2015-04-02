@@ -6,10 +6,6 @@ bingAPIkey='';
 /* Значение true для показа иконок оборудования */
 _imap.settings.show_icons = true;
 
-/* true for use Google Search on map */
-/* Значение true для использования адресного поиска Google */
-_imap.settings.use_search = true;
-
 /* true for use slider in zoom control, false - only buttons '+' & '-' */
 /* Значение true для использования слайдера зума, false - просто показывать кнопки + и - */
 _imap.settings.use_zoom_slider = true;
@@ -33,3 +29,46 @@ _imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url
 /* true - use hardware icons in markers */
 /* true - использовать иконки оборудования для маркеров */
 _imap.settings.useIconsInMarkers = false;
+
+/* Zoom on map initialize */
+/* Уровень увеличения карты при инициализации */
+_imap.settings.startZoom = 4;
+
+/* Coordinates on map initialize */
+/* Координаты карты при инициализации */
+_imap.settings.startCoordinates = [59.95, 30.29];
+
+/* false - map animation is disabled */
+/* false - отключает анимацию на карте */
+_imap.settings.mapAnimation = true;
+
+/* Interval hosts update */
+/* Интервал обновления хостов */
+_imap.settings.intervalLoadHosts = 60;
+
+/* Interval links update */
+/* Интервал обновления связей */
+_imap.settings.intervalLoadLinks = 60;
+
+/* Interval triggers update */
+/* Интервал обновления триггеров */
+_imap.settings.intervalLoadTriggers = 30;
+
+/* Use this object for settings control corners on map (order is important)
+ 	_imap.mapcorners['name of control'] = corner; */
+/* Для управления контролами на карте используйте следующий массив (порядок имеет значение) 
+ 	_imap.mapcorners['название контрола'] = угол; */
+/*
+ Corners (углы):
+ |0  1|
+ |3  2|
+ */
+_imap.mapcorners = new Object;
+_imap.mapcorners['googlesearch'] = 0;
+_imap.mapcorners['layers'] = 1;
+_imap.mapcorners['hosts'] = 1;
+_imap.mapcorners['attribution'] = 3;
+_imap.mapcorners['scale'] = 3;
+_imap.mapcorners['measure'] = 3;
+_imap.mapcorners['mylocationbutton'] = 2;
+_imap.mapcorners['zoom'] = 2;

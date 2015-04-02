@@ -68,6 +68,7 @@ span.st_ok {
 	margin:0px;
 	text-align: center;
 	box-sizing: border-box;
+	line-height: 20px;
 }
 
 .icon_status {
@@ -204,6 +205,9 @@ div.search-control {
 	border:0px;
 	padding:2px;
 	padding-left: 50px;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+
 }
 
 #search-control-input img {
