@@ -45,7 +45,9 @@ The second way for fans of the command line:
 Replace zabbixbd the name of the table with the data zabbix, username for a user with the addition of tables in the database and enter the password.
 
 
-### To create table in PostgreSQL run under root:
+### For PostgreSQL 
+
+run under root:
 
 `sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql`
 
