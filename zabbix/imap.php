@@ -387,10 +387,14 @@ if ($output!='block') {
 };
 //проверяем наличие таблиц в БД
 $check_links = true;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
-if (count($glinks)==0) $check_links = false;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
-if (count($glinks)==0) $check_links = false;
+if (!DBselect('SELECT 1 FROM hosts_links')) {
+	$check_links=false;
+	clear_messages(1);
+};
+if (!DBselect('SELECT 1 FROM hosts_links_settings')) {
+	$check_links=false;
+	clear_messages(1);
+};
 
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
