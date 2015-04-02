@@ -396,10 +396,16 @@ if (!DBselect('SELECT 1 FROM hosts_links_settings')) {
 	clear_messages(1);
 };
 
+//проверяем наличие функции json_encode
+if (!function_exists('json_encode')) {
+	error("No function 'json_encode' in PHP. Look this http://stackoverflow.com/questions/18239405/php-fatal-error-call-to-undefined-function-json-decode");
+};
+
+//проверяем доступ к файлам скрипта
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
 	if ( !is_readable ( $file ) ) {
-		echo '<div id=imapworkareaError style="color:red; font-size:1.4em;">'._('If you see this message, it means that the script had problems with access to the files. Try to set read permissions for the web-server to a folder imap.').'</div>';
+		error (_('If you see this message, it means that the script had problems with access to the files. Try to set read permissions for the web-server to a folder imap.'));
 		break;
 	};
 };
