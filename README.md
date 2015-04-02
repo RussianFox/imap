@@ -34,7 +34,8 @@ For working host's links, we need to add two tables in the database Zabbix.
 
 Look at file imap/tables-xxx.sql
 
-For MySQL:
+### For MySQL:
+
 You can open phpmyadmin, select the database Zabbix, and select this file in the Import section
 
 The second way for fans of the command line:
@@ -44,8 +45,10 @@ The second way for fans of the command line:
 Replace zabbixbd the name of the table with the data zabbix, username for a user with the addition of tables in the database and enter the password.
 
 
-To create table in PostgreSQL run under root:
-$ sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql
+### To create table in PostgreSQL run under root:
+
+`sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql`
+
 where
 sudo -u zabbix - act as system user 'zabbix' (otherwise PosgreSQL will not authenticate user),
 -U zabbix - database owner,
