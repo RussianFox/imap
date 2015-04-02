@@ -52,6 +52,9 @@ run under root:
 `sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql`
 
 where
+
 sudo -u zabbix - act as system user 'zabbix' (otherwise PosgreSQL will not authenticate user),
+
 -U zabbix - database owner,
+
 -d zabbix - database name.
