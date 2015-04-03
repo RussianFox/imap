@@ -43,7 +43,7 @@ Interactive map for Zabbix
 
 Второй способ для любителей командной строки:
 
-`mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables.sql`
+`mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables-mysql.sql`
 
 Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
 
@@ -52,7 +52,7 @@ Interactive map for Zabbix
 
 От рута запустить
 
-`sudo -u zabbix psql -U zabbix -W -d zabbix < table.sql`
+`sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql`
 
 где
 

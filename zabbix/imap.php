@@ -361,8 +361,9 @@ if ($output!='block') {
 	// $showEvents = $_REQUEST['show_events'];
 	// $ackStatus = $_REQUEST['ack_status'];
 
+	textdomain("frontend");
+	
 	$triggerWidget = new CWidget();
-
 	$rightForm = new CForm('get');
 	$rightForm->addItem(array(_('Group').SPACE, $pageFilter->getGroupsCB(true)));
 	$rightForm->addItem(array(SPACE._('Host').SPACE, $pageFilter->getHostsCB(true)));
@@ -371,20 +372,20 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
+	
 	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
+	
 	textdomain("frontend");
 	
 	$rightForm->addVar('fullscreen', $_REQUEST['fullscreen']);
-
 	$triggerWidget->addHeader(SPACE,$rightForm);
 	$triggerWidget->addPageHeader(_('Interactive map'), get_icon('fullscreen', array('fullscreen' => $_REQUEST['fullscreen'])));
-		
 	$triggerWidget->show();
-
-	
-	textdomain("imap");
 };
+
+textdomain("imap");
+
 //проверяем наличие таблиц в БД
 $check_links = true;
 if (!DBselect('SELECT 1 FROM hosts_links')) {
@@ -526,7 +527,7 @@ foreach ($needThisFiles as $file) {
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
 	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
 	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
-	
+	locale['No hosts with inventory'] = "<?php echo _("No hosts with inventory"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
