@@ -114,7 +114,8 @@
 				ui.zoomOut = this._createZoomBtn('out', 'bottom', ui.bar);
 				ui.body    = L.DomUtil.create('div', ns + '-body', ui.wrap);
 				ui.knob    = L.DomUtil.create('div', ns + '-knob');
-
+				ui.label    = L.DomUtil.create('div', ns + '-label');
+				
 				L.DomEvent.disableClickPropagation(ui.bar);
 				L.DomEvent.disableClickPropagation(ui.knob);
 
