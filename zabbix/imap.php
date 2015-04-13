@@ -164,13 +164,20 @@ if ($output=='ajax') {
 		$options['monitored'] = true;
 		$options['maintenance'] = false;
 		$options['skipDependent'] = true;
+		$options['sortfield'] = array('lastchange');
+		$options['sortorder'] = 'DESC';
 		$options['filter'] = array('value' => TRIGGER_VALUE_TRUE);
 		if ($showSeverity > TRIGGER_SEVERITY_NOT_CLASSIFIED) {
 			$options['min_severity'] = $showSeverity;
 		};
-		$hosts = API::Trigger()->get($options);
+		$triggers = API::Trigger()->get($options);
+
+		$ntriggers = array();
+		foreach ($triggers as $tr) {
+			$ntriggers[] = $tr;
+		};
 		
-		$responseData = json_encode($hosts, FALSE);
+		$responseData = json_encode($ntriggers);
 		echo $responseData;
 		exit;
 	};
@@ -250,6 +257,14 @@ if ($output=='ajax') {
 		$hosts = API::Host()->update($options);
 		
 		$responseData = json_encode(array('result' => $hosts), FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_graphs') {
+		$options['expandName'] = true;
+		$graphs = API::Graph()->get($options);
+		$responseData = json_encode($graphs, FALSE);
 		echo $responseData;
 		exit;
 	};
@@ -361,9 +376,8 @@ if ($output!='block') {
 	// $showEvents = $_REQUEST['show_events'];
 	// $ackStatus = $_REQUEST['ack_status'];
 
-	textdomain("frontend");
-	
 	$triggerWidget = new CWidget();
+
 	$rightForm = new CForm('get');
 	$rightForm->addItem(array(_('Group').SPACE, $pageFilter->getGroupsCB(true)));
 	$rightForm->addItem(array(SPACE._('Host').SPACE, $pageFilter->getHostsCB(true)));
@@ -372,15 +386,15 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
-	
 	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
-	
 	textdomain("frontend");
 	
 	$rightForm->addVar('fullscreen', $_REQUEST['fullscreen']);
+
 	$triggerWidget->addHeader(SPACE,$rightForm);
 	$triggerWidget->addPageHeader(_('Interactive map'), get_icon('fullscreen', array('fullscreen' => $_REQUEST['fullscreen'])));
+		
 	$triggerWidget->show();
 };
 
@@ -420,10 +434,10 @@ foreach ($needThisFiles as $file) {
 </div>
 
 <link rel="stylesheet" href="imap/leaflet/leaflet.css" />
-<script type="text/javascript" src="imap/leaflet/leaflet.js"></script>
+<script type="text/javascript" src="imap/leaflet/leaflet-src.js"></script>
 <script type="text/javascript" src="imap/leaflet/plugins/leaflet.label.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.label.css" />
-<link rel="stylesheet" href="imap/markers.css" />
+
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.css" />
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.Default.css" />
 <script src="imap/leaflet/plugins/leaflet.markercluster.js"></script>
@@ -447,6 +461,9 @@ foreach ($needThisFiles as $file) {
 
 <script src="imap/leaflet/plugins/leaflet.measure/leaflet.measure.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
+
+<link rel="stylesheet" href="imap/markers.css" />
+<link rel="stylesheet" href="imap/userstyles.css" />
 
 <script type="text/javascript">
 
@@ -479,9 +496,13 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.intervalLoadHosts = 60;
 	_imap.settings.intervalLoadTriggers = 30;
 	_imap.settings.intervalLoadLinks = 60;
+	_imap.settings.showMarkersLabels = false;
+	_imap.settings.spiderfyDistanceMultiplier = 1;
+	_imap.settings.defaultbaselayer = "OpenStreetMap";
 	bingAPIkey=false;
 	
 	_imap.mapcorners['googlesearch'] = 0;
+	_imap.mapcorners['lasttriggers'] = 0;
 	_imap.mapcorners['layers'] = 1;
 	_imap.mapcorners['hosts'] = 1;
 	_imap.mapcorners['attribution'] = 3;
@@ -492,13 +513,22 @@ foreach ($needThisFiles as $file) {
 	
 	
 	/* Перевод для текущего языка */
+	<?php textdomain("frontend"); ?>
 	locale.Search = '<?php echo _('Search'); ?>';
-	
 	
 	locale.inventoryfields = new Object;
 	<?php foreach (getHostInventories() as $field): ?>
 		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
 	<?php endforeach; ?>
+	
+	locale['Ack'] = '<?php echo _('Ack'); ?>';
+	locale['Yes'] = '<?php echo _('Yes'); ?>';
+	locale['No'] = '<?php echo _('No'); ?>';
+	
+	locale['Host inventory'] = '<?php echo _('Host inventory'); ?>';
+	locale['Triggers'] = '<?php echo _('Triggers'); ?>';
+	locale['Graphs'] = '<?php echo _('Graphs'); ?>';
+	locale['Latest data'] = '<?php echo _('Latest data'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -528,6 +558,9 @@ foreach ($needThisFiles as $file) {
 	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
 	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
 	locale['No hosts with inventory'] = "<?php echo _("No hosts with inventory"); ?>";
+	locale['Keep'] = "<?php echo _("Keep"); ?>";
+	locale['Tools'] = "<?php echo _("Tools"); ?>";
+	
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {

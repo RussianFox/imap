@@ -4,18 +4,26 @@
 	
 	Code is executed when the page loads. UserAdditions function is executed after the initialization of all additions.
 	
-	If after the file enabled you something broke, so in this file you did something wrong, and it's not a bug of the supplement.
+	If after the file enabled you something broke, so in this file you did something wrong, and it's not a bug of imap.
 	
 	If you want something to ask the developer about this file, please attach the entire file, not a piece of it.
-	
-	For example, add a new layer on the map:
-	_imap.mapControl.addBaseLayer(L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),'OpenStreetMap.Mapnik');
-	
-	For example, add a new overlay on the map:
-	_imap.mapControl.addOverlay(L.tileLayer('http://openfiremap.org/hytiles/{z}/{x}/{y}.png', {attribution: '© OpenFireMap contributors - © OpenStreetMap contributors'}),'OpenFireMap');
-	 
-  */	
+*/
   
 function userAdditions() {
+/*	
+	For example, add a new layer on the map:
+	_imap.Controls['layers'].addBaseLayer(L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),'OpenStreetMap.Mapnik');
 	
+	For example, add a new overlay on the map:
+	_imap.Controls['layers'].addOverlay(L.tileLayer('http://openfiremap.org/hytiles/{z}/{x}/{y}.png', {attribution: '© OpenFireMap contributors - © OpenStreetMap contributors'}),'OpenFireMap');
+	
+	For example, add overlay image on the map
+	var imageUrl = 'https://img.site.com/12345.jpg',
+	imageBounds = [[60.002737, 30.130992], [59.873728, 30.435788]],
+	imageOpacity = 1,
+	imageAttribution = 'This is my layer',
+	imageLayerName = 'Custom layer';
+	_imap.Controls['layers'].addOverlay(L.imageOverlay(imageUrl, imageBounds, {opacity:imageOpacity, attribution:imageAttribution}),imageLayerName);
+	 
+  */
 };
