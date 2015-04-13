@@ -434,7 +434,7 @@ foreach ($needThisFiles as $file) {
 </div>
 
 <link rel="stylesheet" href="imap/leaflet/leaflet.css" />
-<script type="text/javascript" src="imap/leaflet/leaflet-src.js"></script>
+<script type="text/javascript" src="imap/leaflet/leaflet.js"></script>
 <script type="text/javascript" src="imap/leaflet/plugins/leaflet.label.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.label.css" />
 
