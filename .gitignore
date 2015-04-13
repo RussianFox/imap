@@ -1,4 +1,5 @@
 settings.js
+additions.js
 userstyles.css
 zabbix/imap/hardware/*
 !zabbix/imap/hardware/readme.md
