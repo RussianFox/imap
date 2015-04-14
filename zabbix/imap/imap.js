@@ -219,6 +219,8 @@
 		});
 	};
 	
+	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
+	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
 		if (ff == undefined) return true;
@@ -745,14 +747,14 @@
 		return (out);
 	};
 	
+	
 	function addLastTrigger(trigger) {
 		if (jQuery('#lasttrigger'+trigger.triggerid).length) return;
 		var container = L.DomUtil.create('div');
 		container.innerHTML = "";
 			
 			var rstr = '';
-			rstr = rstr + '<div id="lasttrigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;trigger&quot;,&quot;triggerid&quot;:&quot;'+trigger.triggerid+'&quot;,&quot;showEvents&quot;:true}">'+escapeHtml(trigger.description)+'</span>';
-			if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'trigger\','+host_id+','+trigger.triggerid+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
+			rstr = rstr + '<div id="lasttrigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
 
 			rstr = rstr + '<div class=acknowledge>';
 			if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
@@ -1229,9 +1231,10 @@
 		return np;
 	};
 	
-	function viewHostOnMap(hh) {
+	function viewHostOnMap(hh, op) {
 		if (_imap.markersList[hh].marker)
 			_imap.map.setView(_imap.markersList[hh].marker._latlng,_imap.map.getMaxZoom());
+		if (op!==undefined) _imap.markersList[hh].marker.openPopup();
 	};
 	
 	/* TimerSearchGoogle(jQuery('#search-control-text').val()); */
@@ -1307,7 +1310,7 @@
 	};
 	
 	function iniMap() {
-		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false, maxZoom:18 }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
+		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
 		
 		L.polyline([[0, 0], ]).addTo(this._imap.map);
 		
@@ -1318,6 +1321,8 @@
 		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
 		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
+		counter();
+		
 		var SearchControl = L.Control.extend({
 			options: {
 				position: setMapCorner(_imap.mapcorners['googlesearch'])
@@ -1458,12 +1463,10 @@
 		overlayMaps = _layers[1];
 		
 		overlayMaps[mlocale('Hosts')] = _imap.markers;
-		_imap.map.addLayer(_imap.markers);
+		
 		
 		if (_imap.settings.links_enabled) {
 			overlayMaps[mlocale("Host's links")] = _imap.links;
-			_imap.map.addLayer(_imap.links);
-			_imap.vars.linksVisible=true;
 		};
 		
 		_imap.map.addLayer(_imap.searchmarkers);
@@ -1497,7 +1500,8 @@
 		_imap.map.on('overlayremove',function(event,obj){ checkLinksLayer(); saveLayersMap(); });
 		_imap.map.on('overlayadd',function(event,obj){ checkLinksLayer(); saveLayersMap(); });
 		_imap.map.on('baselayerchange',function(event,obj){ 
-		  saveLayersMap(event.name);
+			/*_imap.map.options.maxZoom=event.layer.options.maxZoom;*/
+			saveLayersMap(event.name);
 		});
 	};
 	
@@ -1552,6 +1556,9 @@
 				};
 			};
 		};
+		_imap.map.addLayer(_imap.markers);
+		_imap.map.addLayer(_imap.links);
+		_imap.vars.linksVisible=true;
 	};
 
 	function checkLinksLayer() {

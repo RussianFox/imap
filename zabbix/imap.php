@@ -398,6 +398,8 @@ if ($output!='block') {
 	$triggerWidget->show();
 };
 
+$version=trim(file_get_contents('imap/version'));
+
 textdomain("imap");
 
 //проверяем наличие таблиц в БД
@@ -479,6 +481,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.show_with_triggers_only = <?php echo $with_triggers_only; ?>;
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
 	_imap.mapcorners = new Object;
+	_imap.version='<?php echo $version; ?>';
 
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
