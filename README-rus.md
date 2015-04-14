@@ -33,6 +33,9 @@ Interactive map for Zabbix
 
 
 
+## Изменения в базе данных для работы связей
+
+### Для MySQL
 
 Для работы связей между хостами нам нужно добавить две таблицы в базу данных Zabbix.
 
@@ -40,7 +43,21 @@ Interactive map for Zabbix
 
 Второй способ для любителей командной строки:
 
-`mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables.sql`
+`mysql -u user -p zabbixbd < /usr/share/zabbix/imap/tables-mysql.sql`
 
 Замените zabbixbd на название таблицы с данными zabbix, user на имя пользователя с правами добавления таблиц в базу и введите пароль.
 
+
+### Для PostgreSQL
+
+От рута запустить
+
+`sudo -u zabbix psql -U zabbix -W -d zabbix < table-postgresql.sql`
+
+где
+
+sudo -u zabbix - действия от имени системного пользователя zabbix (иначе PosgreSQL не аутентифицирует пользователя),
+
+-U zabbix - владелец БД,
+
+-d zabbix - название БД.

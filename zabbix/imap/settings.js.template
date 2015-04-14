@@ -63,6 +63,7 @@ _imap.settings.intervalLoadTriggers = 30;
  |0  1|
  |3  2|
  */
+/*
 _imap.mapcorners = new Object;
 _imap.mapcorners['googlesearch'] = 0;
 _imap.mapcorners['layers'] = 1;
@@ -72,3 +73,15 @@ _imap.mapcorners['scale'] = 3;
 _imap.mapcorners['measure'] = 3;
 _imap.mapcorners['mylocationbutton'] = 2;
 _imap.mapcorners['zoom'] = 2;
+*/
+
+
+/* true - host's labels will show allways, false - only on over */
+/* true - метки хостов будут всегда показываться, false - только при наведении */
+_imap.settings.showMarkersLabels = false;
+
+
+/* Force a start layer */
+/* Принудительно установить слой при загрузке */
+/*_imap.settings.startbaselayer = "Google"; */
+

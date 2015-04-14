@@ -164,13 +164,20 @@ if ($output=='ajax') {
 		$options['monitored'] = true;
 		$options['maintenance'] = false;
 		$options['skipDependent'] = true;
+		$options['sortfield'] = array('lastchange');
+		$options['sortorder'] = 'DESC';
 		$options['filter'] = array('value' => TRIGGER_VALUE_TRUE);
 		if ($showSeverity > TRIGGER_SEVERITY_NOT_CLASSIFIED) {
 			$options['min_severity'] = $showSeverity;
 		};
-		$hosts = API::Trigger()->get($options);
+		$triggers = API::Trigger()->get($options);
+
+		$ntriggers = array();
+		foreach ($triggers as $tr) {
+			$ntriggers[] = $tr;
+		};
 		
-		$responseData = json_encode($hosts, FALSE);
+		$responseData = json_encode($ntriggers);
 		echo $responseData;
 		exit;
 	};
@@ -250,6 +257,14 @@ if ($output=='ajax') {
 		$hosts = API::Host()->update($options);
 		
 		$responseData = json_encode(array('result' => $hosts), FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_graphs') {
+		$options['expandName'] = true;
+		$graphs = API::Graph()->get($options);
+		$responseData = json_encode($graphs, FALSE);
 		echo $responseData;
 		exit;
 	};
@@ -381,21 +396,33 @@ if ($output!='block') {
 	$triggerWidget->addPageHeader(_('Interactive map'), get_icon('fullscreen', array('fullscreen' => $_REQUEST['fullscreen'])));
 		
 	$triggerWidget->show();
-
-	
-	textdomain("imap");
 };
+
+$version=trim(file_get_contents('imap/version'));
+
+textdomain("imap");
+
 //проверяем наличие таблиц в БД
 $check_links = true;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links'"));
-if (count($glinks)==0) $check_links = false;
-$glinks = DBfetchArray(DBselect("Show tables from zabbix like 'hosts_links_settings'"));
-if (count($glinks)==0) $check_links = false;
+if (!DBselect('SELECT 1 FROM hosts_links')) {
+	$check_links=false;
+	clear_messages(1);
+};
+if (!DBselect('SELECT 1 FROM hosts_links_settings')) {
+	$check_links=false;
+	clear_messages(1);
+};
 
+//проверяем наличие функции json_encode
+if (!function_exists('json_encode')) {
+	error("No function 'json_encode' in PHP. Look this http://stackoverflow.com/questions/18239405/php-fatal-error-call-to-undefined-function-json-decode");
+};
+
+//проверяем доступ к файлам скрипта
 $needThisFiles = array('imap/leaflet/leaflet.js','imap/leaflet/plugins/leaflet.markercluster.js','imap/imap.js');
 foreach ($needThisFiles as $file) {
 	if ( !is_readable ( $file ) ) {
-		echo '<div id=imapworkareaError style="color:red; font-size:1.4em;">'._('If you see this message, it means that the script had problems with access to the files. Try to set read permissions for the web-server to a folder imap.').'</div>';
+		error (_('If you see this message, it means that the script had problems with access to the files. Try to set read permissions for the web-server to a folder imap.'));
 		break;
 	};
 };
@@ -412,7 +439,7 @@ foreach ($needThisFiles as $file) {
 <script type="text/javascript" src="imap/leaflet/leaflet.js"></script>
 <script type="text/javascript" src="imap/leaflet/plugins/leaflet.label.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.label.css" />
-<link rel="stylesheet" href="imap/markers.css" />
+
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.css" />
 <link rel="stylesheet" href="imap/leaflet/plugins/MarkerCluster.Default.css" />
 <script src="imap/leaflet/plugins/leaflet.markercluster.js"></script>
@@ -437,6 +464,9 @@ foreach ($needThisFiles as $file) {
 <script src="imap/leaflet/plugins/leaflet.measure/leaflet.measure.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
+<link rel="stylesheet" href="imap/markers.css" />
+<link rel="stylesheet" href="imap/userstyles.css" />
+
 <script type="text/javascript">
 
 	var _imap = new Object;
@@ -451,6 +481,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.show_with_triggers_only = <?php echo $with_triggers_only; ?>;
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
 	_imap.mapcorners = new Object;
+	_imap.version='<?php echo $version; ?>';
 
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
@@ -468,9 +499,13 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.intervalLoadHosts = 60;
 	_imap.settings.intervalLoadTriggers = 30;
 	_imap.settings.intervalLoadLinks = 60;
+	_imap.settings.showMarkersLabels = false;
+	_imap.settings.spiderfyDistanceMultiplier = 1;
+	_imap.settings.defaultbaselayer = "OpenStreetMap";
 	bingAPIkey=false;
 	
 	_imap.mapcorners['googlesearch'] = 0;
+	_imap.mapcorners['lasttriggers'] = 0;
 	_imap.mapcorners['layers'] = 1;
 	_imap.mapcorners['hosts'] = 1;
 	_imap.mapcorners['attribution'] = 3;
@@ -481,13 +516,22 @@ foreach ($needThisFiles as $file) {
 	
 	
 	/* Перевод для текущего языка */
+	<?php textdomain("frontend"); ?>
 	locale.Search = '<?php echo _('Search'); ?>';
-	
 	
 	locale.inventoryfields = new Object;
 	<?php foreach (getHostInventories() as $field): ?>
 		locale.inventoryfields["<?php echo $field['db_field'] ?>"] = "<?php echo $field['title'] ?>";
 	<?php endforeach; ?>
+	
+	locale['Ack'] = '<?php echo _('Ack'); ?>';
+	locale['Yes'] = '<?php echo _('Yes'); ?>';
+	locale['No'] = '<?php echo _('No'); ?>';
+	
+	locale['Host inventory'] = '<?php echo _('Host inventory'); ?>';
+	locale['Triggers'] = '<?php echo _('Triggers'); ?>';
+	locale['Graphs'] = '<?php echo _('Graphs'); ?>';
+	locale['Latest data'] = '<?php echo _('Latest data'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -516,6 +560,9 @@ foreach ($needThisFiles as $file) {
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
 	locale['Zoom in'] = "<?php echo _("Zoom in"); ?>";
 	locale['Zoom out'] = "<?php echo _("Zoom out"); ?>";
+	locale['No hosts with inventory'] = "<?php echo _("No hosts with inventory"); ?>";
+	locale['Keep'] = "<?php echo _("Keep"); ?>";
+	locale['Tools'] = "<?php echo _("Tools"); ?>";
 	
 	
 	/* Фильтр для отбора хостов и групп */

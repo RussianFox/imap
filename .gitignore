@@ -1,0 +1,7 @@
+settings.js
+additions.js
+userstyles.css
+zabbix/imap/version
+zabbix/imap/hardware/*
+!zabbix/imap/hardware/readme.md
+!zabbix/imap/hardware/none.png

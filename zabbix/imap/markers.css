@@ -30,15 +30,41 @@ span.st_ok {
 	border-radius:0.3em;
 }
 
-.lastchange {
-	font-size: 0.7em;
-	text-align: right;
+.acknowledge {
+	font-size: smaller;
 	color: rgb(4, 76, 157);
-	text-shadow: 0em 0em 0.8em rgb(142, 255, 0);
+	position: relative;
+	height:1.2em;
+}
+
+.lastchange {
+	font-size: smaller;
+	display:inline-block;
+	right:0px;
+	text-align: right;
+	position:absolute;
 }
 
 .leafletlabel {
-	z-index:999 !important;
+    z-index: 999 !important;
+    border: 0px;
+    background-color: rgba(29, 28, 28, 0.8);
+    color:white;
+    font-weight:normal;
+    white-space: nowrap;
+    padding:2px;
+    margin:0px;
+    font-size: 10px;
+    line-height: 12px;
+    font: Arial, Helvetica, sans-serif;
+}
+
+.leaflet-label:after {
+    border-left-color: black !important;
+}
+
+.leaflet-label:before {
+    border-right-color: black !important;
 }
 
 .icon_status_cluster {
@@ -47,13 +73,33 @@ span.st_ok {
 	border-width:0px !important;
 	width:26px !important;
 	height:26px !important;
-	line-height: 26px !important;
+	line-height: 25px !important;
 	color: rgb(103, 94, 94);
 	font-weight:bold;
 	font-size:12px;
 	text-align: center;
 	background-position: center center;
 	font-size:8px;
+	padding:0px !important;
+	margin:0px !important;
+	margin-top:-13px !important;
+	margin-left:-13px !important;
+}
+
+.icon_status {
+	background-repeat: no-repeat !important;
+	border-radius:9px !important;
+	width:18px !important;
+	height:18px !important;
+	background-position: center center !important;
+	box-shadow: none !important;
+	border-width:0px !important;
+	padding:0px !important;
+	margin:0px !important;
+	margin-top:-9px !important;
+	margin-left:-9px !important;
+	text-align: center !important;
+	box-sizing: border-box !important;
 }
 
 .icon_status_img {
@@ -64,33 +110,21 @@ span.st_ok {
 	background-position: center center;
 	box-shadow: none !important;
 	border-width:0px !important;
-	padding:0px;
-	margin:0px;
-	text-align: center;
-	box-sizing: border-box;
-	line-height: 20px;
-}
-
-.icon_status {
-	background-repeat: no-repeat !important;
-	border-radius:8px;
-	width:18px !important;
-	height:18px !important;
-	background-position: center center;
-	box-shadow: none !important;
-	border-width:0px !important;
-	padding:0px;
-	margin:0px;
-	text-align: center;
-	box-sizing: border-box;
+	padding:0px !important;
+	margin:0px !important;
+	margin-top:-12px !important;
+	margin-left:-12px !important;
+	text-align: center !important;
+	box-sizing: border-box !important;
+	line-height: 20px !important;
 }
 
 .icon_status_img img {
 	max-width:18px !important;
 	max-height:18px !important;
-	display: inline-block;
-	vertical-align: middle;
-	margin: 0 auto;
+	display: inline-block !important;
+	vertical-align: middle !important;
+	margin: 0 auto !important;
 }
 
 .icon_status_0 {
@@ -242,7 +276,8 @@ img.vertical-middle {
 div.hostcontrol {
 	text-align:right;
 	margin-top:5px;
-	min-width: 100px;
+	min-width: 220px;
+	position: relative;
 }
 
 #imapmes {
@@ -286,7 +321,7 @@ div.hostcontrol {
 	padding: 0px;
 	margin: 0px;
 	font-weight: 900;
-	font-size: 0.9em;
+	font-size: smaller;
 }
 
 #show_hosts_list {
@@ -481,7 +516,7 @@ width: 10px !important;
 .leaflet-popup .hosterror {
 	margin-bottom:0.5em;
 	color:red;
-	font-size:0.9em;
+	font-size: smaller;
 }
 
 .hostdescription pre {
@@ -525,10 +560,78 @@ width: 10px !important;
 	border-radius: 5px; 
 }
 
+.last_triggers.leaflet-control {
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  background: #fff;
+  border-radius: 5px;
+  max-height: 30%;
+}
+
+#last_triggers_cap {
+	padding:10px;
+	cursor:pointer;
+	font-weight:bold;
+}
+
+#last_triggers_div {
+	padding:5px;
+	margin-top: 30px;
+	width:250px;
+	min-height:30px;
+	overflow-y: auto;
+	max-height:400px;
+}
+
+#last_triggers_close {
+	right:10px;
+	top:5px;
+	position:absolute;
+	cursor:pointer;
+	font-weight:bold;
+	font-size: smaller;
+}
+
+#last_triggers_close input {
+	vertical-align:middle;
+}
+
 .leaflet-top {
 	z-index:1002;
 }
 
 span.coordinates {
 	  color: rgb(140, 140, 140);
+}
+
+.leaflet-control-zoomslider a {
+  border-radius:4px;
+}
+
+.leaflet-control-zoomslider .leaflet-control-zoomslider-wrap {
+  border-color:transparent !important;
+  background-color:transparent !important;
+}
+
+.leaflet-control-zoomslider .leaflet-control-zoomslider-body {
+  border-width: 4px !important;
+  background-color: black;
+}
+
+span.graphPopupWindow {
+  display:block !important;
+  position:relative !important;
+}
+
+.ui-dialog {
+  z-index: 1003;
+}
+
+.menuPopup .ui-menu ul.ui-corner-all {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.hostcontrol .hostItems {
+	position:absolute;
+	left:0px;
 }
