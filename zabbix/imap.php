@@ -482,6 +482,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.min_status = <?php echo $showSeverity; ?>;
 	_imap.mapcorners = new Object;
 	_imap.version='<?php echo $version; ?>';
+	_imap.zabbixversion='<?php echo ZABBIX_VERSION; ?>';
 
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
