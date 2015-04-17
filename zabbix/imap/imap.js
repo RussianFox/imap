@@ -219,7 +219,7 @@
 		});
 	};
 	
-	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
+	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
 	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
@@ -1030,6 +1030,19 @@
 		});
 	};
 
+	function checkUpdateCoords(host_id,host_lat,host_lng) {
+		var marker = _imap.markersList[host_id].marker;
+		if (marker._preSpiderfyLatlng) {
+			origlat = marker._preSpiderfyLatlng.lat;
+			origlng = marker._preSpiderfyLatlng.lng;
+		} else {
+			origlat = marker._latlng.lat;
+			origlng = marker._latlng.lng;
+		};
+		if (!((origlat == host_lat) && (origlng == host_lng)))
+			_imap.markersList[host_id].marker.setLatLng([host_lat,host_lng]);
+	};
+	
 	function hostUpdate(host) {
 		var new_host = false;
 		var host_id = host.hostid;
@@ -1069,7 +1082,7 @@
 				_imap.markersList[host_id].marker.on('popupclose', function() { closePopupHost(this.options.host_id); });
 				new_host = true;
 			} else {
-				_imap.markersList[host_id].marker.setLatLng([host_lat,host_lon]);
+				checkUpdateCoords(host_id,host_lat,host_lon);
 			};
 		};
 
@@ -1116,24 +1129,28 @@
 			},
 			success: function(data){
 				var container = L.DomUtil.create('span', 'link_menu');
-				var graphs=[];
-				for (nn in data) {
-					graphs[graphs.length] = {label: data[nn].name, url: 'charts.php?graphid='+nn, css: 'hostInventories', clickCallback: function(){
-						var nn = jQuery(this).data('graphId');
-						popupFrame('charts.php?ispopup=1&graphid='+nn);
-						return false;
-					  
-					}, items: [], data: {graphId: nn} };
-					    
+				if (_imap.zabbixversion.search('2.4')==0) {
+					var graphs=[];
+					for (nn in data) {
+						if (data[nn].graphid) {
+							graph = data[nn];
+							graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, css: 'hostInventories', clickCallback: function(){
+								var tn = jQuery(this).data('graphId');
+								popupFrame('charts.php?ispopup=1&graphid='+tn);
+								return false;
+							  
+							}, items: [], data: {graphId: +graph.graphid} };
+						};
+					};
+					
+					var lastdd = { label: mlocale('Latest data'), items: [], url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
+					var hostinv = { label: mlocale('Host inventory'), items: [], url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
+					var ltrig = { label: mlocale('Triggers'), items: [], url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
+					
+					jQuery(container).bind('click',function(event){ datas = [{items: [{label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig]}]; jQuery(this).menuPopup(datas, event); });
+					jQuery(container).html(mlocale('Tools'));
+					jQuery('#hostItems'+hh).append(container);
 				};
-				
-				var lastdd = { label: mlocale('Latest data'), items: [], url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
-				var hostinv = { label: mlocale('Host inventory'), items: [], url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
-				var ltrig = { label: mlocale('Triggers'), items: [], url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
-				
-				jQuery(container).bind('click',function(event){ datas = [{items: [{label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig]}]; jQuery(this).menuPopup(datas, event); });
-				jQuery(container).html(mlocale('Tools'));
-				jQuery('#hostItems'+hh).append(container);
 			}
 		});
 		
@@ -1312,8 +1329,6 @@
 	function iniMap() {
 		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
 		
-		L.polyline([[0, 0], ]).addTo(this._imap.map);
-		
 		_imap.Controls = new Object;
 		
 		_imap.Controls['attribution'] = L.control.attribution({position:setMapCorner(_imap.mapcorners['attribution'])});
@@ -1460,16 +1475,7 @@
 		
 		var _layers = getLayers();
 		baseMaps = _layers[0];
-		overlayMaps = _layers[1];
-		
-		overlayMaps[mlocale('Hosts')] = _imap.markers;
-		
-		
-		if (_imap.settings.links_enabled) {
-			overlayMaps[mlocale("Host's links")] = _imap.links;
-		};
-		
-		_imap.map.addLayer(_imap.searchmarkers);
+		overlayMaps = _layers[1];		
 		
 		_imap.Controls['layers'] = L.control.layers(baseMaps, overlayMaps, {position: setMapCorner(_imap.mapcorners['layers'])});
 
@@ -1558,7 +1564,15 @@
 		};
 		_imap.map.addLayer(_imap.markers);
 		_imap.map.addLayer(_imap.links);
+		_imap.map.addLayer(_imap.searchmarkers);
 		_imap.vars.linksVisible=true;
+		
+		_imap.Controls['layers'].addOverlay(_imap.markers,mlocale("Hosts"));
+		
+		if (_imap.settings.links_enabled) {
+			_imap.Controls['layers'].addOverlay(_imap.links,mlocale("Host's links"));
+		};
+		
 	};
 
 	function checkLinksLayer() {
