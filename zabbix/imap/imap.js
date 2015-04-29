@@ -783,17 +783,16 @@
 	
 	function addLastTrigger(trigger) {
 		if (jQuery('#lasttrigger'+trigger.triggerid).length) return;
-		var container = L.DomUtil.create('div');
-		container.innerHTML = "";
+		var container = jQuery('<div/>',{'id':'lasttrigger'+trigger.triggerid, 'class':'trigger triggerst'+trigger.priority, 'status':trigger.priority, 'time':trigger.lastchange});
 			
 			var rstr = '';
-			rstr = rstr + '<div id="lasttrigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
+			rstr = rstr + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
 
 			rstr = rstr + '<div class=acknowledge>';
 			if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
-			rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div></div>';
+			rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 		
-		container.innerHTML = rstr;
+		container.append(rstr);
 		jQuery('#last_triggers_div').append(container);
 	};
 	
@@ -1026,6 +1025,13 @@
 		var status=0;
 		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
+		
+		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
+			for (var nn in _imap.markersList[host_id].triggers) {
+				var trigger = _imap.markersList[host_id].triggers[+nn];
+				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
+			};
+		};
 		
 		_imap.markersList[host_id].marker.options.status = status;
 		if (!_imap.markersList[host_id].marker.label) {
@@ -1480,16 +1486,36 @@
 				var container = L.DomUtil.create('div', 'last_triggers');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-					'<div id=last_triggers_cap>'+mlocale('Triggers')+'</div><div style="display:none;" class=nicescroll id=last_triggers_div></div><div style="display:none;" id=last_triggers_close>'+mlocale('Keep')+' <input  type="checkbox"></div> <div style="display:none;" id=last_triggers_sort>Сортировать</div>'
+					'<div id=last_triggers_cap>'+mlocale('Triggers')+'</div><div style="display:none;" class=nicescroll id=last_triggers_div></div><div style="display:none;" id=last_triggers_close>'+mlocale('Keep')+' <input  type="checkbox"></div>'
 				);
 				
 				jQuery(container).mouseleave(function(){ if (!jQuery( '#last_triggers_close input' ).prop( "checked" )) { jQuery('#last_triggers_div').hide(); jQuery('#last_triggers_cap').show(); jQuery('#last_triggers_close').hide(); jQuery('#last_triggers_sort').hide(); }; _imap.map.scrollWheelZoom.enable(); });
 				jQuery(container).mouseover(function(){ jQuery('#last_triggers_div').show(); jQuery('#last_triggers_cap').hide();  jQuery('#last_triggers_close').show();  jQuery('#last_triggers_sort').show(); _imap.map.scrollWheelZoom.disable(); });
 				
 				
-				jQuery('#last_triggers_sort').click(function(event){ 
-				  this.sorting(); 
+				var sortbutton = jQuery('<div/>', {
+				    id: 'last_triggers_sort',
+				    href: 'http://google.com',
+				    title: 'Become a Googler',
+				    rel: 'external',
+				    text: 'Sorting'
+				}).appendTo(container);
+				
+				jQuery(sortbutton).click(function(event){ 
+					var elements = jQuery(this).parent().children('#last_triggers_div').children('.trigger');
+					var target = jQuery(this).parent().children('#last_triggers_div');
+					
+					elements.sort(function (a, b) {
+						var an = +jQuery(a).attr('status'),
+						bn = +jQuery(b).attr('status');
+					    
+						return -1*(an - bn);
+					});
+					elements.detach().appendTo(target);
+					
 				});
+				
+				jQuery(container).append(sortbutton);
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
