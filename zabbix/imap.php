@@ -30,6 +30,7 @@ if (function_exists('get_request')) {
 	$linkid = get_request('linkid', null);
 	$linkoptions = get_request('linkoptions', null);
 	$hardwareField = get_request('hardwareField','type');
+	$searchstring = get_request('searchstring','');
 };
 
 if (function_exists('getRequest')) {
@@ -49,6 +50,7 @@ if (function_exists('getRequest')) {
 	$linkid = getRequest('linkid', null);
 	$linkoptions = getRequest('linkoptions', null);
 	$hardwareField = getRequest('hardwareField');
+	$searchstring = getRequest('searchstring','');
 };
 
 if (function_exists('get_current_nodeid')) { 
@@ -182,9 +184,24 @@ if ($output=='ajax') {
 		exit;
 	};
 	
-	if ($action_ajax=='get_hosts') {
-		$options['monitored_hosts'] = true;
-		$options['withInventory'] = true;
+	if ($action_ajax=='search_hosts') {
+		//$options = array();
+		$options['searchByAny'] = true;
+		$options['output'] = 'hostid';
+		$options['search'] = array(
+			'host' => $searchstring,
+			'name' => $searchstring,
+			'dns' => $searchstring,
+			'ip' => $searchstring
+		 );
+		
+		$hosts = API::Host()->get($options);
+		$responseData = json_encode($hosts, FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_host') {
 		$options['selectInterfaces'] = 'extend';
 		//$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
 		$options['selectInventory'] = 'extend';
@@ -202,6 +219,19 @@ if ($output=='ajax') {
 			$hosts[$host['hostid']]['scripts'] = $scripts[$host['hostid']];
 		};
 		
+		$responseData = json_encode($hosts, FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_hosts') {
+		$options['monitored_hosts'] = true;
+		$options['withInventory'] = true;
+		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
+		//$options['selectInventory'] = 'extend';
+		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
+		$options['selectMaintenances'] = 'extend';
+		$hosts = API::Host()->get($options);
 		$responseData = json_encode($hosts, FALSE);
 		echo $responseData;
 		exit;
