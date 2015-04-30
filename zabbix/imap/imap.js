@@ -793,11 +793,11 @@
 			rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 		
 		container.append(rstr);
-		jQuery('#last_triggers_div').append(container);
+		_imap.Controls['lasttriggers'].addTrigger(container);
 	};
 	
 	function delLastTrigger(nn) {
-		jQuery('#lasttriggers'+nn).detach();
+		_imap.Controls['lasttriggers'].removeTrigger(+nn);
 	};
 	
 	function loadTriggers() {
@@ -818,7 +818,6 @@
 						_imap.markersList[+nn].triggers[+mm].del = true;
 					};
 				};
-				jQuery('#last_triggers_div').html('');
 				for (var nn in data) {
 					var trigger = data[+nn];
 					if (!trigger) continue;
@@ -1477,46 +1476,27 @@
 		_imap.Controls['hosts'] = new HostsControl;
 		
 		var LastTriggers = L.Control.extend({
+			container: undefined,
 			options: {
 				position: setMapCorner(_imap.mapcorners['lasttriggers'])
 			},
-
 			onAdd: function (map) {
 				// create the control container with a particular class name
 				var container = L.DomUtil.create('div', 'last_triggers');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-					'<div id=last_triggers_cap>'+mlocale('Triggers')+'</div><div style="display:none;" class=nicescroll id=last_triggers_div></div><div style="display:none;" id=last_triggers_close>'+mlocale('Keep')+' <input  type="checkbox"></div>'
+					'<div class="last_triggers_cap">'+mlocale('Triggers')+'</div><div style="display:none;" class="nicescroll last_triggers_div"></div><div style="display:none;" class="last_triggers_close">'+mlocale('Keep')+' <input  type="checkbox"></div>'
 				);
 				
-				jQuery(container).mouseleave(function(){ if (!jQuery( '#last_triggers_close input' ).prop( "checked" )) { jQuery('#last_triggers_div').hide(); jQuery('#last_triggers_cap').show(); jQuery('#last_triggers_close').hide(); jQuery('#last_triggers_sort').hide(); }; _imap.map.scrollWheelZoom.enable(); });
-				jQuery(container).mouseover(function(){ jQuery('#last_triggers_div').show(); jQuery('#last_triggers_cap').hide();  jQuery('#last_triggers_close').show();  jQuery('#last_triggers_sort').show(); _imap.map.scrollWheelZoom.disable(); });
+				L.DomEvent.on(container, 'mouseleave', this.mouseLeave, this)
+					  .on(container, 'mouseover', this.mouseOver, this);
 				
+		
+				var sortbutton = L.DomUtil.create('div', 'last_triggers_sort', container);
+				sortbutton.innerHTML = 'Sorting';
 				
-				var sortbutton = jQuery('<div/>', {
-				    id: 'last_triggers_sort',
-				    href: 'http://google.com',
-				    title: 'Become a Googler',
-				    rel: 'external',
-				    text: 'Sorting'
-				}).appendTo(container);
-				
-				jQuery(sortbutton).click(function(event){ 
-					var elements = jQuery(this).parent().children('#last_triggers_div').children('.trigger');
-					var target = jQuery(this).parent().children('#last_triggers_div');
-					
-					elements.sort(function (a, b) {
-						var an = +jQuery(a).attr('status'),
-						bn = +jQuery(b).attr('status');
-					    
-						return -1*(an - bn);
-					});
-					elements.detach().appendTo(target);
-					
-				});
-				
-				jQuery(container).append(sortbutton);
-				
+				L.DomEvent.on(sortbutton, 'click', this.sorting, this);
+					  
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
 				  
@@ -1535,11 +1515,47 @@
 				});
 				
 				this.container = container;
+				this.mouseLeave();
 				return container;
 			},
 			
-			sorting: function () {
-				alert('test');
+			mouseLeave: function(e) {
+				if (!jQuery(this.container).children('.last_triggers_close').children('input' ).prop( "checked" )) {
+					jQuery(this.container).children('.last_triggers_div').hide(); 
+					jQuery(this.container).children('.last_triggers_cap').show(); 
+					jQuery(this.container).children('.last_triggers_close').hide(); 
+					jQuery(this.container).children('.last_triggers_sort').hide(); 
+				}; 
+				this._map.scrollWheelZoom.enable(); 
+			},
+			
+			mouseOver: function(e) {
+				jQuery(this.container).children('.last_triggers_div').show(); 
+				jQuery(this.container).children('.last_triggers_cap').hide();  
+				jQuery(this.container).children('.last_triggers_close').show();  
+				jQuery(this.container).children('.last_triggers_sort').show(); 
+				this._map.scrollWheelZoom.disable();
+			},
+			
+			addTrigger: function(el) {
+				jQuery(this.container).children('.last_triggers_div').append(el);
+			},
+			
+			removeTrigger: function(nn) {
+				jQuery(this.container).children('#lasttrigger'+nn).detach();
+			},
+			
+			sorting: function (e) {
+					var elements = jQuery(this.container).children('.last_triggers_div').children('.trigger');
+					var target = jQuery(this.container).children('.last_triggers_div');
+					
+					elements.sort(function (a, b) {
+						var an = +jQuery(a).attr('status'),
+						bn = +jQuery(b).attr('status');
+					    
+						return -1*(an - bn);
+					});
+					elements.detach().appendTo(target);
 			}
 		});
 		

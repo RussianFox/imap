@@ -571,13 +571,13 @@ width: 10px !important;
   max-height: 30%;
 }
 
-#last_triggers_cap {
+.last_triggers.leaflet-control .last_triggers_cap {
 	padding:10px;
 	cursor:pointer;
 	font-weight:bold;
 }
 
-#last_triggers_div {
+.last_triggers.leaflet-control .last_triggers_div {
 	padding:5px;
 	margin:6px;
 	margin-top: 30px;
@@ -587,7 +587,7 @@ width: 10px !important;
 	max-height:400px;
 }
 
-#last_triggers_close {
+.last_triggers.leaflet-control .last_triggers_close {
 	right:10px;
 	top:5px;
 	position:absolute;
@@ -597,7 +597,7 @@ width: 10px !important;
 	vertical-align:middle;
 }
 
-#last_triggers_sort {
+.last_triggers.leaflet-control .last_triggers_sort {
 	left:10px;
 	top:5px;
 	position:absolute;
