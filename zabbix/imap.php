@@ -495,7 +495,9 @@ foreach ($needThisFiles as $file) {
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
 <link rel="stylesheet" href="imap/markers.css" />
-<link rel="stylesheet" href="imap/userstyles.css" />
+
+<?php if (file_exists('imap/userstyles.css')) echo '<link rel="stylesheet" href="imap/userstyles.css" />'; ?>
+
 
 <script type="text/javascript">
 
@@ -595,6 +597,8 @@ foreach ($needThisFiles as $file) {
 	locale['Keep'] = "<?php echo _("Keep"); ?>";
 	locale['Tools'] = "<?php echo _("Tools"); ?>";
 	
+	locale['Sort by severity'] = "<?php echo _("Sort by severity"); ?>";
+	locale['Sort by time'] = "<?php echo _("Sort by time"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {

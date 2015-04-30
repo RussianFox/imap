@@ -599,6 +599,15 @@ width: 10px !important;
 
 .last_triggers.leaflet-control .last_triggers_sort {
 	left:10px;
+	top:6px;
+	position:absolute;
+	cursor:pointer;
+	font-weight:bold;
+	font-size: smaller;
+}
+
+.last_triggers.leaflet-control .last_triggers_sort_type {
+  	left:10px;
 	top:5px;
 	position:absolute;
 	cursor:pointer;

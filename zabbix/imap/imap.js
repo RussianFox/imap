@@ -1491,11 +1491,18 @@
 				L.DomEvent.on(container, 'mouseleave', this.mouseLeave, this)
 					  .on(container, 'mouseover', this.mouseOver, this);
 				
-		
-				var sortbutton = L.DomUtil.create('div', 'last_triggers_sort', container);
+				var sortselect = L.DomUtil.create('select', 'last_triggers_sort_type', container);
+				sortselect.innerHTML = '<option value="status">'+mlocale('Sort by severity')+'</option><option value="time">'+mlocale('Sort by time')+'</option>';
+				
+				jQuery(sortselect).val(getCookie('imap_lasttriggers_sorttype'));
+				
+				L.DomEvent.on(sortselect, 'change', this.sorting, this);
+					  
+				
+				/* var sortbutton = L.DomUtil.create('div', 'last_triggers_sort', container);
 				sortbutton.innerHTML = 'Sorting';
 				
-				L.DomEvent.on(sortbutton, 'click', this.sorting, this);
+				L.DomEvent.on(sortbutton, 'click', this.sorting, this); */
 					  
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -1524,7 +1531,7 @@
 					jQuery(this.container).children('.last_triggers_div').hide(); 
 					jQuery(this.container).children('.last_triggers_cap').show(); 
 					jQuery(this.container).children('.last_triggers_close').hide(); 
-					jQuery(this.container).children('.last_triggers_sort').hide(); 
+					jQuery(this.container).children('.last_triggers_sort_type').hide(); 
 				}; 
 				this._map.scrollWheelZoom.enable(); 
 			},
@@ -1533,12 +1540,13 @@
 				jQuery(this.container).children('.last_triggers_div').show(); 
 				jQuery(this.container).children('.last_triggers_cap').hide();  
 				jQuery(this.container).children('.last_triggers_close').show();  
-				jQuery(this.container).children('.last_triggers_sort').show(); 
+				jQuery(this.container).children('.last_triggers_sort_type').show(); 
 				this._map.scrollWheelZoom.disable();
 			},
 			
 			addTrigger: function(el) {
 				jQuery(this.container).children('.last_triggers_div').append(el);
+				this.sorting();
 			},
 			
 			removeTrigger: function(nn) {
@@ -1549,9 +1557,12 @@
 					var elements = jQuery(this.container).children('.last_triggers_div').children('.trigger');
 					var target = jQuery(this.container).children('.last_triggers_div');
 					
+					var attr = jQuery(this.container).children('.last_triggers_sort_type').val();
+					setCookie('imap_lasttriggers_sorttype', attr, {expires: 36000000, path: '/'});
+					
 					elements.sort(function (a, b) {
-						var an = +jQuery(a).attr('status'),
-						bn = +jQuery(b).attr('status');
+						var an = +jQuery(a).attr(attr),
+						bn = +jQuery(b).attr(attr);
 					    
 						return -1*(an - bn);
 					});
@@ -1717,7 +1728,7 @@
 		if (bl!==undefined) baselayer=bl;
 		text = text+baselayer+'|*|';
 		
-		setCookie('maplayer', text, {expires: 36000000, path: '/'})
+		setCookie('maplayer', text, {expires: 36000000, path: '/'});
 	};
 	
 	function mapSize() {
