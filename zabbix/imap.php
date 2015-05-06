@@ -227,6 +227,7 @@ if ($output=='ajax') {
 	if ($action_ajax=='get_hosts') {
 		$options['monitored_hosts'] = true;
 		$options['withInventory'] = true;
+		$options['output'] = array('hostid','name','description');
 		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
 		//$options['selectInventory'] = 'extend';
 		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
