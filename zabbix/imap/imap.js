@@ -785,12 +785,12 @@
 		if (jQuery('#lasttrigger'+trigger.triggerid).length) return;
 		var container = jQuery('<div/>',{'id':'lasttrigger'+trigger.triggerid, 'class':'trigger triggerst'+trigger.priority, 'status':trigger.priority, 'time':trigger.lastchange});
 			
-			var rstr = '';
-			rstr = rstr + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
+		var rstr = '';
+		rstr = rstr + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
 
-			rstr = rstr + '<div class=acknowledge>';
-			if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
-			rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
+		rstr = rstr + '<div class=acknowledge>';
+		if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
+		rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 		
 		container.append(rstr);
 		_imap.Controls['lasttriggers'].addTrigger(container);
@@ -826,6 +826,8 @@
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
 					addLastTrigger(trigger);
 				};
+				
+				
 				
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
@@ -1485,7 +1487,7 @@
 				var container = L.DomUtil.create('div', 'last_triggers');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-					'<div class="last_triggers_cap">'+mlocale('Triggers')+'</div><div style="display:none;" class="nicescroll last_triggers_div"></div><div style="display:none;" class="last_triggers_close">'+mlocale('Keep')+' <input  type="checkbox"></div>'
+					'<div class="last_triggers_cap">'+mlocale('Triggers')+'</div><div style="display:none;" class="nicescroll last_triggers_div"></div><div style="display:none;" class="last_triggers_keep">'+mlocale('Keep')+' <input  type="checkbox"></div>'
 				);
 				
 				L.DomEvent.on(container, 'mouseleave', this.mouseLeave, this)
@@ -1527,10 +1529,10 @@
 			},
 			
 			mouseLeave: function(e) {
-				if (!jQuery(this.container).children('.last_triggers_close').children('input' ).prop( "checked" )) {
+				if (!jQuery(this.container).children('.last_triggers_keep').children('input' ).prop( "checked" )) {
 					jQuery(this.container).children('.last_triggers_div').hide(); 
 					jQuery(this.container).children('.last_triggers_cap').show(); 
-					jQuery(this.container).children('.last_triggers_close').hide(); 
+					jQuery(this.container).children('.last_triggers_keep').hide(); 
 					jQuery(this.container).children('.last_triggers_sort_type').hide(); 
 				}; 
 				this._map.scrollWheelZoom.enable(); 
@@ -1539,7 +1541,7 @@
 			mouseOver: function(e) {
 				jQuery(this.container).children('.last_triggers_div').show(); 
 				jQuery(this.container).children('.last_triggers_cap').hide();  
-				jQuery(this.container).children('.last_triggers_close').show();  
+				jQuery(this.container).children('.last_triggers_keep').show();  
 				jQuery(this.container).children('.last_triggers_sort_type').show(); 
 				this._map.scrollWheelZoom.disable();
 			},
@@ -1561,6 +1563,7 @@
 					setCookie('imap_lasttriggers_sorttype', attr, {expires: 36000000, path: '/'});
 					
 					elements.sort(function (a, b) {
+						if ( (a==undefined) || (b==undefined) ) return 0;
 						var an = +jQuery(a).attr(attr),
 						bn = +jQuery(b).attr(attr);
 					    

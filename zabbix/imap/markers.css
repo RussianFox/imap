@@ -587,13 +587,16 @@ width: 10px !important;
 	max-height:400px;
 }
 
-.last_triggers.leaflet-control .last_triggers_close {
+.last_triggers.leaflet-control .last_triggers_keep {
 	right:10px;
 	top:5px;
 	position:absolute;
 	cursor:pointer;
 	font-weight:bold;
 	font-size: smaller;
+}
+
+.last_triggers.leaflet-control .last_triggers_keep input{
 	vertical-align:middle;
 }
 
@@ -613,6 +616,7 @@ width: 10px !important;
 	cursor:pointer;
 	font-weight:bold;
 	font-size: smaller;
+	padding:2px;
 }
 
 .leaflet-top {
