@@ -1345,7 +1345,11 @@
 			  
 			};
 			jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
+<<<<<<< HEAD
 			jQuery(e.currentTarget).menuPopup([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5), items: [lastdd], url: '#'}], e);
+=======
+			jQuery(e.currentTarget).menuPopup([{label:'Map point menu', items: [{label:''+latlng.lat+', '+latlng.lng, items:[], url:'#'}, lastdd], url: '#'}], e);
+>>>>>>> 1200c86444e404849bc22b9cb30eac7602222673
 		};
 	};
 	
