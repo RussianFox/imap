@@ -124,7 +124,7 @@
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
 		ttx = ttx + '<div class="item">'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=color></div>';
+		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></div>';
 		ttx = ttx + '<div class="item">'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></div>';
 		ttx = ttx + '<div class="item">'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></div>';
 		ttx = ttx + '<div class="item linkdash">'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
@@ -184,7 +184,10 @@
 				}
 			}
 		});
-		jQuery("input[type='color']").minicolors();
+		/*jQuery("input[type='color']").minicolors();*/
+		
+		jQuery("input[type='colorpicker']").colorPicker();
+		
 		jQuery("input[type='number']").css('width','80%');
 		jQuery("input[type='number']").stepper();
 		
@@ -1191,7 +1194,7 @@
 			},
 			success: function(data){
 				var container = L.DomUtil.create('span', 'link_menu');
-				if (_imap.zabbixversion.search('2.4')==0) {
+				if (_imap.zabbixversion.search('2.2')!==0) {
 					var graphs=[];
 					for (nn in data) {
 						if (data[nn].graphid) {
@@ -1264,15 +1267,13 @@
 	function googlestreetviewmove() {
 		if (_imap.googlestreetviewer) {
 			_imap.googlestreetviewer_marker.setLatLng([_imap.googlestreetviewer.getPosition().lat(),_imap.googlestreetviewer.getPosition().lng()]);
-			_imap.googlestreetviewer.getPosition().lat();
-			_imap.googlestreetviewer.getPosition().lng();
 		};
 	};
 	
 	function googlestreetviewrotate() {
 		if (_imap.googlestreetviewer) {
 			var heading = _imap.googlestreetviewer.getPov().heading;
-			heading = heading-12;
+			heading = heading-24;
 			heading = heading % 360;
 			if (heading<0) headhing = 360+heading;
 			heading = 360 - heading;
@@ -1281,52 +1282,71 @@
 		};
 	};
 	
+	function creategooglestreetview(latlng) {
+		var googlestreetviewer = jQuery('<div/>', {id:'googlestreetview'});
+		
+		var panoramaOptions = {
+			pov: {
+				heading: 0,
+				pitch: 0
+			}
+		};
+		var width = 500;
+		var height = 300;
+		var sizestr = getCookie('imap_googlestreetview_size');
+		if (sizestr) {
+			sizestr = sizestr.split(',');
+			width = +sizestr[0];
+			height = +sizestr[1];
+		};
+		jQuery(googlestreetviewer).dialog({title: 'Google Street View', maxWidth:'100%', maxHeight:'100%', width:width, height:height, position: {at:'center bottom+10px', of:'#imapworkarea'}, resizable:true, beforeClose:function(){ 
+				_imap.googlestreetviewer=false;
+				_imap.map.removeLayer(_imap.googlestreetviewer_marker);
+				_imap.googlestreetviewer_marker = false;
+				jQuery(this).detach();
+			}, resizeStop: function() { googlestreetviewresize(); }
+		});
+		_imap.googlestreetviewer = new google.maps.StreetViewPanorama(document.getElementById('googlestreetview'),panoramaOptions);
+		google.maps.event.addListener(_imap.googlestreetviewer, 'position_changed', function() { googlestreetviewmove(); });
+		google.maps.event.addListener(_imap.googlestreetviewer, 'pov_changed', function() { googlestreetviewrotate(); });
+		
+		var icon = L.divIcon({className:'googlestreetview_marker',html:'',iconSize:[50,50], iconAnchor:[25, 31]});
+		_imap.googlestreetviewer_marker = L.marker(_imap.map.getCenter(), {draggable:true, icon:icon}).addTo(_imap.map);
+		_imap.googlestreetviewer_marker.on('dragend',function(event){ 
+			var latlng = event.target.getLatLng();
+			googlestreetview(latlng);
+			return false;
+		});
+	};
 	
 	function googlestreetview(latlng) {
-		if (!_imap.googlestreetviewer) {
-			var googlestreetviewer = jQuery('<div/>', {id:'googlestreetview'});
-			
-			var panoramaOptions = {
-				pov: {
-					heading: 0,
-					pitch: 0
-				}
-			};
-			var width = 500;
-			var height = 300;
-			var sizestr = getCookie('imap_googlestreetview_size');
-			if (sizestr) {
-				sizestr = sizestr.split(',');
-				width = +sizestr[0];
-				height = +sizestr[1];
-			};
-			jQuery(googlestreetviewer).dialog({title: 'Google Street View', maxWidth:'100%', maxHeight:'100%', width:width, height:height, position: {at: 'center bottom+10', of:'#imapworkarea'}, resizable:true, beforeClose:function(){ 
-					_imap.googlestreetviewer=false;
-					_imap.map.removeLayer(_imap.googlestreetviewer_marker);
-					_imap.googlestreetviewer_marker = false;
-					jQuery(this).detach();
-				}, resizeStop: function() { googlestreetviewresize(); }
-			});
-			_imap.googlestreetviewer = new google.maps.StreetViewPanorama(document.getElementById('googlestreetview'),panoramaOptions);
-			google.maps.event.addListener(_imap.googlestreetviewer, 'position_changed', function() { googlestreetviewmove(); });
-			google.maps.event.addListener(_imap.googlestreetviewer, 'pov_changed', function() { googlestreetviewrotate(); });
-			
-			var icon = L.divIcon({className:'googlestreetview_marker',html:'',iconSize:[50,50], iconAnchor:[25, 31]});
-			_imap.googlestreetviewer_marker = L.marker(latlng, {draggable:true, icon:icon}).addTo(_imap.map);
-			_imap.googlestreetviewer_marker.on('dragend',function(event){ var latlng = event.target.getLatLng(); var fenway = new google.maps.LatLng(latlng.lat,latlng.lng); _imap.googlestreetviewer.setPosition(fenway); });
-		};
+		if (!google) return;
+		var sv = new google.maps.StreetViewService();
 		var fenway = new google.maps.LatLng(latlng.lat,latlng.lng);
-		_imap.googlestreetviewer.setPosition(fenway);
+		
+		sv.getPanoramaByLocation(fenway, 50, function(data,status){
+			if (status !== google.maps.StreetViewStatus.OK) {
+				if ( (!_imap.googlestreetviewer) && (_imap.googlestreetviewer_marker) ) _imap.googlestreetviewer_marker.setLatLng([_imap.googlestreetviewer.getPosition().lat(),_imap.googlestreetviewer.getPosition().lng()]);
+				return;
+			};
+			if (!_imap.googlestreetviewer) {
+				creategooglestreetview(data.location.latLng);
+			};
+			_imap.googlestreetviewer.setPosition(data.location.latLng);
+		});
+		
 	};
 	
 	function mapcontextmenu(e,latlng) {
-		var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
-			var latlng = jQuery(this).data()['latlng'];
-			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
-		  
+		if (_imap.zabbixversion.search('2.2')!==0) {
+			var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+				var latlng = jQuery(this).data()['latlng'];
+				googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
+			  
+			};
+			jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
+			jQuery(e.currentTarget).menuPopup([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5), items: [lastdd], url: '#'}], e);
 		};
-		jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
-		jQuery(e.currentTarget).menuPopup([{label:'Map point menu', items: [lastdd], url: '#'}], e);
 	};
 	
 	function loadHosts() {
@@ -1517,12 +1537,6 @@
 				
 				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
 				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
-				/*
-				
-				jQuery( "#search_hosts_list input" ).on('input',function() {
-					getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
-				});
-				*/
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();

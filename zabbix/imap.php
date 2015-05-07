@@ -487,8 +487,8 @@ foreach ($needThisFiles as $file) {
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/jquery.fs.stepper.css" />
 
-<script src="imap/leaflet/plugins/jquery.minicolors.min.js"></script>
-<link rel="stylesheet" href="imap/leaflet/plugins/jquery.minicolors.css" />
+<script type="text/javascript" src="imap/colorpicker/colors.js"></script>
+<script type="text/javascript" src="imap/colorpicker/jqColorPicker.js"></script>
 
 <link rel="stylesheet" href="imap/leaflet/plugins/L.Control.Zoomslider.css" />
 <script src="imap/leaflet/plugins/L.Control.Zoomslider.js"></script>
@@ -611,12 +611,12 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js"></script>
+<script type="text/javascript" src="imap/imap.js?<?php echo rand(); ?>"></script>
 
 <?php
 
-	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js"></script>';
-	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js"></script>';
+	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js?'.rand().'"></script>';
+	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
 
