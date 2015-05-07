@@ -667,3 +667,7 @@ span.graphPopupWindow {
 	background-color:transparent;
 	background-image:url('images/pegman-1x.png');
 }
+
+.cp-color-picker {
+  z-index:1099;
+}

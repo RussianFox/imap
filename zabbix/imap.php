@@ -496,7 +496,7 @@ foreach ($needThisFiles as $file) {
 <script src="imap/leaflet/plugins/leaflet.measure/leaflet.measure.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
-<link rel="stylesheet" href="imap/markers.css" />
+<link rel="stylesheet" href="imap/markers.css?<?php echo rand(); ?>" />
 
 <?php if (file_exists('imap/userstyles.css')) echo '<link rel="stylesheet" href="imap/userstyles.css" />'; ?>
 
