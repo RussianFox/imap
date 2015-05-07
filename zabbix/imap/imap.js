@@ -14,6 +14,8 @@
 	_imap.vars.linksVisible = false;
 	_imap.hostsfilter = '';
 	_imap.searchmarkers = L.layerGroup();
+	_imap.googlestreetviewer = false;
+	_imap.googlestreetviewer_marker = false;
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -1252,6 +1254,81 @@
 		});
 	};
 	
+	function googlestreetviewresize() {
+		if (_imap.googlestreetviewer) {
+			setCookie('imap_googlestreetview_size',jQuery(_imap.googlestreetviewer.S).width()+','+jQuery(_imap.googlestreetviewer.S).height(), {expires: 36000000, path: '/'});
+			google.maps.event.trigger(_imap.googlestreetviewer, 'resize');
+		};
+	};
+	
+	function googlestreetviewmove() {
+		if (_imap.googlestreetviewer) {
+			_imap.googlestreetviewer_marker.setLatLng([_imap.googlestreetviewer.getPosition().lat(),_imap.googlestreetviewer.getPosition().lng()]);
+			_imap.googlestreetviewer.getPosition().lat();
+			_imap.googlestreetviewer.getPosition().lng();
+		};
+	};
+	
+	function googlestreetviewrotate() {
+		if (_imap.googlestreetviewer) {
+			var heading = _imap.googlestreetviewer.getPov().heading;
+			heading = heading-12;
+			heading = heading % 360;
+			if (heading<0) headhing = 360+heading;
+			heading = 360 - heading;
+			var sm = 52*(Math.round(heading/24));
+			jQuery(_imap.googlestreetviewer_marker._icon).css('background-position','0px '+sm+'px');
+		};
+	};
+	
+	
+	function googlestreetview(latlng) {
+		if (!_imap.googlestreetviewer) {
+			var googlestreetviewer = jQuery('<div/>', {id:'googlestreetview'});
+			
+			var panoramaOptions = {
+				pov: {
+					heading: 0,
+					pitch: 0
+				}
+			};
+			var width = 500;
+			var height = 300;
+			var sizestr = getCookie('imap_googlestreetview_size');
+			if (sizestr) {
+				sizestr = sizestr.split(',');
+				width = +sizestr[0];
+				height = +sizestr[1];
+			};
+			jQuery(googlestreetviewer).dialog({title: 'Google Street View', maxWidth:'100%', maxHeight:'100%', width:width, height:height, position: {at: 'center bottom+10', of:'#imapworkarea'}, resizable:true, beforeClose:function(){ 
+					_imap.googlestreetviewer=false;
+					_imap.map.removeLayer(_imap.googlestreetviewer_marker);
+					_imap.googlestreetviewer_marker = false;
+					jQuery(this).detach();
+				}, resizeStop: function() { googlestreetviewresize(); }
+			});
+			_imap.googlestreetviewer = new google.maps.StreetViewPanorama(document.getElementById('googlestreetview'),panoramaOptions);
+			google.maps.event.addListener(_imap.googlestreetviewer, 'position_changed', function() { googlestreetviewmove(); });
+			google.maps.event.addListener(_imap.googlestreetviewer, 'pov_changed', function() { googlestreetviewrotate(); });
+			
+			var icon = L.divIcon({className:'googlestreetview_marker',html:'',iconSize:[50,50], iconAnchor:[25, 31]});
+			_imap.googlestreetviewer_marker = L.marker(latlng, {draggable:true, icon:icon}).addTo(_imap.map);
+			_imap.googlestreetviewer_marker.on('dragend',function(event){ var latlng = event.target.getLatLng(); var fenway = new google.maps.LatLng(latlng.lat,latlng.lng); _imap.googlestreetviewer.setPosition(fenway); });
+		};
+		var fenway = new google.maps.LatLng(latlng.lat,latlng.lng);
+		_imap.googlestreetviewer.setPosition(fenway);
+	};
+	
+	function mapcontextmenu(e,latlng) {
+		var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+			var latlng = jQuery(this).data()['latlng'];
+			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
+		  
+		};
+		jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
+		jQuery(e.currentTarget).menuPopup([{label:'Map point menu', items: [lastdd], url: '#'}], e);
+	};
+	
 	function loadHosts() {
 		jQuery.ajax({
 			url: 'imap.php',
@@ -1383,6 +1460,10 @@
 	
 	function iniMap() {
 		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
+		
+		_imap.map.on('contextmenu',function(e){
+		    mapcontextmenu(e.originalEvent,e.latlng);
+		});
 		
 		_imap.Controls = new Object;
 		

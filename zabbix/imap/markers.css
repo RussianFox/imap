@@ -659,3 +659,11 @@ span.graphPopupWindow {
 	position:absolute;
 	left:0px;
 }
+
+.googlestreetview_marker {
+	display:block;
+	width:50px;
+	height:50px;
+	background-color:transparent;
+	background-image:url('images/pegman-1x.png');
+}
