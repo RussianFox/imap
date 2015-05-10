@@ -68,6 +68,7 @@ _imap.mapcorners = new Object;
 _imap.mapcorners['googlesearch'] = 0;
 _imap.mapcorners['layers'] = 1;
 _imap.mapcorners['hosts'] = 1;
+_imap.mapcorners['panoramio'] = 1;
 _imap.mapcorners['attribution'] = 3;
 _imap.mapcorners['scale'] = 3;
 _imap.mapcorners['measure'] = 3;
@@ -85,3 +86,6 @@ _imap.settings.showMarkersLabels = false;
 /* Принудительно установить слой при загрузке */
 /*_imap.settings.startbaselayer = "Google"; */
 
+/*Show Panoramio photos from this user only*/
+/*Показывать фото в Panoramio только от этого пользователя*/
+/*_imap.panoramiouserid = '959842942402428529';*/

@@ -14,6 +14,8 @@
 	_imap.vars.linksVisible = false;
 	_imap.hostsfilter = '';
 	_imap.searchmarkers = L.layerGroup();
+	_imap.googlestreetviewer = false;
+	_imap.googlestreetviewer_marker = false;
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -31,18 +33,18 @@
 	}
 	
 	function getLayers() {
-		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
-		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
-		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
+		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {maxZoom:18, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
+		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
+		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
-		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
+		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
+		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
 		
 		var mapboxsat = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {maxZoom:17, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var stamenbw = new L.tileLayer('http://d.tile.stamen.com/toner/{z}/{x}/{y}.png', {attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
+		var stamenbw = new L.tileLayer('http://d.tile.stamen.com/toner/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
 		
-		var kosmosnimki = new L.tileLayer('http://a.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
+		var kosmosnimki = new L.tileLayer('http://a.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
 		
 		var overlayMaps = {
 		    "MapSurfer transparent": mapsurft
@@ -66,8 +68,10 @@
 		
 		try {
 			baseMaps["Yandex"] = new L.Yandex();
+			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
+			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
@@ -122,7 +126,7 @@
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
 		ttx = ttx + '<div class="item">'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=color></div>';
+		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></div>';
 		ttx = ttx + '<div class="item">'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></div>';
 		ttx = ttx + '<div class="item">'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></div>';
 		ttx = ttx + '<div class="item linkdash">'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
@@ -182,7 +186,10 @@
 				}
 			}
 		});
-		jQuery("input[type='color']").minicolors();
+		/*jQuery("input[type='color']").minicolors();*/
+		
+		jQuery("input[type='colorpicker']").colorPicker();
+		
 		jQuery("input[type='number']").css('width','80%');
 		jQuery("input[type='number']").stepper();
 		
@@ -252,20 +259,38 @@
 	/* поиск в списке хостов на карте */
 	function getHostsFilter1(tx) {
 		_imap.hostsfilter = tx.toLowerCase();
+
 		if (_imap.hostsfilter=='') {
 		  jQuery('#filter-indicator').hide();
 		} else {
 		  jQuery('#filter-indicator').show();
 		};
-		for (nn in _imap.markersList) {
-			if (hostsFilter(+nn,_imap.hostsfilter)) {
-				showMarker(+nn);
-				jQuery('.host_in_list').filter('[hostid='+nn+']').show();
-			} else {
-				unshowMarker(+nn);
-				jQuery('.host_in_list').filter('[hostid='+nn+']').hide();
-			};
-		};
+		
+		jQuery.ajax({
+			url: 'imap.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				hostid: _imap.filter.hostid,
+				groupid: _imap.filter.groupid,
+				action_ajax: 'search_hosts',
+				output: 'ajax',
+				searchstring: _imap.hostsfilter
+			},
+			success: function(data){
+				for (nn in _imap.markersList) {
+					if (data[nn]) {
+						showMarker(+nn);
+						jQuery('.host_in_list').filter('[hostid='+nn+']').show();
+					} else {
+						unshowMarker(+nn);
+						jQuery('.host_in_list').filter('[hostid='+nn+']').hide();
+					};
+				};
+				
+			}
+		});
+		
 	};
 	
 	_imap.vars.timeoutHostSearch2 = false;
@@ -283,12 +308,30 @@
 			jQuery('.links_fields table tr').show();
 			return;
 		};
-		jQuery('.links_fields table tr').hide();
-		jQuery('.links_fields table tr').filter(
-		  function(index) {
-		    return( hostsFilter(jQuery(this).attr('hostid'),tx) );
-		  }
-		).show();
+		
+		jQuery.ajax({
+			url: 'imap.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				hostid: _imap.filter.hostid,
+				groupid: _imap.filter.groupid,
+				action_ajax: 'search_hosts',
+				output: 'ajax',
+				searchstring: tx
+			},
+			success: function(data){
+			  
+				jQuery('.links_fields table tr').hide();
+				jQuery('.links_fields table tr').filter(
+					function(index) {
+						if (data[jQuery(this).attr('hostid')]) return true;
+						return false;
+					}
+				).show();
+			  
+			}
+		});
 		
 	};
 	
@@ -336,12 +379,9 @@
 	};
 	
 	function getHostname(id) {
-		var rr='';
 		if (!_imap.markersList[+id]) return '';
-		if (!_imap.markersList[+id].host_info) return '';
-		rr = _imap.markersList[+id].host_info.name;
-		if (rr == '') rr = _imap.markersList[+id].host_info.host;
-		return rr;
+		if (!_imap.markersList[+id].marker) return '';
+		return ''+_imap.markersList[+id].marker.options.host_name;
 	};
 	
 	function loadLine(nl) {
@@ -479,7 +519,7 @@
 				_imap.markersList[+hh].marker.options.hardware = im;
 				updateMarker(+hh);
 				_imap.map.closePopup();
-				_imap.markersList[+hh].marker.openPopup();
+				openPopupHost(+hh);
 			},
 			error: function(data) {
 				ajaxError(mlocale('Failed to update data'));
@@ -749,23 +789,11 @@
 	
 	
 	function addLastTrigger(trigger) {
-		if (jQuery('#lasttrigger'+trigger.triggerid).length) return;
-		var container = L.DomUtil.create('div');
-		container.innerHTML = "";
-			
-			var rstr = '';
-			rstr = rstr + '<div id="lasttrigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span>';
-
-			rstr = rstr + '<div class=acknowledge>';
-			if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
-			rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div></div>';
-		
-		container.innerHTML = rstr;
-		jQuery('#last_triggers_div').append(container);
+		_imap.Controls['lasttriggers'].addTrigger(trigger);
 	};
 	
 	function delLastTrigger(nn) {
-		jQuery('#lasttriggers'+nn).detach();
+		_imap.Controls['lasttriggers'].removeTrigger(+nn);
 	};
 	
 	function loadTriggers() {
@@ -786,7 +814,6 @@
 						_imap.markersList[+nn].triggers[+mm].del = true;
 					};
 				};
-				jQuery('#last_triggers_div').html('');
 				for (var nn in data) {
 					var trigger = data[+nn];
 					if (!trigger) continue;
@@ -795,6 +822,8 @@
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
 					addLastTrigger(trigger);
 				};
+				
+				
 				
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
@@ -897,83 +926,9 @@
 		});	
 	};
 
-
-	
-	function updateMarker(host_id) {
-		if (!_imap.markersList[host_id].marker) return;
-		var status=0;
-		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
-		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
+	function updatePopup(host_id) {
+	  
 		var rstr = '';
-		
-		
-		
-		if (_imap.markersList[host_id].host_info) {
-			if (_imap.markersList[host_id].host_info.error) rstr = rstr +'<div class=hosterror> Error: '+ _imap.markersList[host_id].host_info.error+'</div>';
-		};
-		
-		
-		
-		rstr = rstr + '<div>';
-		var shh = '';
-		if (_imap.markersList[host_id].host_info) jQuery(_imap.markersList[host_id].host_info.scripts).each(function() { shh=shh+'{&quot;name&quot;:&quot;'+this.name+'&quot;,&quot;scriptid&quot;:&quot;'+this.scriptid+'&quot;,&quot;confirmation&quot;:&quot;&quot;},'; });
-		var hh = '<span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;host&quot;,&quot;hostid&quot;:&quot;'+host_id+'&quot;,&quot;showGraphs&quot;:true,&quot;showScreens&quot;:true,&quot;showTriggers&quot;:true,&quot;hasGoTo&quot;:true,&quot;scripts&quot;:['+shh.slice(0, -1)+']}">'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</span>';
-		rstr = rstr + '<div class=hostname>';
-		var hardware = ((_imap.markersList[host_id].marker.options.hardware && _imap.settings.show_icons)?'<img onerror="this.src=\'imap/hardware/none.png\';" title="'+_imap.markersList[host_id].marker.options.hardware+'" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\' class=hardwareIcon>':'');
-		rstr = rstr + hardware;
-		rstr = rstr + ' '+hh+'</div>';
-		
-		
-		
-		rstr = rstr + '<div class=hostcontrol>';
-		rstr = rstr + '<div class="hostItems" id="hostItems'+host_id+'"></div>';
-		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+mlocale('Change location')+'"><img src="imap/images/target.png"></a>';
-		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+mlocale('Delete location')+'"><img src="imap/images/target-del.png"></a>';
-		if (_imap.settings.links_enabled) rstr = rstr + '<a href="#" Title="'+mlocale('Add a link to another host')+'" onClick="addLinkHost('+host_id+');"><img src="imap/images/link.png"></a>';
-		if (_imap.settings.show_icons) rstr = rstr + '<a onClick="getHardware('+host_id+')" href="#" Title="'+mlocale('Set a hardware type')+'"><img src="imap/images/hardware.png"></a>';
-		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
-		rstr = rstr + '</div>';
-		
-		
-		
-		var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
-		rstr = rstr + '<div class=host_interfaces>';
-		_imap.markersList[host_id].host_info.interfaces.each(function(el) {
-				rstr = rstr + '<div class=host_interfaces_line>';
-				var addr = el.dns;
-				if ( (el.useip=='1') && (el.ip!=='') ) 
-					addr = el.ip;
-				rstr = rstr + '<b>' + intftype[el.type] + '</b> ' + addr + ':' + el.port;
-				rstr = rstr + '</div>';
-		});
-		rstr = rstr + '</div>';
-		
-		
-		rstr = rstr + '<div class=host_des>';
-			rstr = rstr + '<div class=hostdescription><pre>'+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre></div>';
-			
-			rstr = rstr + '<div class=host_inventory>';
-			for (nn in _imap.markersList[host_id].host_info.inventory) {
-				if (("#" + _imap.settings.exluding_inventory.join("#,#") + "#").search("#"+nn+"#") == -1)
-					if (_imap.markersList[host_id].host_info.inventory[nn].length)
-						rstr = rstr + '<div class=host_inventory_line><div class=host_inventory_line_l>'+locale.inventoryfields[nn]+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
-			};
-			rstr = rstr + '</div>';
-		rstr = rstr + '</div>';
-		
-
-		
-		
-		var lhh = '';
-		if (_imap.markersList[host_id].host_info) {
-			if (_imap.markersList[host_id].host_info.inventory.url_a) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_a+'" target=_blank>URL A</a></div>';
-			if (_imap.markersList[host_id].host_info.inventory.url_b) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_b+'" target=_blank>URL B</a></div>';
-			if (_imap.markersList[host_id].host_info.inventory.url_c) lhh = lhh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
-		};
-		rstr = rstr + '<div class=host_links>'+lhh+' </div>';
-		
-		
-		rstr = rstr + '<div class=triggers>';
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
 			for (var nn in _imap.markersList[host_id].triggers) {
 				var trigger = _imap.markersList[host_id].triggers[+nn];
@@ -987,15 +942,110 @@
 				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
 			};
 		};
+		jQuery('#hostPopup'+host_id+' .triggers').html(rstr);
+	  
+	  
+		if (_imap.markersList[host_id].host_info) {
+		  
+			jQuery('#hostPopup'+host_id+' .hosterror').html('');
+			if (_imap.markersList[host_id].host_info.error) jQuery('#hostPopup'+host_id+' .hosterror').html('Error: '+ _imap.markersList[host_id].host_info.error);
+			
+			var shh = '';
+			if (_imap.markersList[host_id].host_info) jQuery(_imap.markersList[host_id].host_info.scripts).each(function() { shh=shh+'{&quot;name&quot;:&quot;'+this.name+'&quot;,&quot;scriptid&quot;:&quot;'+this.scriptid+'&quot;,&quot;confirmation&quot;:&quot;&quot;},'; });
+			var hh = '<span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;host&quot;,&quot;hostid&quot;:&quot;'+host_id+'&quot;,&quot;showGraphs&quot;:true,&quot;showScreens&quot;:true,&quot;showTriggers&quot;:true,&quot;hasGoTo&quot;:true,&quot;scripts&quot;:['+shh.slice(0, -1)+']}">'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</span>';
+			var hardware = ((_imap.markersList[host_id].marker.options.hardware && _imap.settings.show_icons)?'<img onerror="this.src=\'imap/hardware/none.png\';" title="'+_imap.markersList[host_id].marker.options.hardware+'" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\' class=hardwareIcon>':'');
+			jQuery('#hostPopup'+host_id+' .hostname').html(hardware +' ' + hh);
+			
+			
+			jQuery('#hostPopup'+host_id+' .host_interfaces').html('');
+			var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
+			var shh = '';
+			_imap.markersList[host_id].host_info.interfaces.each(function(el) {
+					shh = shh + '<div class=host_interfaces_line>';
+					var addr = el.dns;
+					if ( (el.useip=='1') && (el.ip!=='') ) 
+						addr = el.ip;
+					shh = shh + '<b>' + intftype[el.type] + '</b> ' + addr + ':' + el.port;
+					shh = shh + '</div>';
+			});
+			jQuery('#hostPopup'+host_id+' .host_interfaces').html(shh);
+			
+			
+			jQuery('#hostPopup'+host_id+' .hostdescription').html(''+escapeHtml(_imap.markersList[host_id].marker.options.description)+'</pre>');
+			
+			
+			jQuery('#hostPopup'+host_id+' .host_inventory').html('');
+			var shh = '';
+			for (nn in _imap.markersList[host_id].host_info.inventory) {
+				if (("#" + _imap.settings.exluding_inventory.join("#,#") + "#").search("#"+nn+"#") == -1)
+					if (_imap.markersList[host_id].host_info.inventory[nn].length)
+						shh = shh + '<div class=host_inventory_line><div class=host_inventory_line_l>'+locale.inventoryfields[nn]+':</div><div class=host_inventory_line_r>'+_imap.markersList[host_id].host_info.inventory[nn]+'</div></div>';
+			};
+			jQuery('#hostPopup'+host_id+' .host_inventory').html(shh);
+			
+			
+			jQuery('#hostPopup'+host_id+' .host_links').html('');
+			var shh = '';
+			if (_imap.markersList[host_id].host_info) {
+				if (_imap.markersList[host_id].host_info.inventory.url_a) shh = shh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_a+'" target=_blank>URL A</a></div>';
+				if (_imap.markersList[host_id].host_info.inventory.url_b) shh = shh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_b+'" target=_blank>URL B</a></div>';
+				if (_imap.markersList[host_id].host_info.inventory.url_c) shh = shh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
+			};
+			jQuery('#hostPopup'+host_id+' .host_links').html(shh);
+			
+		};
+	};
+	
+	function createPopup(host_id) {
+		var rstr = '<div id="hostPopup'+host_id+'"><div class=hosterror></div><div class=hostname>'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</div>';
+		
+		rstr = rstr + '<div class=hostcontrol>';
+		rstr = rstr + '<div class="hostItems" id="hostItems'+host_id+'"></div>';
+		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+mlocale('Change location')+'"><img src="imap/images/target.png"></a>';
+		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+mlocale('Delete location')+'"><img src="imap/images/target-del.png"></a>';
+		if (_imap.settings.links_enabled) rstr = rstr + '<a href="#" Title="'+mlocale('Add a link to another host')+'" onClick="addLinkHost('+host_id+');"><img src="imap/images/link.png"></a>';
+		if (_imap.settings.show_icons) rstr = rstr + '<a onClick="getHardware('+host_id+')" href="#" Title="'+mlocale('Set a hardware type')+'"><img src="imap/images/hardware.png"></a>';
+		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
 		rstr = rstr + '</div>';
 		
+		rstr = rstr + '<div class=host_interfaces></div><div class=host_des><div class=hostdescription></div><div class=host_inventory></div></div><div class=host_links></div>';
+
+		rstr = rstr + '<div class=triggers></div>';
+		
 		rstr = rstr + '</div>';
+		
+		_imap.markersList[host_id].marker.bindPopup(rstr);
+	};
+	
+	function showImage(url,text) {
+		jQuery('#showImage').detach();
+		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery(this).detach();});
+		jQuery(container).append('<div class=loading_indicator></div>');
+		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('contextmenu',function(){ jQuery(this).children('.text_for_image_div').toggle(); return false; });
+		var img = jQuery('<img />').attr('src',url).css('display','none').bind('load',function(){ jQuery(this).show(); }).bind('contextmenu',function(){ jQuery(this).parent().parent().children('.text_for_image_div').toggle(); return false; });
+		jQuery('<div />').addClass('image_div').append(img).appendTo(container);
+		jQuery(container).appendTo('body').hide().show();
+	};
+	
+	function updateMarker(host_id) {
+		if (!_imap.markersList[host_id].marker) return;
+		var status=0;
+		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
+		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
+		
+		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
+			for (var nn in _imap.markersList[host_id].triggers) {
+				var trigger = _imap.markersList[host_id].triggers[+nn];
+				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
+			};
+		};
+		
 		_imap.markersList[host_id].marker.options.status = status;
 		if (!_imap.markersList[host_id].marker.label) {
 			_imap.markersList[host_id].marker.bindLabel('', {noHide: _imap.settings.showMarkersLabels, direction: 'auto', offset:[25,-15], className: 'leafletlabel'})
 		};
+		hardware = '<img style="max-height:1.5em;" onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>';
 		_imap.markersList[host_id].marker.label.setContent((_imap.settings.useIconsInMarkers ? '' : hardware+' ')+escapeHtml(_imap.markersList[host_id].marker.options.host_name));
-		_imap.markersList[host_id].marker.bindPopup(rstr);
 		if (_imap.settings.useIconsInMarkers) {
 			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
 		} else {
@@ -1066,13 +1116,10 @@
 		var maintenance_t = (maintenance?'maintenance ':'');
 		var nottrigger = (host.maintenance_type === '1' ? true:false);
 		var nottrigger_t = (nottrigger?'nottrigger ':'');
-		var description = host.description;
 		
 		if (!_imap.markersList[host_id]) {
 			_imap.markersList[host_id] = {marker: false, triggers: new Object, del:false, clust:false};
 		};
-		
-		_imap.markersList[host_id].host_info = host;
 		
 		if ( (host_lat) && (host_lon) ) {
 			if (!_imap.markersList[host_id].marker) {
@@ -1090,12 +1137,12 @@
 			_imap.markersList[host_id].marker.options.maintenance = maintenance;
 			_imap.markersList[host_id].marker.options.nottrigger = nottrigger;
 			_imap.markersList[host_id].marker.options.hardware = hardware;
-			_imap.markersList[host_id].marker.options.description = description;
 			_imap.markersList[host_id].marker.options.host_name = host_name;
 		};
 		_imap.markersList[host_id].del = false;
 		
 		if (new_host) {
+			createPopup(host_id);
 			if (!_imap.settings.show_with_triggers_only) {
 				updateMarker(host_id);
 				if (hostsFilter(host_id)) showMarker(host_id);
@@ -1116,6 +1163,36 @@
 	};
 	
 	function openPopupHost(hh) {
+
+		_imap.markersList[+hh].marker.openPopup();
+	  
+		jQuery.ajax({
+			url: 'imap.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				hostid: +hh,
+				action_ajax: 'get_host',
+				output: 'ajax'
+			},
+			success: function(data){
+			  
+				for (var nn in data) {
+					var host = data[+nn];
+					if (!host) continue;
+					var host_id = +host.hostid;
+					_imap.markersList[host_id].host_info = host;
+					updatePopup(host_id);
+				};
+
+				
+			},
+			error: function(data){
+				ajaxError(mlocale('Failed to get data'));
+			}
+		});
+	  
+  
 		jQuery('#hostItems'+hh).html();
 		
 		jQuery.ajax({
@@ -1129,7 +1206,7 @@
 			},
 			success: function(data){
 				var container = L.DomUtil.create('span', 'link_menu');
-				if (_imap.zabbixversion.search('2.4')==0) {
+				if (_imap.zabbixversion.search('2.2')!==0) {
 					var graphs=[];
 					for (nn in data) {
 						if (data[nn].graphid) {
@@ -1154,6 +1231,7 @@
 			}
 		});
 		
+		return false;
 
 	};
 	
@@ -1189,6 +1267,98 @@
 				ajaxError(mlocale('Failed to get data'));
 			}
 		});
+	};
+	
+	function googlestreetviewresize() {
+		if (_imap.googlestreetviewer) {
+			setCookie('imap_googlestreetview_size',jQuery(_imap.googlestreetviewer.S).width()+','+jQuery(_imap.googlestreetviewer.S).height(), {expires: 36000000, path: '/'});
+			google.maps.event.trigger(_imap.googlestreetviewer, 'resize');
+		};
+	};
+	
+	function googlestreetviewmove() {
+		if (_imap.googlestreetviewer) {
+			_imap.googlestreetviewer_marker.setLatLng([_imap.googlestreetviewer.getPosition().lat(),_imap.googlestreetviewer.getPosition().lng()]);
+		};
+	};
+	
+	function googlestreetviewrotate() {
+		if (_imap.googlestreetviewer) {
+			var heading = _imap.googlestreetviewer.getPov().heading;
+			heading = heading-24;
+			heading = heading % 360;
+			if (heading<0) headhing = 360+heading;
+			heading = 360 - heading;
+			var sm = 52*(Math.round(heading/24));
+			jQuery(_imap.googlestreetviewer_marker._icon).css('background-position','0px '+sm+'px');
+		};
+	};
+	
+	function creategooglestreetview(latlng) {
+		var googlestreetviewer = jQuery('<div/>', {id:'googlestreetview'});
+		
+		var panoramaOptions = {
+			pov: {
+				heading: 0,
+				pitch: 0
+			}
+		};
+		var width = 500;
+		var height = 300;
+		var sizestr = getCookie('imap_googlestreetview_size');
+		if (sizestr) {
+			sizestr = sizestr.split(',');
+			width = +sizestr[0];
+			height = +sizestr[1];
+		};
+		jQuery(googlestreetviewer).dialog({title: 'Google Street View', maxWidth:'100%', maxHeight:'100%', width:width, height:height, position: {at:'center bottom+10px', of:'#imapworkarea'}, resizable:true, beforeClose:function(){ 
+				_imap.googlestreetviewer=false;
+				_imap.map.removeLayer(_imap.googlestreetviewer_marker);
+				_imap.googlestreetviewer_marker = false;
+				jQuery(this).detach();
+			}, resizeStop: function() { googlestreetviewresize(); }
+		});
+		_imap.googlestreetviewer = new google.maps.StreetViewPanorama(document.getElementById('googlestreetview'),panoramaOptions);
+		google.maps.event.addListener(_imap.googlestreetviewer, 'position_changed', function() { googlestreetviewmove(); });
+		google.maps.event.addListener(_imap.googlestreetviewer, 'pov_changed', function() { googlestreetviewrotate(); });
+		
+		var icon = L.divIcon({className:'googlestreetview_marker',html:'',iconSize:[50,50], iconAnchor:[25, 31]});
+		_imap.googlestreetviewer_marker = L.marker(_imap.map.getCenter(), {draggable:true, icon:icon}).addTo(_imap.map);
+		_imap.googlestreetviewer_marker.on('dragend',function(event){ 
+			var latlng = event.target.getLatLng();
+			googlestreetview(latlng);
+			return false;
+		});
+	};
+	
+	function googlestreetview(latlng) {
+		if (!google) return;
+		var sv = new google.maps.StreetViewService();
+		var fenway = new google.maps.LatLng(latlng.lat,latlng.lng);
+		
+		sv.getPanoramaByLocation(fenway, 50, function(data,status){
+			if (status !== google.maps.StreetViewStatus.OK) {
+				if ( (!_imap.googlestreetviewer) && (_imap.googlestreetviewer_marker) ) _imap.googlestreetviewer_marker.setLatLng([_imap.googlestreetviewer.getPosition().lat(),_imap.googlestreetviewer.getPosition().lng()]);
+				return;
+			};
+			if (!_imap.googlestreetviewer) {
+				creategooglestreetview(data.location.latLng);
+			};
+			_imap.googlestreetviewer.setPosition(data.location.latLng);
+		});
+		
+	};
+	
+	function mapcontextmenu(e,latlng) {
+		if (_imap.zabbixversion.search('2.2')!==0) {
+			var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+				var latlng = jQuery(this).data()['latlng'];
+				googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
+			  
+			};
+			jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
+			jQuery(e.currentTarget).menuPopup([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5), items: [lastdd], url: '#'}], e);
+		};
 	};
 	
 	function loadHosts() {
@@ -1251,7 +1421,7 @@
 	function viewHostOnMap(hh, op) {
 		if (_imap.markersList[hh].marker)
 			_imap.map.setView(_imap.markersList[hh].marker._latlng,_imap.map.getMaxZoom());
-		if (op!==undefined) _imap.markersList[hh].marker.openPopup();
+		if (op!==undefined) openPopupHost(+hh);
 	};
 	
 	/* TimerSearchGoogle(jQuery('#search-control-text').val()); */
@@ -1299,12 +1469,6 @@
 					event.stopPropagation();
 					_imap.map.setView(_imap.searchmarkers.getLayer(jQuery(this).attr('layerid'))._latlng,_imap.map.getMaxZoom(),{animate:false,pan:{animate:false},zoom:{animate:false}});
 					_imap.searchmarkers.getLayer(jQuery(this).attr('layerid')).openPopup();
-					/*_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18,{animate:false,pan:{animate:false},zoom:{animate:false}});
-					var searchpopup = L.popup();
-					searchpopup.setLatLng([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')]);
-					searchpopup.setContent(jQuery(this).html());
-					_imap.map.openPopup(searchpopup)
-					_imap.map.setView([+jQuery(this).attr('lat'),+jQuery(this).attr('lon')],18);*/
 				});
 			};
 		  }
@@ -1327,7 +1491,11 @@
 	};
 	
 	function iniMap() {
-		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
+		_imap.map = new L.Map('mapdiv',{ maxZoom:18, fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
+		
+		_imap.map.on('contextmenu',function(e){
+		    mapcontextmenu(e.originalEvent,e.latlng);
+		});
 		
 		_imap.Controls = new Object;
 		
@@ -1381,12 +1549,6 @@
 				
 				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
 				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
-				/*
-				
-				jQuery( "#search_hosts_list input" ).on('input',function() {
-					getHostsFilter1T(jQuery( "#search_hosts_list input" ).val());
-				});
-				*/
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -1411,22 +1573,179 @@
 		
 		_imap.Controls['hosts'] = new HostsControl;
 		
+		
+		var PanoramioControl = L.Control.extend({
+		  
+			options: {
+				position: setMapCorner(_imap.mapcorners['panoramio']),
+				
+			},
+			onAdd: function (map) {
+				this.enabled = false;
+				this.requestid = 0;
+				this.layer = new L.MarkerClusterGroup({
+					maxClusterRadius: 30,
+					iconCreateFunction: function (cluster) {
+						var cmarkers = cluster.getAllChildMarkers();
+						return L.divIcon({iconSize:[18, 18], iconAnchor:[9, 9], popupAnchor:[0, -9], className:'panoramio-cluster', html:'<div style="font-weight:bold;width:18px;height:18px;text-align: center;">'+cmarkers.length+'</div>',iconAnchor:[9, 9]});
+					}
+				});
+				this.layer.on('clustercontextmenu',function(tt){ 
+					tt.layer.spiderfy();
+				});
+				/*this.layer = new L.layerGroup();*/
+				var container = L.DomUtil.create('div', 'panoramio');
+				jQuery(container).attr('aria-haspopup','true');
+				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> Panoramio');
+				this.mas = new Object;
+				this.options.count = 100;
+				this.start = 0;
+				L.DomEvent.on(container, 'click', this._switch, this);
+				map.on('moveend', this._update, this);
+				this.container = container;
+				this._update();
+				return container;
+			},
+			_switch: function() {
+				if (this.enabled) {
+					this.enabled = false;
+					this._map.removeLayer(this.layer);
+					jQuery(this.container).children('img').attr('src','imap/images/panoramio-cluster.png');
+				} else {
+					this.enabled = true;
+					this._update();
+					this._map.addLayer(this.layer);
+					jQuery(this.container).children('img').attr('src','imap/images/panoramio-marker.png');
+				};
+			},
+			_update: function() {
+				if (!this.enabled) return;
+				this.start = 0;
+				this.requestid++;
+				this.loadData();
+			},
+			loadData: function () {
+				if (!this.enabled) return;
+				var set = 'full'; /*full, public, userId*/
+				if (_imap.panoramiouserid) set = _imap.panoramiouserid;
+				var size = 'small'; /* original, medium (default value), small, thumbnail, square, mini_square */
+				var bounds = this._map.getBounds();
+				var maxlat = bounds.getNorth();
+				var minlat = bounds.getSouth();
+				var maxlng = bounds.getEast();
+				var minlng = bounds.getWest();
+				var url = 'http://www.panoramio.com/map/get_panoramas.php?set='+set+'&from=0&to=20&minx='+minlng+'&miny='+minlat+'&maxx='+maxlng+'&maxy='+maxlat+'&size='+size+'&mapfilter=true&callback=?';
+				var cor = this;
+				var requestid = this.requestid;
+				jQuery.ajax({
+					url: 'http://www.panoramio.com/map/get_panoramas.php',
+					type: 'GET',
+					dataType: 'jsonp',
+					data: {
+						set:set,
+						from:cor.start,
+						to:(cor.start+cor.options.count-1),
+						minx:minlng,
+						miny:minlat,
+						maxx:maxlng,
+						maxy:maxlat,
+						size:size,
+						mapfilter:true
+					},
+					success: function(data){
+						cor.showMarkers(data, requestid);
+						cor.showPhotos(data, requestid);
+					},
+					error: function(data){
+						
+					}
+				});
+			},
+			showMarkers: function (data,requestid) {
+				/*alert('Markers!');*/
+				if (this.requestid!==requestid) return;
+				if (this.start==0) {
+					for (var nn in this.mas) {
+						if (this.mas[nn]) {
+							this.mas[nn].need=0;
+						};
+					};
+				};
+				var tt=0;
+				for (var nn=0; nn<data.count; nn++) {
+					var photo = data.photos[nn];
+					if (photo) {
+						tt++;
+						if (!this.mas[photo.photo_id]) {
+							var icon = L.icon({
+								iconUrl: 'imap/images/panoramio-marker.png',
+
+								iconSize:     [18, 18], // size of the icon
+								shadowSize:   [50, 64], // size of the shadow
+								iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
+								shadowAnchor: [4, 62],  // the same for the shadow
+								popupAnchor:  [0, -9] // point from which the popup should open relative to the iconAnchor
+							});
+							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div style="text-align:center;"><h3>'+photo.photo_title+'</h3></div><div style="text-align:center;"><a style="text-align:center; display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="width:'+photo.width+'px; height:'+photo.height+'px" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{minWidth:photo.width+10, minHeight:photo.height+30, keepInView:false, autoPan:true, closeButton:true}).bindLabel(photo.photo_title);
+							this.layer.addLayer(marker);
+							this.mas[photo.photo_id] = {marker:marker};
+						};
+						this.mas[photo.photo_id].need=1;
+					};
+				};
+				if (data.has_more) {
+					this.start = this.start + tt;
+					this.loadData();
+				} else {
+					/*удалить старые*/
+					for (var nn in this.mas) {
+						var el = this.mas[nn];
+						if (el) {
+							if (el.need==0) {
+								this.layer.removeLayer(el.marker);
+							};
+						};
+					};
+				};
+			},
+			showPhotos: function (data,requestid) {
+				/*alert('Photos!');*/
+				if (this.requestid!==requestid) return;
+			}
+		  
+		})
+		_imap.Controls['panoramio'] = new PanoramioControl;
+		
+		
 		var LastTriggers = L.Control.extend({
+			container: undefined,
 			options: {
 				position: setMapCorner(_imap.mapcorners['lasttriggers'])
 			},
-
 			onAdd: function (map) {
 				// create the control container with a particular class name
 				var container = L.DomUtil.create('div', 'last_triggers');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-					'<div id=last_triggers_cap>'+mlocale('Triggers')+'</div><div style="display:none;" class=nicescroll id=last_triggers_div></div><div style="display:none;" id=last_triggers_close>'+mlocale('Keep')+' <input  type="checkbox"></div>'
+					'<div class="last_triggers_cap">'+mlocale('Triggers')+'</div><div class="nicescroll last_triggers_div"></div>'
 				);
 				
-				jQuery(container).mouseleave(function(){ if (!jQuery( '#last_triggers_close input' ).prop( "checked" )) { jQuery('#last_triggers_div').hide(); jQuery('#last_triggers_cap').show(); jQuery('#last_triggers_close').hide(); }; _imap.map.scrollWheelZoom.enable(); });
-				jQuery(container).mouseover(function(){ jQuery('#last_triggers_div').show(); jQuery('#last_triggers_cap').hide();  jQuery('#last_triggers_close').show(); _imap.map.scrollWheelZoom.disable(); });
+				L.DomEvent.on(container, 'mouseleave', this.mouseLeave, this)
+					  .on(container, 'mouseover', this.mouseOver, this);
 				
+				var sortselect = L.DomUtil.create('select', 'last_triggers_sort_type', container);
+				sortselect.innerHTML = '<option value="status">'+mlocale('Sort by severity')+'</option><option value="time">'+mlocale('Sort by time')+'</option>';
+				
+				jQuery(sortselect).val(getCookie('imap_lasttriggers_sorttype'));
+				
+				L.DomEvent.on(sortselect, 'change', this.sorting, this);
+					  
+				var keepdiv = L.DomUtil.create('div', 'last_triggers_keep', container);
+				keepdiv.innerHTML = mlocale('Keep')+' ';
+				var keepselect = L.DomUtil.create('input', 'last_triggers_keep_input', keepdiv);
+				keepselect.type = 'checkbox';
+				keepselect.checked = getCookie('imap_lasttriggers_keep') === 'true';
+				L.DomEvent.on(keepselect, 'change', this.keep, this);
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -1445,7 +1764,67 @@
 				  
 				});
 				
+				this.container = container;
+				this.mouseLeave();
 				return container;
+			},
+			
+			keep: function(e) {
+				setCookie('imap_lasttriggers_keep', e.currentTarget.checked, {expires: 36000000, path: '/'});
+			},
+			
+			mouseLeave: function(e) {
+				jQuery(this.container).children('.last_triggers_cap').hide();
+				if (!jQuery(this.container).children('.last_triggers_keep').children('input' ).prop( "checked" )) {
+					jQuery(this.container).children('.last_triggers_cap').show();
+					jQuery(this.container).children('.last_triggers_div').hide(); 
+					jQuery(this.container).children('.last_triggers_keep').hide(); 
+					jQuery(this.container).children('.last_triggers_sort_type').hide(); 
+				}; 
+				this._map.scrollWheelZoom.enable(); 
+			},
+			
+			mouseOver: function(e) {
+				jQuery(this.container).children('.last_triggers_div').show(); 
+				jQuery(this.container).children('.last_triggers_cap').hide();  
+				jQuery(this.container).children('.last_triggers_keep').show();  
+				jQuery(this.container).children('.last_triggers_sort_type').show(); 
+				this._map.scrollWheelZoom.disable();
+			},
+			
+			addTrigger: function(trigger) {
+				if (jQuery(this.container).children('#lasttrigger'+trigger.triggerid).length) return;
+				var container = jQuery('<div/>',{'id':'lasttrigger'+trigger.triggerid, 'class':'trigger triggerst'+trigger.priority, 'status':trigger.priority, 'time':trigger.lastchange});
+
+				rstr = '' + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span> <div class=acknowledge>';
+				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
+				rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
+				
+				container.append(rstr);
+			  
+				jQuery(this.container).children('.last_triggers_div').append(container);
+				this.sorting();
+			},
+			
+			removeTrigger: function(nn) {
+				jQuery(this.container).children('#lasttrigger'+nn).detach();
+			},
+			
+			sorting: function (e) {
+					var elements = jQuery(this.container).children('.last_triggers_div').children('.trigger');
+					var target = jQuery(this.container).children('.last_triggers_div');
+					
+					var attr = jQuery(this.container).children('.last_triggers_sort_type').val();
+					setCookie('imap_lasttriggers_sorttype', attr, {expires: 36000000, path: '/'});
+					
+					elements.sort(function (a, b) {
+						if ( (a==undefined) || (b==undefined) ) return 0;
+						var an = +jQuery(a).attr(attr),
+						bn = +jQuery(b).attr(attr);
+					    
+						return -1*(an - bn);
+					});
+					elements.detach().appendTo(target);
 			}
 		});
 		
@@ -1512,7 +1891,7 @@
 	};
 	
 	function setLayersMap() {
-		var lays=''+getCookie('maplayer');
+		var lays=''+getCookie('imap_layer');
 		var isBaseLayer=false;
 		lays=lays.split('|*|');
 
@@ -1607,11 +1986,15 @@
 		if (bl!==undefined) baselayer=bl;
 		text = text+baselayer+'|*|';
 		
-		setCookie('maplayer', text, {expires: 36000000, path: '/'})
+		setCookie('imap_layer', text, {expires: 36000000, path: '/'});
 	};
 	
 	function mapSize() {
 		nheight = jQuery(window).innerHeight() - jQuery('.page_footer').outerHeight(true) - jQuery('#mapdiv').offset().top - 2;
+		
+		jQuery('.last_triggers.leaflet-control .last_triggers_div').css('max-height',+nheight*0.7);
+		jQuery('#hosts_list').css('max-height',+nheight*0.7);
+		
 		jQuery('#mapdiv').height(nheight);
 		_imap.map.invalidateSize();
 		if (_imap.settings.do_map_control) mapBbox();

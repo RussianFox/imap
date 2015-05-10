@@ -30,6 +30,7 @@ if (function_exists('get_request')) {
 	$linkid = get_request('linkid', null);
 	$linkoptions = get_request('linkoptions', null);
 	$hardwareField = get_request('hardwareField','type');
+	$searchstring = get_request('searchstring','');
 };
 
 if (function_exists('getRequest')) {
@@ -49,6 +50,7 @@ if (function_exists('getRequest')) {
 	$linkid = getRequest('linkid', null);
 	$linkoptions = getRequest('linkoptions', null);
 	$hardwareField = getRequest('hardwareField');
+	$searchstring = getRequest('searchstring','');
 };
 
 if (function_exists('get_current_nodeid')) { 
@@ -182,9 +184,24 @@ if ($output=='ajax') {
 		exit;
 	};
 	
-	if ($action_ajax=='get_hosts') {
-		$options['monitored_hosts'] = true;
-		$options['withInventory'] = true;
+	if ($action_ajax=='search_hosts') {
+		//$options = array();
+		$options['searchByAny'] = true;
+		$options['output'] = 'hostid';
+		$options['search'] = array(
+			'host' => $searchstring,
+			'name' => $searchstring,
+			'dns' => $searchstring,
+			'ip' => $searchstring
+		 );
+		
+		$hosts = API::Host()->get($options);
+		$responseData = json_encode($hosts, FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_host') {
 		$options['selectInterfaces'] = 'extend';
 		//$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
 		$options['selectInventory'] = 'extend';
@@ -205,6 +222,21 @@ if ($output=='ajax') {
 		$responseData = json_encode($hosts, FALSE);
 		echo $responseData;
 		exit;
+	};
+	
+	if ($action_ajax=='get_hosts') {
+	
+		$options['monitored_hosts'] = true;
+		$options['withInventory'] = true;
+		$options['output'] = array('hostid','name','description');
+		$options['selectInventory'] = array('location_lat','location_lon','url_a','url_b','url_c');
+		if ($hardwareField) $options['selectInventory'][] = $hardwareField;
+		$options['selectMaintenances'] = 'extend';
+		$hosts = API::Host()->get($options);
+		$responseData = json_encode($hosts, FALSE);
+		echo $responseData;
+		exit;
+		
 	};
 	
 	if ($action_ajax=='update_coords') {
@@ -455,8 +487,8 @@ foreach ($needThisFiles as $file) {
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/jquery.fs.stepper.css" />
 
-<script src="imap/leaflet/plugins/jquery.minicolors.min.js"></script>
-<link rel="stylesheet" href="imap/leaflet/plugins/jquery.minicolors.css" />
+<script type="text/javascript" src="imap/colorpicker/colors.js"></script>
+<script type="text/javascript" src="imap/colorpicker/jqColorPicker.js"></script>
 
 <link rel="stylesheet" href="imap/leaflet/plugins/L.Control.Zoomslider.css" />
 <script src="imap/leaflet/plugins/L.Control.Zoomslider.js"></script>
@@ -464,8 +496,10 @@ foreach ($needThisFiles as $file) {
 <script src="imap/leaflet/plugins/leaflet.measure/leaflet.measure.js"></script>
 <link rel="stylesheet" href="imap/leaflet/plugins/leaflet.measure/leaflet.measure.css" />
 
-<link rel="stylesheet" href="imap/markers.css" />
-<link rel="stylesheet" href="imap/userstyles.css" />
+<link rel="stylesheet" href="imap/markers.css?<?php echo rand(); ?>" />
+
+<?php if (file_exists('imap/userstyles.css')) echo '<link rel="stylesheet" href="imap/userstyles.css" />'; ?>
+
 
 <script type="text/javascript">
 
@@ -509,6 +543,7 @@ foreach ($needThisFiles as $file) {
 	_imap.mapcorners['lasttriggers'] = 0;
 	_imap.mapcorners['layers'] = 1;
 	_imap.mapcorners['hosts'] = 1;
+	_imap.mapcorners['panoramio'] = 1;
 	_imap.mapcorners['attribution'] = 3;
 	_imap.mapcorners['scale'] = 3;
 	_imap.mapcorners['measure'] = 3;
@@ -565,6 +600,8 @@ foreach ($needThisFiles as $file) {
 	locale['Keep'] = "<?php echo _("Keep"); ?>";
 	locale['Tools'] = "<?php echo _("Tools"); ?>";
 	
+	locale['Sort by severity'] = "<?php echo _("Sort by severity"); ?>";
+	locale['Sort by time'] = "<?php echo _("Sort by time"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
@@ -575,12 +612,12 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js"></script>
+<script type="text/javascript" src="imap/imap.js?<?php echo rand(); ?>"></script>
 
 <?php
 
-	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js"></script>';
-	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js"></script>';
+	if (file_exists('imap/settings.js')) echo '<script src="imap/settings.js?'.rand().'"></script>';
+	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
 

@@ -230,6 +230,10 @@ div.search-control {
 	border: 2px solid rgba(0,0,0,0.2);
 }
 
+#search-control-input {
+	padding:5px;
+}
+
 #search-control-text{
 	display: block;
 	width: 100%;
@@ -246,8 +250,8 @@ div.search-control {
 
 #search-control-input img {
 	position: absolute;
-	left: 0px;
-	top: 4px;
+	left: 5px;
+	top: 10px;
 }
 
 div.result {
@@ -324,10 +328,6 @@ div.hostcontrol {
 	font-size: smaller;
 }
 
-#show_hosts_list {
-
-}
-
 #under_hosts_list {
 	padding:5px;
 }
@@ -375,6 +375,16 @@ div.hostcontrol {
 	overflow-y: auto;
 }
 
+#out_hosts_list {
+	top:80px;
+	right:0px;
+	background-color:#fff;
+	display:block;
+	border-top-left-radius:20px;
+	border-bottom-left-radius:20px;
+	z-index:999;
+}
+
 .nicescroll {
 	scrollbar-3d-light-color: #000000;
 	scrollbar-arrow-color: #F2F5FF;
@@ -385,6 +395,18 @@ div.hostcontrol {
 	scrollbar-shadow-color: #B8C2CC;
 	scrollbar-track-color: #262D34;
 	scrollbar-height: 10px
+}
+
+.panoramio.leaflet-control {
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  background: #fff;
+  border-radius: 5px;
+  padding: 10px;
+  cursor:pointer;
+}
+
+.panoramio.leaflet-control img {
+  vertical-align:middle;
 }
 
 .nicescroll scrollbar[orient="horizontal"] slider{
@@ -567,14 +589,15 @@ width: 10px !important;
   max-height: 30%;
 }
 
-#last_triggers_cap {
+.last_triggers.leaflet-control .last_triggers_cap {
 	padding:10px;
 	cursor:pointer;
 	font-weight:bold;
 }
 
-#last_triggers_div {
+.last_triggers.leaflet-control .last_triggers_div {
 	padding:5px;
+	margin:6px;
 	margin-top: 30px;
 	width:250px;
 	min-height:30px;
@@ -582,7 +605,7 @@ width: 10px !important;
 	max-height:400px;
 }
 
-#last_triggers_close {
+.last_triggers.leaflet-control .last_triggers_keep {
 	right:10px;
 	top:5px;
 	position:absolute;
@@ -591,8 +614,27 @@ width: 10px !important;
 	font-size: smaller;
 }
 
-#last_triggers_close input {
+.last_triggers.leaflet-control .last_triggers_keep input{
 	vertical-align:middle;
+}
+
+.last_triggers.leaflet-control .last_triggers_sort {
+	left:10px;
+	top:6px;
+	position:absolute;
+	cursor:pointer;
+	font-weight:bold;
+	font-size: smaller;
+}
+
+.last_triggers.leaflet-control .last_triggers_sort_type {
+  	left:10px;
+	top:5px;
+	position:absolute;
+	cursor:pointer;
+	font-weight:bold;
+	font-size: smaller;
+	padding:2px;
 }
 
 .leaflet-top {
@@ -634,4 +676,109 @@ span.graphPopupWindow {
 .hostcontrol .hostItems {
 	position:absolute;
 	left:0px;
+}
+
+.googlestreetview_marker {
+	display:block;
+	width:50px;
+	height:50px;
+	background-color:transparent;
+	background-image:url('images/pegman-1x.png');
+}
+
+.cp-color-picker {
+  z-index:1099;
+}
+
+.leaflet-marker-icon.panoramio-cluster {
+	border:0px;
+	width:18px;
+	height:18px;
+	background-image:url('images/panoramio-cluster.png');
+}
+
+#showImage {
+	display:block;
+	position:fixed;
+	background-color:rgba(0, 0, 0, 0.69);
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	z-index: 1400;
+}
+
+#showImage .close_button {
+	display: block;
+	position: absolute;
+	right: 30px;
+	top: 30px;
+	color: red;
+	font-size: 2em;
+	font-weight: bolder;
+	background-color: rgba(8, 1, 1, 0.25);
+	padding: 7px;
+	border-radius: 10px;
+	cursor: pointer;
+	z-index: 1400;
+}
+
+#showImage .image_div {
+	display:block;
+	vertical-align: middle;
+	text-align:center;
+	position: absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	line-height: 100;
+}
+
+#showImage .loading_indicator {
+	display:block;
+	position: absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	background-image:url('images/image-loading.gif');
+	background-repeat:no-repeat;
+	background-position: center center;
+}
+
+#showImage .image_div img {
+	display:inline;
+	vertical-align: middle;
+	text-align:center;
+	max-width:98%;
+	max-height:98%;
+}
+
+#showImage .text_for_image_div {
+	display: block;
+	position: absolute;
+	text-align:center;
+	bottom:30px;
+	left:0;
+	right:0;
+	z-index: 1400;
+}
+
+#showImage .text_for_image {
+	display: inline;
+	color: white;
+	font-size: 1.5em;
+	z-index: 1400;
+	background-color: rgba(8, 1, 1, 0.5);
+	padding: 7px;
+	border-radius: 10px;
+}
+
+#showImage .text_for_image a {
+	color:rgb(0, 245, 255);
+}
+
+#showImage .text_for_image a:visited {
+	color:rgb(0, 245, 255);
 }
