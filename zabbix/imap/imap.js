@@ -33,18 +33,18 @@
 	}
 	
 	function getLayers() {
-		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
-		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
-		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
+		var osm = new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {maxZoom:18, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
+		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
+		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
-		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
+		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
+		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
 		
 		var mapboxsat = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {maxZoom:17, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var stamenbw = new L.tileLayer('http://d.tile.stamen.com/toner/{z}/{x}/{y}.png', {attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
+		var stamenbw = new L.tileLayer('http://d.tile.stamen.com/toner/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
 		
-		var kosmosnimki = new L.tileLayer('http://a.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
+		var kosmosnimki = new L.tileLayer('http://a.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
 		
 		var overlayMaps = {
 		    "MapSurfer transparent": mapsurft
@@ -68,8 +68,10 @@
 		
 		try {
 			baseMaps["Yandex"] = new L.Yandex();
+			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
+			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
@@ -1015,6 +1017,16 @@
 		_imap.markersList[host_id].marker.bindPopup(rstr);
 	};
 	
+	function showImage(url,text) {
+		jQuery('#showImage').detach();
+		container = jQuery('<div />').attr('id','showImage');
+		jQuery(container).append('<div class=close_button onClick="jQuery(this).parent().detach();">X</div>');
+		jQuery(container).append('<div class=loading_indicator></div>');
+		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('click',function(){ jQuery(this).children('.text_for_image_div').toggle(); });
+		jQuery(container).append('<div class=image_div><img style="display:none;" onLoad="jQuery(this).show();" src="'+url+'"></div>');
+		jQuery(container).appendTo('body').hide().show();
+	};
+	
 	function updateMarker(host_id) {
 		if (!_imap.markersList[host_id].marker) return;
 		var status=0;
@@ -1479,7 +1491,7 @@
 	};
 	
 	function iniMap() {
-		_imap.map = new L.Map('mapdiv',{ fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
+		_imap.map = new L.Map('mapdiv',{ maxZoom:18, fadeAnimation:_imap.settings.mapAnimation, zoomAnimation:_imap.settings.mapAnimation, markerZoomAnimation:_imap.settings.mapAnimation, zoomControl:false, attributionControl:false }).setView(_imap.settings.startCoordinates, _imap.settings.startZoom);
 		
 		_imap.map.on('contextmenu',function(e){
 		    mapcontextmenu(e.originalEvent,e.latlng);
@@ -1560,6 +1572,149 @@
 		});
 		
 		_imap.Controls['hosts'] = new HostsControl;
+		
+		
+		var PanoramioControl = L.Control.extend({
+		  
+			options: {
+				position: setMapCorner(_imap.mapcorners['panoramio']),
+				
+			},
+			onAdd: function (map) {
+				this.enabled = false;
+				this.requestid = 0;
+				this.layer = new L.MarkerClusterGroup({
+					maxClusterRadius: 30,
+					iconCreateFunction: function (cluster) {
+						var cmarkers = cluster.getAllChildMarkers();
+						return L.divIcon({iconSize:[18, 18], iconAnchor:[9, 9], popupAnchor:[0, -9], className:'panoramio-cluster', html:'<div style="font-weight:bold;width:18px;height:18px;text-align: center;">'+cmarkers.length+'</div>',iconAnchor:[9, 9]});
+					}
+				});
+				this.layer.on('clustercontextmenu',function(tt){ 
+					tt.layer.spiderfy();
+				});
+				/*this.layer = new L.layerGroup();*/
+				var container = L.DomUtil.create('div', 'panoramio');
+				jQuery(container).attr('aria-haspopup','true');
+				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> Panoramio');
+				this.mas = new Object;
+				this.options.count = 100;
+				this.start = 0;
+				L.DomEvent.on(container, 'click', this._switch, this);
+				map.on('moveend', this._update, this);
+				this.container = container;
+				this._update();
+				return container;
+			},
+			_switch: function() {
+				if (this.enabled) {
+					this.enabled = false;
+					this._map.removeLayer(this.layer);
+					jQuery(this.container).children('img').attr('src','imap/images/panoramio-cluster.png');
+				} else {
+					this.enabled = true;
+					this._update();
+					this._map.addLayer(this.layer);
+					jQuery(this.container).children('img').attr('src','imap/images/panoramio-marker.png');
+				};
+			},
+			_update: function() {
+				if (!this.enabled) return;
+				this.start = 0;
+				this.requestid++;
+				this.loadData();
+			},
+			loadData: function () {
+				if (!this.enabled) return;
+				var set = 'full'; /*full, public, userId*/
+				var size = 'medium'; /* original, medium (default value), small, thumbnail, square, mini_square */
+				var bounds = this._map.getBounds();
+				var maxlat = bounds.getNorth();
+				var minlat = bounds.getSouth();
+				var maxlng = bounds.getEast();
+				var minlng = bounds.getWest();
+				var url = 'http://www.panoramio.com/map/get_panoramas.php?set='+set+'&from=0&to=20&minx='+minlng+'&miny='+minlat+'&maxx='+maxlng+'&maxy='+maxlat+'&size='+size+'&mapfilter=true&callback=?';
+				var cor = this;
+				var requestid = this.requestid;
+				jQuery.ajax({
+					url: 'http://www.panoramio.com/map/get_panoramas.php',
+					type: 'GET',
+					dataType: 'jsonp',
+					data: {
+						set:set,
+						from:cor.start,
+						to:(cor.start+cor.options.count-1),
+						minx:minlng,
+						miny:minlat,
+						maxx:maxlng,
+						maxy:maxlat,
+						size:size,
+						mapfilter:true
+					},
+					success: function(data){
+						cor.showMarkers(data, requestid);
+						cor.showPhotos(data, requestid);
+					},
+					error: function(data){
+						
+					}
+				});
+			},
+			showMarkers: function (data,requestid) {
+				/*alert('Markers!');*/
+				if (this.requestid!==requestid) return;
+				if (this.start==0) {
+					for (var nn in this.mas) {
+						if (this.mas[nn]) {
+							this.mas[nn].need=0;
+						};
+					};
+				};
+				var tt=0;
+				for (var nn=0; nn<data.count; nn++) {
+					var photo = data.photos[nn];
+					if (photo) {
+						tt++;
+						if (!this.mas[photo.photo_id]) {
+							var icon = L.icon({
+								iconUrl: 'imap/images/panoramio-marker.png',
+
+								iconSize:     [18, 18], // size of the icon
+								shadowSize:   [50, 64], // size of the shadow
+								iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
+								shadowAnchor: [4, 62],  // the same for the shadow
+								popupAnchor:  [0, -9] // point from which the popup should open relative to the iconAnchor
+							});
+							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div><h3>'+photo.photo_title+'</h3></div><div><a style="display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="display:block; width:100%;" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{maxWidth:photo.width, keepInView:false, closeButton:true});
+							this.layer.addLayer(marker);
+							this.mas[photo.photo_id] = {marker:marker};
+						};
+						this.mas[photo.photo_id].need=1;
+					};
+				};
+				if (data.has_more) {
+					this.start = this.start + tt;
+					this.loadData();
+				} else {
+					/*удалить старые*/
+					for (var nn in this.mas) {
+						var el = this.mas[nn];
+						if (el) {
+							if (el.need==0) {
+								this.layer.removeLayer(el.marker);
+							};
+						};
+					};
+				};
+			},
+			showPhotos: function (data,requestid) {
+				/*alert('Photos!');*/
+				if (this.requestid!==requestid) return;
+			}
+		  
+		})
+		_imap.Controls['panoramio'] = new PanoramioControl;
+		
 		
 		var LastTriggers = L.Control.extend({
 			container: undefined,
