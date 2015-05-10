@@ -86,3 +86,6 @@ _imap.settings.showMarkersLabels = false;
 /* Принудительно установить слой при загрузке */
 /*_imap.settings.startbaselayer = "Google"; */
 
+/*Show Panoramio photos from this user only*/
+/*Показывать фото в Panoramio только от этого пользователя*/
+/*_imap.panoramiouserid = '959842942402428529';*/

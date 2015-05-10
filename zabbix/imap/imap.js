@@ -1019,11 +1019,11 @@
 	
 	function showImage(url,text) {
 		jQuery('#showImage').detach();
-		container = jQuery('<div />').attr('id','showImage');
-		jQuery(container).append('<div class=close_button onClick="jQuery(this).parent().detach();">X</div>');
+		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery(this).detach();});
 		jQuery(container).append('<div class=loading_indicator></div>');
-		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('click',function(){ jQuery(this).children('.text_for_image_div').toggle(); });
-		jQuery(container).append('<div class=image_div><img style="display:none;" onLoad="jQuery(this).show();" src="'+url+'"></div>');
+		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('contextmenu',function(){ jQuery(this).children('.text_for_image_div').toggle(); return false; });
+		var img = jQuery('<img />').attr('src',url).css('display','none').bind('load',function(){ jQuery(this).show(); }).bind('contextmenu',function(){ jQuery(this).parent().parent().children('.text_for_image_div').toggle(); return false; });
+		jQuery('<div />').addClass('image_div').append(img).appendTo(container);
 		jQuery(container).appendTo('body').hide().show();
 	};
 	
@@ -1627,7 +1627,8 @@
 			loadData: function () {
 				if (!this.enabled) return;
 				var set = 'full'; /*full, public, userId*/
-				var size = 'medium'; /* original, medium (default value), small, thumbnail, square, mini_square */
+				if (_imap.panoramiouserid) set = _imap.panoramiouserid;
+				var size = 'small'; /* original, medium (default value), small, thumbnail, square, mini_square */
 				var bounds = this._map.getBounds();
 				var maxlat = bounds.getNorth();
 				var minlat = bounds.getSouth();
@@ -1685,7 +1686,7 @@
 								shadowAnchor: [4, 62],  // the same for the shadow
 								popupAnchor:  [0, -9] // point from which the popup should open relative to the iconAnchor
 							});
-							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div><h3>'+photo.photo_title+'</h3></div><div><a style="display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="display:block; width:100%;" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{maxWidth:photo.width, keepInView:false, closeButton:true});
+							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div style="text-align:center;"><h3>'+photo.photo_title+'</h3></div><div style="text-align:center;"><a style="text-align:center; display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="width:'+photo.width+'px; height:'+photo.height+'px" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{minWidth:photo.width+10, minHeight:photo.height+30, keepInView:false, autoPan:true, closeButton:true}).bindLabel(photo.photo_title);
 							this.layer.addLayer(marker);
 							this.mas[photo.photo_id] = {marker:marker};
 						};
