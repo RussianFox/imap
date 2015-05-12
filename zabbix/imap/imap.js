@@ -37,14 +37,14 @@
 		var ocm = new L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Maps &copy; <a href="http://www.thunderforest.com">Thunderforest</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
 		var oqm = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
-		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map Data: © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors'});
+		var mapsurf = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, Imagery © <a href="http://giscience.uni-hd.de/">GIScience Research Group @ Heidelberg University</a>'});
+		var mapsurft = new L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/hybrid/x={x}&y={y}&z={z}', {maxZoom:18, attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, Imagery © <a href="http://giscience.uni-hd.de/">GIScience Research Group @ Heidelberg University</a>'});
 		
 		var mapboxsat = new L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {maxZoom:17, attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'});
 		
-		var stamenbw = new L.tileLayer('http://d.tile.stamen.com/toner/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
+		var stamenbw = new L.tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcd', attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
 		
-		var kosmosnimki = new L.tileLayer('http://a.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {maxZoom:18, attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
+		var kosmosnimkiosm = new L.tileLayer('http://{s}.tile.osm.kosmosnimki.ru/kosmo/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcdef', attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
 		
 		var overlayMaps = {
 		    "MapSurfer transparent": mapsurft
@@ -57,7 +57,7 @@
 		    "Mapsurfer Roads": mapsurf,
 		    "Mapbox satellite": mapboxsat,
 		    "Stamen B&W": stamenbw,
-		    "Kosmosnimki.ru": kosmosnimki
+		    "Kosmosnimki.ru OSM": kosmosnimkiosm
 		};
 		
 		if (bingAPIkey) {
