@@ -1019,12 +1019,28 @@
 	
 	function showImage(url,text) {
 		jQuery('#showImage').detach();
-		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery(this).detach();});
+		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery("html,body").css('overflow', 'auto'); jQuery(this).detach();});
 		jQuery(container).append('<div class=loading_indicator></div>');
 		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('contextmenu',function(){ jQuery(this).children('.text_for_image_div').toggle(); return false; });
 		var img = jQuery('<img />').attr('src',url).css('display','none').bind('load',function(){ jQuery(this).show(); }).bind('contextmenu',function(){ jQuery(this).parent().parent().children('.text_for_image_div').toggle(); return false; });
 		jQuery('<div />').addClass('image_div').append(img).appendTo(container);
+		
+		jQuery(container).click(function(event){ 
+		  event.stopPropagation();
+		});
+		jQuery(container).dblclick(function(event){
+		  event.stopPropagation(); 
+		});
+		jQuery(container).mousemove(function(event){
+		  event.stopPropagation(); 
+		});
+		jQuery(container).scroll(function(event){
+		  event.stopPropagation(); 
+		});
+		
 		jQuery(container).appendTo('body').hide().show();
+		jQuery("html,body").css('overflow', 'hidden');
+		
 	};
 	
 	function updateMarker(host_id) {
@@ -1577,7 +1593,7 @@
 		var PanoramioControl = L.Control.extend({
 		  
 			options: {
-				position: setMapCorner(_imap.mapcorners['panoramio']),
+				position: setMapCorner(_imap.mapcorners['panoramio'])
 				
 			},
 			onAdd: function (map) {
@@ -1654,7 +1670,6 @@
 					},
 					success: function(data){
 						cor.showMarkers(data, requestid);
-						cor.showPhotos(data, requestid);
 					},
 					error: function(data){
 						
@@ -1689,6 +1704,13 @@
 							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div style="text-align:center;"><h3>'+photo.photo_title+'</h3></div><div style="text-align:center;"><a style="text-align:center; display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="width:'+photo.width+'px; height:'+photo.height+'px" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{minWidth:photo.width+10, minHeight:photo.height+30, keepInView:false, autoPan:true, closeButton:true}).bindLabel(photo.photo_title);
 							this.layer.addLayer(marker);
 							this.mas[photo.photo_id] = {marker:marker};
+							var pcont = jQuery('<div />');
+							if (this.options.photocontainer) {
+								jQuery(pcont).attr('id','panoramio_pcont_'+photo.photo_id).attr('data-tooltip',photo.photo_title);
+								jQuery(pcont).addClass('panoramio_photo_container').width(photo.width).height(photo.height).html('<img alt="'+photo.photo_title+'" title="'+photo.photo_title+'" src="'+photo.photo_file_url+'">').attr('originurl','http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg');
+								jQuery(pcont).mouseout(function(){jQuery(this).removeClass('hover');}).mouseover(function(){jQuery(this).addClass('hover');}).bind('click',function(){showImage(jQuery(this).attr('originurl'));});
+								jQuery('#'+this.options.photocontainer).append(pcont);
+							};
 						};
 						this.mas[photo.photo_id].need=1;
 					};
@@ -1703,16 +1725,12 @@
 						if (el) {
 							if (el.need==0) {
 								this.layer.removeLayer(el.marker);
+								jQuery('#panoramio_pcont_'+nn).detach();
 							};
 						};
 					};
 				};
-			},
-			showPhotos: function (data,requestid) {
-				/*alert('Photos!');*/
-				if (this.requestid!==requestid) return;
-			}
-		  
+			}		  
 		})
 		_imap.Controls['panoramio'] = new PanoramioControl;
 		
