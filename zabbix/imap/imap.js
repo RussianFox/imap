@@ -1825,7 +1825,7 @@
 			},
 			
 			removeTrigger: function(nn) {
-				jQuery(this.container).children('#lasttrigger'+nn).detach();
+				jQuery('#lasttrigger'+nn).detach();
 			},
 			
 			sorting: function (e) {
