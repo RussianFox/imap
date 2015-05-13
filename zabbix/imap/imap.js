@@ -118,6 +118,8 @@
 		}
 	});
 	
+	
+	
 	/* Изменение свойств линии связи */
 	function linkOptions(hl) {
 		var ttx='';
@@ -1175,7 +1177,7 @@
 		jQuery(container).append(
 			jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
 		).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
-		.on('close',function(){ jQuery(this).detach(); });
+		.on('close',function(){ jQuery(this).remove(); });
 	};
 	
 	function openPopupHost(hh) {
@@ -1240,7 +1242,7 @@
 					var hostinv = { label: mlocale('Host inventory'), items: [], url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
 					var ltrig = { label: mlocale('Triggers'), items: [], url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
 					
-					jQuery(container).bind('click',function(event){ datas = [{items: [{label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig]}]; jQuery(this).menuPopup(datas, event); });
+					jQuery(container).bind('click',function(event){ datas = [{label:'Host menu'}, {label: mlocale('Graphs'), items: graphs, url:''}, lastdd, hostinv, ltrig]; menuPopup2(datas, event); });
 					jQuery(container).html(mlocale('Tools'));
 					jQuery('#hostItems'+hh).append(container);
 				};
@@ -1249,6 +1251,49 @@
 		
 		return false;
 
+	};
+	
+	function menuPopup2Transform(data) {
+		var container = jQuery('<ul/>');
+		for (var nn=0; nn<data.length; nn++) {
+			el = data[nn];
+			var item = jQuery('<li/>');
+			if (el.data) {
+				jQuery(item).data(el.data);
+				
+			};
+			if ( (el.url==undefined) && (!el.clickCallback) ) {
+				jQuery(item).addClass('ui-widget-header').html(el.label);
+				
+			} else {
+				if (el.clickCallback) {
+					jQuery(item).click(el.clickCallback);
+					
+				};
+				jQuery(item).html('<a href="'+el.url+'">'+el.label+'</a>');
+			};
+			if (el.items) {
+				if (el.items.length>0) {
+					var addEl = menuPopup2Transform(el.items);
+					jQuery(item).append(addEl);
+				};
+			};
+			jQuery(container).append(item);
+		};
+		return container;
+	};
+	
+	function menuPopup2(data, event) {
+		jQuery('#menuPopup2').remove();
+		var container = jQuery(menuPopup2Transform(data)).menu();
+		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY).css('left',event.pageX)
+		.mouseleave(function(){
+			jQuery(this).delay(1000).hide(0, function(){ jQuery(this).remove(); });
+		})
+		.mouseover(function(){ 
+			jQuery(this).stop(true,true);
+		})
+		.appendTo('body').show();
 	};
 	
 	function loadHost(id) {
@@ -1331,7 +1376,7 @@
 				_imap.googlestreetviewer=false;
 				_imap.map.removeLayer(_imap.googlestreetviewer_marker);
 				_imap.googlestreetviewer_marker = false;
-				jQuery(this).detach();
+				jQuery(this).remove();
 			}, resizeStop: function() { googlestreetviewresize(); }
 		});
 		_imap.googlestreetviewer = new google.maps.StreetViewPanorama(document.getElementById('googlestreetview'),panoramaOptions);
@@ -1366,15 +1411,13 @@
 	};
 	
 	function mapcontextmenu(e,latlng) {
-		if (_imap.zabbixversion.search('2.2')!==0) {
-			var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
-				var latlng = jQuery(this).data()['latlng'];
-				googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
-			  
-			};
-			jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
-			jQuery(e.currentTarget).menuPopup([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5), items: [lastdd], url: '#'}], e);
+		var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+			var latlng = jQuery(this).data()['latlng'];
+			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
+		  
 		};
+		jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
+		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},lastdd], e);
 	};
 	
 	function loadHosts() {
