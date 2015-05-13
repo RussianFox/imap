@@ -1229,20 +1229,31 @@
 					for (nn in data) {
 						if (data[nn].graphid) {
 							graph = data[nn];
-							graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, css: 'hostInventories', clickCallback: function(){
+							graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, clickCallback: function(){
 								var tn = jQuery(this).data('graphId');
 								popupFrame('charts.php?ispopup=1&graphid='+tn);
 								return false;
 							  
-							}, items: [], data: {graphId: +graph.graphid} };
+							}, data: {graphId: +graph.graphid} };
 						};
 					};
 					
-					var lastdd = { label: mlocale('Latest data'), items: [], url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
-					var hostinv = { label: mlocale('Host inventory'), items: [], url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
-					var ltrig = { label: mlocale('Triggers'), items: [], url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
+					var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
+					var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
+					var chost = { label: mlocale('Host config'), items: [
+					  
+						{ label: mlocale('Host'), url: 'hosts.php?form=update&hostid='+hh},
+						{ label: mlocale('Applications'), url: 'applications.php?hostid='+hh},
+						{ label: mlocale('Items'), url: 'items.php?hostid='+hh},
+						{ label: mlocale('Triggers'), url: 'triggers.php?hostid='+hh},
+						{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
+						{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
+						{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
+					  
+					] };
 					
-					jQuery(container).bind('click',function(event){ datas = [{label:'Host menu'}, {label: mlocale('Graphs'), items: graphs, url:''}, lastdd, hostinv, ltrig]; menuPopup2(datas, event); });
+					jQuery(container).bind('click',function(event){ datas = [{label:'Host view'}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
 					jQuery(container).html(mlocale('Tools'));
 					jQuery('#hostItems'+hh).append(container);
 				};
@@ -1255,28 +1266,46 @@
 	
 	function menuPopup2Transform(data) {
 		var container = jQuery('<ul/>');
+		if (data.length==0) {
+			var item = jQuery('<li/>').addClass('ui-state-disabled').html('<a>none</a>').appendTo(container);
+		};
 		for (var nn=0; nn<data.length; nn++) {
 			el = data[nn];
 			var item = jQuery('<li/>');
 			if (el.data) {
 				jQuery(item).data(el.data);
-				
 			};
-			if ( (el.url==undefined) && (!el.clickCallback) ) {
+			
+			if (el.items) {
+				if (el.items.length==0) {
+					
+				}
+			};
+			
+			if (!el.url) {
+				el.url='';
+			};
+			
+			if ( (!el.url) && (!el.clickCallback) && (!el.items) ) {
 				jQuery(item).addClass('ui-widget-header').html(el.label);
 				
 			} else {
 				if (el.clickCallback) {
 					jQuery(item).click(el.clickCallback);
-					
 				};
-				jQuery(item).html('<a href="'+el.url+'">'+el.label+'</a>');
+				
+				var link = jQuery('<a/>');
+				jQuery(link).html(el.label);
+				if (el.url!=='') jQuery(link).attr('href',el.url);
+				if (!el.onpage) jQuery(link).attr('target','_blank');
+				
+				jQuery(item).append(link);
 			};
 			if (el.items) {
-				if (el.items.length>0) {
+				
 					var addEl = menuPopup2Transform(el.items);
 					jQuery(item).append(addEl);
-				};
+				
 			};
 			jQuery(container).append(item);
 		};
@@ -1411,7 +1440,7 @@
 	};
 	
 	function mapcontextmenu(e,latlng) {
-		var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+		var lastdd = { label: 'Google street view', data: {latlng:latlng}, clickCallback: function(){ 
 			var latlng = jQuery(this).data()['latlng'];
 			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
 		  
