@@ -733,7 +733,6 @@ span.graphPopupWindow {
 	bottom:0;
 	left:0;
 	right:0;
-	line-height: 100;
 }
 
 #showImage .loading_indicator {
@@ -749,11 +748,19 @@ span.graphPopupWindow {
 }
 
 #showImage .image_div img {
-	display:inline;
+	display:inline-block;
 	vertical-align: middle;
 	text-align:center;
 	max-width:98%;
 	max-height:98%;
+}
+
+#showImage .image_div:before { /* для IE8+ */
+  content: "";
+  display: inline-block;
+  min-height: inherit;
+  height: 100%;
+  vertical-align: middle;
 }
 
 #showImage .text_for_image_div {
