@@ -1811,7 +1811,7 @@
 			},
 			
 			addTrigger: function(trigger) {
-				if (jQuery(this.container).children('#lasttrigger'+trigger.triggerid).length) return;
+				if (jQuery('#lasttrigger'+trigger.triggerid).length) return;
 				var container = jQuery('<div/>',{'id':'lasttrigger'+trigger.triggerid, 'class':'trigger triggerst'+trigger.priority, 'status':trigger.priority, 'time':trigger.lastchange});
 
 				rstr = '' + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span> <div class=acknowledge>';
