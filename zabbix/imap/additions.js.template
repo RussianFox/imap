@@ -26,4 +26,15 @@ function userAdditions() {
 	_imap.Controls['layers'].addOverlay(L.imageOverlay(imageUrl, imageBounds, {opacity:imageOpacity, attribution:imageAttribution}),imageLayerName);
 	 
   */
+
+  
+/*
+	Interesting maps for russian speaking people
+	_imap.Controls['layers'].addBaseLayer(L.tileLayer('http://{s}.tile.cart.kosmosnimki.ru/r/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcd', attribution: '© <a href="http://maps.kosmosnimki.ru/Apikey/License.html" target="_blank">maps.kosmosnimki.ru</a>'}),'Kosmosnimki.ru Relief');
+	_imap.Controls['layers'].addBaseLayer(L.tileLayer('http://{s}.tile.cart.kosmosnimki.ru/m/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcd', attribution: '© <a href="http://maps.kosmosnimki.ru/Apikey/License.html" target="_blank">maps.kosmosnimki.ru</a>'}),'Kosmosnimki.ru');
+	_imap.Controls['layers'].addBaseLayer(L.tileLayer('http://tile{s}.maps.2gis.com/tiles?x={x}&y={y}&z={z}&v=4', {maxZoom:18, subdomains:'123456789', attribution: '&copy; <a target=_blank href="http://help.2gis.ru/api-rules/#kart">2gis.com</a>'}),'2gis.com');
+
+*/  
+  
+  
 };

@@ -782,3 +782,18 @@ span.graphPopupWindow {
 #showImage .text_for_image a:visited {
 	color:rgb(0, 245, 255);
 }
+
+.panoramio_photo_container {
+	border-width: 8px;
+	border-radius: 12px;
+	border-color: transparent;
+	border-style: solid;
+	display:inline-block;
+	cursor:pointer;
+}
+
+.panoramio_photo_container.hover {
+	border-color: rgba(111, 239, 255, 0.22);
+}
+
+
