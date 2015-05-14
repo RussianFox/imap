@@ -755,6 +755,11 @@
 	};
 
 	function showMarker(nn) {
+	  
+		for (var mm in _imap.markersList[+nn].triggers) {
+			addLastTrigger(_imap.markersList[+nn].triggers[+mm]);
+		};
+	  
 		if (!_imap.markersList[+nn].marker) return;
 		if (_imap.markersList[+nn].marker.options.show) return;
 		_imap.markers.addLayer(_imap.markersList[+nn].marker);
@@ -765,6 +770,11 @@
 	};
 	
 	function unshowMarker(nn) {
+	  
+		for (var mm in _imap.markersList[+nn].triggers) {
+			delLastTrigger(+mm);
+		};
+	  
 		if (!_imap.markersList[+nn].marker) return;
 		if (!_imap.markersList[+nn].marker.options.show) return;
 		_imap.markersList[+nn].marker.options.del = true;
@@ -799,6 +809,8 @@
 	};
 	
 	function loadTriggers() {
+		if(!_imap.loadingtriggersid) _imap.loadingtriggersid=0;
+		_imap.loadingtriggersid++;
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -811,29 +823,41 @@
 				output: 'ajax'
 			},
 			success: function(data){
+				var lhi = _imap.loadingtriggersid;
+				
+				var luhost = new Object;
+				
+				/*
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
 						_imap.markersList[+nn].triggers[+mm].del = true;
 					};
 				};
+				*/
+				
 				for (var nn in data) {
 					var trigger = data[+nn];
 					if (!trigger) continue;
 					if (!trigger.value==1) continue;
 					if (!_imap.markersList[trigger.hostid]) continue;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
+					_imap.markersList[trigger.hostid].triggers[trigger.triggerid].lhi = lhi;
 					addLastTrigger(trigger);
+					luhost[trigger.hostid] = trigger.hostid;
 				};
 				
 				
 				
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
-						if (_imap.markersList[+nn].triggers[+mm].del) {
+						if (_imap.markersList[+nn].triggers[+mm].lhi<lhi) {
 							delete _imap.markersList[+nn].triggers[+mm];
+							delLastTrigger(+mm);
+							luhost[+nn] = +nn;
 						};
 					};
 				};
+				
 				for (var nn in _imap.markersList) {
 					if (!_imap.markersList[+nn].marker) continue;
 					updateMarker(+nn);
@@ -849,6 +873,7 @@
 						_imap.bbox = addBbox(_imap.markersList[+nn].marker._latlng.lat,_imap.markersList[+nn].marker._latlng.lng,_imap.bbox);
 					};
 				};
+				
 				if (_imap.settings.do_map_control | _imap.vars.it_first) {
 					mapBbox(_imap.bbox);
 				};
@@ -1020,8 +1045,8 @@
 	};
 	
 	function showImage(url,text) {
-		jQuery('#showImage').detach();
-		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery("html,body").css('overflow', 'auto'); jQuery(this).detach();});
+		jQuery('#showImage').remove();
+		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery("html,body").css('overflow', 'auto'); jQuery(this).remove();});
 		jQuery(container).append('<div class=loading_indicator></div>');
 		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('contextmenu',function(){ jQuery(this).children('.text_for_image_div').toggle(); return false; });
 		var img = jQuery('<img />').attr('src',url).css('display','none').bind('load',function(){ jQuery(this).show(); }).bind('contextmenu',function(){ jQuery(this).parent().parent().children('.text_for_image_div').toggle(); return false; });
@@ -1111,7 +1136,8 @@
 			_imap.markersList[host_id].marker.setLatLng([host_lat,host_lng]);
 	};
 	
-	function hostUpdate(host) {
+	function hostUpdate(host,lhi) {
+		if (!lhi) lhi = _imap.loadinghostsid;
 		var new_host = false;
 		var host_id = host.hostid;
 		var host_name = host.name;
@@ -1136,7 +1162,7 @@
 		var nottrigger_t = (nottrigger?'nottrigger ':'');
 		
 		if (!_imap.markersList[host_id]) {
-			_imap.markersList[host_id] = {marker: false, triggers: new Object, del:false, clust:false};
+			_imap.markersList[host_id] = {marker: false, triggers: new Object, lhi:lhi, clust:false};
 		};
 		
 		if ( (host_lat) && (host_lon) ) {
@@ -1157,7 +1183,7 @@
 			_imap.markersList[host_id].marker.options.hardware = hardware;
 			_imap.markersList[host_id].marker.options.host_name = host_name;
 		};
-		_imap.markersList[host_id].del = false;
+		_imap.markersList[host_id].lhi = lhi;
 		
 		if (new_host) {
 			createPopup(host_id);
@@ -1253,7 +1279,7 @@
 					  
 					] };
 					
-					jQuery(container).bind('click',function(event){ datas = [{label:'Host view'}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
+					jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
 					jQuery(container).html(mlocale('Tools'));
 					jQuery('#hostItems'+hh).append(container);
 				};
@@ -1445,11 +1471,12 @@
 			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
 		  
 		};
-		jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
 		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},lastdd], e);
 	};
 	
 	function loadHosts() {
+		if (!_imap.loadinghostsid) _imap.loadinghostsid=0;
+		_imap.loadinghostsid++;
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -1462,32 +1489,35 @@
 				hardwareField: _imap.settings.hardware_field
 			},
 			success: function(data){
-			  
+				var lhi = _imap.loadinghostsid;
 				if (data.error) {
 					ajaxError(data.error.message,1);
 					exit();
 				};
-			  
+				
+				/*
 				for (var nn in _imap.markersList) {
 					_imap.markersList[+nn].del = true;
 				};
+				*/
+				
 				for (var nn in data) {
 					var host = data[+nn];
 					if (!host) continue;
-					hostUpdate(host);
+					hostUpdate(host,lhi);
 				};
 
-				sortingHosts();
-				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
-				
 				
 				for (var nn in _imap.markersList) {
-					if ((_imap.markersList[+nn].del == true)) {
+					if ((_imap.markersList[+nn].lhi < lhi)) {
 						unshowMarker(nn);
 						delete _imap.markersList[+nn];
 					};
 				};
 
+				sortingHosts();
+				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
+				
 				if (_imap.vars.it_first) {
 					loadLinks();
 					loadTriggers();
@@ -1684,7 +1714,7 @@
 				/*this.layer = new L.layerGroup();*/
 				var container = L.DomUtil.create('div', 'panoramio');
 				jQuery(container).attr('aria-haspopup','true');
-				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> Panoramio');
+				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> <b>Panoramio</b>');
 				this.mas = new Object;
 				this.options.count = 100;
 				this.start = 0;
@@ -1797,7 +1827,7 @@
 						if (el) {
 							if (el.need==0) {
 								this.layer.removeLayer(el.marker);
-								jQuery('#panoramio_pcont_'+nn).detach();
+								jQuery('#panoramio_pcont_'+nn).remove();
 							};
 						};
 					};
@@ -1897,7 +1927,7 @@
 			},
 			
 			removeTrigger: function(nn) {
-				jQuery('#lasttrigger'+nn).detach();
+				jQuery('#lasttrigger'+nn).remove();
 			},
 			
 			sorting: function (e) {

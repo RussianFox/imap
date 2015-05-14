@@ -568,6 +568,11 @@ foreach ($needThisFiles as $file) {
 	locale['Triggers'] = '<?php echo _('Triggers'); ?>';
 	locale['Graphs'] = '<?php echo _('Graphs'); ?>';
 	locale['Latest data'] = '<?php echo _('Latest data'); ?>';
+	locale['Host'] = '<?php echo _('Host'); ?>';
+	locale['Applications'] = '<?php echo _('Applications'); ?>';
+	locale['Items'] = '<?php echo _('Items'); ?>';
+	locale['Discovery rules'] = '<?php echo _('Discovery rules'); ?>';
+	locale['Web scenarios'] = '<?php echo _('Web scenarios'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -602,6 +607,10 @@ foreach ($needThisFiles as $file) {
 	
 	locale['Sort by severity'] = "<?php echo _("Sort by severity"); ?>";
 	locale['Sort by time'] = "<?php echo _("Sort by time"); ?>";
+	
+	locale['Config'] = '<?php echo _('Config'); ?>';
+	locale['Host config'] = '<?php echo _('Host config'); ?>';
+	locale['Host view'] = '<?php echo _('Host view'); ?>';
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {

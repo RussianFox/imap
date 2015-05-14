@@ -76,9 +76,13 @@ _imap.mapcorners['mylocationbutton'] = 2;
 _imap.mapcorners['zoom'] = 2;
 */
 
+/* If you want disble some controls */
+/* Если вы хотите удалить какой-то из контролов */
+/* delete (_imap.mapcorners['panoramio']); */
 
-/* true - host's labels will show allways, false - only on over */
-/* true - метки хостов будут всегда показываться, false - только при наведении */
+
+/* true - host's labels will show allways, false - only on mouse over */
+/* true - метки хостов будут всегда показываться, false - только при наведении курсора мыши */
 _imap.settings.showMarkersLabels = false;
 
 
