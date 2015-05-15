@@ -1249,7 +1249,7 @@
 				output: 'ajax'
 			},
 			success: function(data){
-				var container = L.DomUtil.create('span', 'link_menu');
+				var container = jQuery('<span/>', {class:'link_menu'});
 				var graphs=[];
 				for (nn in data) {
 					if (data[nn].graphid) {
@@ -1280,6 +1280,7 @@
 				
 				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
 				jQuery(container).html(mlocale('Tools'));
+				jQuery('.link_menu', '#hostItems'+hh).remove();
 				jQuery('#hostItems'+hh).append(container);
 			}
 		});
