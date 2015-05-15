@@ -64,8 +64,8 @@ _imap.settings.intervalLoadTriggers = 30;
  |3  2|
  */
 /*
-_imap.mapcorners = new Object;
 _imap.mapcorners['googlesearch'] = 0;
+_imap.mapcorners['lasttriggers'] = 0;
 _imap.mapcorners['layers'] = 1;
 _imap.mapcorners['hosts'] = 1;
 _imap.mapcorners['panoramio'] = 1;

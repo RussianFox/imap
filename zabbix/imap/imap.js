@@ -127,11 +127,11 @@
 		
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
-		ttx = ttx + '<div class="item">'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></div>';
-		ttx = ttx + '<div class="item linkdash">'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></label></div>';
+		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
 		
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="5,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="2,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
@@ -900,7 +900,7 @@
 		var hhs = jQuery('.host_in_list');
 		for (var nn=0; nn<hhs.length; nn++) {
 			if ( ( +jQuery(hhs[nn]).attr('hostid')!==+hh ) && (_imap.markersList[+jQuery(hhs[nn]).attr('hostid')]) ) {
-				ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</td></tr>';
+				ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><label><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</label></td></tr>';
 			};
 		};
 		ttx = ttx+'</table>';
@@ -1250,39 +1250,37 @@
 			},
 			success: function(data){
 				var container = L.DomUtil.create('span', 'link_menu');
-				if (_imap.zabbixversion.search('2.2')!==0) {
-					var graphs=[];
-					for (nn in data) {
-						if (data[nn].graphid) {
-							graph = data[nn];
-							graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, clickCallback: function(){
-								var tn = jQuery(this).data('graphId');
-								popupFrame('charts.php?ispopup=1&graphid='+tn);
-								return false;
-							  
-							}, data: {graphId: +graph.graphid} };
-						};
+				var graphs=[];
+				for (nn in data) {
+					if (data[nn].graphid) {
+						graph = data[nn];
+						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, clickCallback: function(){
+							var tn = jQuery(this).data('graphId');
+							popupFrame('charts.php?ispopup=1&graphid='+tn);
+							return false;
+						  
+						}, data: {graphId: +graph.graphid} };
 					};
-					
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
-					var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
-					var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
-					var chost = { label: mlocale('Host config'), items: [
-					  
-						{ label: mlocale('Host'), url: 'hosts.php?form=update&hostid='+hh},
-						{ label: mlocale('Applications'), url: 'applications.php?hostid='+hh},
-						{ label: mlocale('Items'), url: 'items.php?hostid='+hh},
-						{ label: mlocale('Triggers'), url: 'triggers.php?hostid='+hh},
-						{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
-						{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
-						{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
-					  
-					] };
-					
-					jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
-					jQuery(container).html(mlocale('Tools'));
-					jQuery('#hostItems'+hh).append(container);
 				};
+				
+				var lastdd = { label: mlocale('Latest data'), url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
+				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
+				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
+				var chost = { label: mlocale('Host config'), items: [
+				  
+					{ label: mlocale('Host'), url: 'hosts.php?form=update&hostid='+hh},
+					{ label: mlocale('Applications'), url: 'applications.php?hostid='+hh},
+					{ label: mlocale('Items'), url: 'items.php?hostid='+hh},
+					{ label: mlocale('Triggers'), url: 'triggers.php?hostid='+hh},
+					{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
+					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
+					{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
+				  
+				] };
+				
+				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
+				jQuery(container).html(mlocale('Tools'));
+				jQuery('#hostItems'+hh).append(container);
 			}
 		});
 		
@@ -1861,8 +1859,9 @@
 				L.DomEvent.on(sortselect, 'change', this.sorting, this);
 					  
 				var keepdiv = L.DomUtil.create('div', 'last_triggers_keep', container);
-				keepdiv.innerHTML = mlocale('Keep')+' ';
+				keepdiv.innerHTML = '<label>'+mlocale('Keep')+' ';
 				var keepselect = L.DomUtil.create('input', 'last_triggers_keep_input', keepdiv);
+				jQuery(keepdiv).append('</label>');
 				keepselect.type = 'checkbox';
 				keepselect.checked = getCookie('imap_lasttriggers_keep') === 'true';
 				L.DomEvent.on(keepselect, 'change', this.keep, this);
