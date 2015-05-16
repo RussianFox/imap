@@ -1464,13 +1464,215 @@
 		
 	};
 	
+	function sect(gr,sc) {
+		var heading = gr;
+		
+		sgr = 360/sc;
+
+		heading = heading+(sgr/2);
+		heading = heading % 360;
+		if (heading<0) {
+		  heading = 360+heading;
+		};
+		heading = Math.floor(heading/sgr);		
+		return heading;
+		
+	};
+	
+	function openweathermap(latlng) {
+		if (!_imap.weatherrequestid) _imap.weatherrequestid=0;
+		_imap.weatherrequestid++;
+		var popup = L.popup().setLatLng([latlng.lat,latlng.lng]);
+		popup.setContent('<div id=weatherdiv><img width=50px src="imap/images/image-loading.gif"></div>');
+		popup.addTo(_imap.map);
+		var reqid = _imap.weatherrequestid;
+		
+		jQuery.ajax({
+			url: 'http://api.openweathermap.org/data/2.5/weather',
+			type: 'GET',
+			dataType: 'jsonp',
+			data: {
+				units: 'metric',
+				lang: _imap.settings.lang.substring(0,2),
+				lat: latlng.lat,
+				lon: latlng.lng
+			},
+			success: function(data){
+				container = openweathermapreturn(data);
+				if (container) {
+					popup.setContent(container[0]);
+				};
+			},
+			error: function(data){
+				jQuery("weatherdiv").html('Error request');
+			}
+		});
+
+	};
+	
+	function vednul(val) {
+	  if (val>9) return val;
+	  return '0'+val;
+	};
+		
+	function convert_data(val,ed,ms,nools) {
+			if (ed=='time') {
+				if (isNaN(val)) return '---';
+				H=Math.floor(val / 3600);
+				M=Math.floor(val / 60) - (Math.floor(val / 3600) * 60); if (M<10) M='0'+M;
+				S=Math.round(1000*(val % 60))/1000;
+				SS=''+S;
+				if (nools) SS = ''+S.toFixed(3);
+				if (S<10) SS='0'+SS;
+				
+				return H+':'+M+':'+SS;
+			};
+			if (ed=='hpa') {
+				if (isNaN(+val)) return '---';
+				return +val+'hPa';
+			};
+			if (ed=='mmhg') {
+				if (isNaN(+val)) return '---';
+				return (+val*100/133.3).toFixed(2)+'mmHg';
+			};
+			if (ed=='date') {
+				if (isNaN(val)) return '---';
+				bb=val-Math.round(val);
+				aa=new Date(+val*1000);
+				return (vednul(1900+aa.getYear())+'-'+vednul(1+aa.getMonth())+'-'+vednul(aa.getDate())+' '+vednul(aa.getHours())+':'+vednul(aa.getMinutes())+':'+vednul(aa.getSeconds()));
+			};
+			if (ed=='timeonly') {
+				if (isNaN(val)) return '---';
+				bb=val-Math.round(val);
+				aa=new Date(+val*1000);
+				return (vednul(aa.getHours())+':'+vednul(aa.getMinutes())+':'+vednul(aa.getSeconds()));
+			};
+			if (ed=='') {
+				return val;
+			};
+	};
+
+	function windType(bals) {
+		var typew = new Object;
+		typew['ru']=['отсутствует','тихий','лёгкий','слабый','умеренный','свежий', 'сильный','крепкий','очень крепкий','штормовой', 'сильный штормовой','жестокий штормовой','ураганный'];
+		typew['en']=['none','light air','light breeze','gentle breeze','moderate breeze','fresh breeze', 'strong breeze','whole breeze','fresh gale','strong gale', 'whole gale','storm','нurricane'];
+		var lang = _imap.settings.lang.substring(0,2);
+		if (!typew[lang]) {
+			lang = 'en';
+		};
+		return typew[lang][bals];
+	};
+	
+	function openweathermapreturn(weather,reqid) {
+		var nkw=['N','NNE','NE','ENE','E','ESE','SE','SSE','S', 'SSW','SW','WSW','W','WNW','NW','NNW'];
+		if (!weather.base) return;
+		if (_imap.weatherrequestid>reqid) return false;
+
+		if (weather.wind.deg>180) weather.wind.deg=weather.wind.deg-360;
+	  
+		var windDeg = Math.round(weather.wind.deg);
+		var windImage = -50*sect(windDeg,12);
+		var windDirection = nkw[sect(weather.wind.deg,16)];
+		
+		var windSpeed = Math.round(weather.wind.speed*100)/100+'m/s'
+		
+		var windBals = 12;
+		if (weather.wind.speed<32.6) windBals=11;
+		if (weather.wind.speed<28.4) windBals=10;
+		if (weather.wind.speed<24.4) windBals=9;
+		if (weather.wind.speed<20.7) windBals=8;
+		if (weather.wind.speed<17.1) windBals=7;
+		if (weather.wind.speed<13.8) windBals=6;
+		if (weather.wind.speed<10.7) windBals=5;
+		if (weather.wind.speed<7.9) windBals=4;
+		if (weather.wind.speed<5.4) windBals=3;
+		if (weather.wind.speed<3.3) windBals=2;
+		if (weather.wind.speed<1.5) windBals=1;
+		if (weather.wind.speed<0.2) windBals=0;
+		
+		var tempCur = Math.round(weather.main.temp*10)/10+'°C';
+		var tempMin = Math.round(weather.main.temp_min*10)/10+'°C';
+		var tempMax = Math.round(weather.main.temp_max*10)/10+'°C';
+		
+		var wcontainer = jQuery('<div/>').css('width','280px');
+		
+		var bcontainer = jQuery('<div/>').css('display','table-row');
+		
+		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;"><div style="display:block; width:50px; height:50px; background-image:url(http://openweathermap.org/img/w/'+weather.weather[0].icon+'.png);">'+tempCur+'</div></div>');
+		
+		var ocontainer = jQuery('<div/>').css('display','block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
+		var container = jQuery('<div/>').append(windDeg+'°<br>'+windDirection)
+		.css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px '+windImage+'px')
+		.css('vertical-align','middle').css('text-align','center').css('font-weight','bold').css('line-height','25px').css('font-size','14px');
+		jQuery(ocontainer).append(container);
+		
+		jQuery('<div/>').css('display','table-cell').css('vertical-align','middle').append(ocontainer).appendTo(bcontainer);
+		
+		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;">'+weather.weather[0].description+'<br>'+mlocale('Wind type')+' '+windType(windBals)+'<br>'+mlocale('Humidity')+' '+weather.main.humidity+'%</div><br>');
+		
+		jQuery('<div/>').css('display','table').append(bcontainer).appendTo(wcontainer);
+		
+		jQuery(wcontainer).append(mlocale('Temperature')+": "+tempMin+' - '+tempMax+' <br>');
+		jQuery(wcontainer).append(mlocale('Wind speed')+': '+windSpeed+', '+mlocale('Wind points')+': '+windBals+' ('+windType(windBals)+')<br>');
+		jQuery(wcontainer).append(mlocale('Wind direction')+': '+windDeg+'° ('+windDirection+')<br>');
+		jQuery(wcontainer).append(mlocale('Humidity')+": "+weather.main.humidity+'% <br>');
+		jQuery(wcontainer).append(mlocale('Pressure')+": "+convert_data(weather.main.pressure,'mmhg')+'('+convert_data(weather.main.pressure,'hpa')+') <br>');
+		jQuery(wcontainer).append(mlocale('Sunrise')+": "+convert_data(weather.sys.sunrise,'timeonly')+' '+mlocale('Sunset')+': '+convert_data(weather.sys.sunset,'timeonly')+' <br>');
+		jQuery(wcontainer).append(mlocale('Data obtained')+": "+convert_data(weather.dt,'date')+' <br>');
+		
+		jQuery(wcontainer).append('<div style="text-align:right; margin-top:5px; font-size:0.9em;">Powered by <a href="http://openweathermap.org/terms" title="Free Weather API" target="_blank">OpenWeatherMap</a></div>');
+		
+		return wcontainer;
+	};
+	
+	function worldweatheronline(latlng) {
+	  
+		var tempMax = 23;
+		var tempMin = 10;
+	  
+		var weatherImage = 'http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png';
+		var weatherDesk = 'sunny';
+		var weatherCode = '113';
+		
+		var windDirection = 'WSW';
+		var windDeg = 241;
+		var windImage = -50*sect(windDeg);
+		var windSpeed = 15;
+		
+		var linkback = 'Powered by <a href="http://www.worldweatheronline.com/" title="Free Weather API" target="_blank">World Weather Online</a>';
+		
+		var wcontainer = jQuery('<div/>');
+		jQuery(wcontainer).append('<div style="display:inline-block; margin-right:10px; text-align: center;"><img src="'+weatherImage+'"><br>'+weatherDesk+' </div>');
+		
+		var ocontainer = jQuery('<div/>').css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
+		var container = jQuery('<div/>').append(windDeg+'\'<br>'+windDirection)
+		.css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px '+windImage+'px')
+		.css('vertical-align','middle').css('text-align','center').css('font-weight','bold').css('line-height','25px').css('font-size','14px');
+		jQuery(ocontainer).append(container);
+		
+		jQuery(wcontainer).append(ocontainer);
+		
+		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Temperature</div>'+tempMin+' - '+tempMax+'</div>');
+		
+		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Wind</div>Speed '+windSpeed+'<br>Direction '+windDirection+' '+windDeg+'</div>');
+		
+		jQuery(wcontainer).append('<div class=weatherlinkback>'+linkback+'</div>');
+		
+
+	};
+	
 	function mapcontextmenu(e,latlng) {
-		var lastdd = { label: 'Google street view', data: {latlng:latlng}, clickCallback: function(){ 
+		var gstreetview = { label: 'Google street view', data: {latlng:latlng}, clickCallback: function(){ 
 			var latlng = jQuery(this).data()['latlng'];
 			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
-		  
 		};
-		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},lastdd], e);
+		
+		var gweather = { label: mlocale('Show weather'), data: {latlng:latlng}, clickCallback: function(){ 
+			var latlng = jQuery(this).data()['latlng'];
+			openweathermap({lat:latlng.lat,lng:latlng.lng}); return false; }
+		};
+		
+		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
 	};
 	
 	function loadHosts() {
@@ -1920,7 +2122,7 @@
 				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
 				rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 				
-				container.append(rstr);
+				jQuery(container).append(rstr);
 			  
 				jQuery(this.container).children('.last_triggers_div').append(container);
 				this.sorting();

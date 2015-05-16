@@ -604,13 +604,22 @@ foreach ($needThisFiles as $file) {
 	locale['No hosts with inventory'] = "<?php echo _("No hosts with inventory"); ?>";
 	locale['Keep'] = "<?php echo _("Keep"); ?>";
 	locale['Tools'] = "<?php echo _("Tools"); ?>";
-	
 	locale['Sort by severity'] = "<?php echo _("Sort by severity"); ?>";
 	locale['Sort by time'] = "<?php echo _("Sort by time"); ?>";
-	
 	locale['Config'] = '<?php echo _('Config'); ?>';
 	locale['Host config'] = '<?php echo _('Host config'); ?>';
 	locale['Host view'] = '<?php echo _('Host view'); ?>';
+	locale['Wind speed'] = "<?php echo _("Wind speed"); ?>";
+	locale['Wind points'] = "<?php echo _("Wind points"); ?>";
+	locale['Wind type'] = "<?php echo _("Wind type"); ?>";
+	locale['Wind direction'] = "<?php echo _("Wind direction"); ?>";
+	locale['Temperature'] = "<?php echo _("Temperature"); ?>";
+	locale['Humidity'] = "<?php echo _("Humidity"); ?>";
+	locale['Pressure'] = "<?php echo _("Pressure"); ?>";
+	locale['Sunset'] = "<?php echo _("Sunset"); ?>";
+	locale['Sunrise'] = "<?php echo _("Sunrise"); ?>";
+	locale['Data obtained'] = "<?php echo _("Data obtained"); ?>";
+	locale['Show weather'] = "<?php echo _("Show weather"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
@@ -621,7 +630,7 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js?<?php echo rand(); ?>"></script>
+<script type="text/javascript" src="imap/imap.js<?php echo '?'.rand(); ?>"></script>
 
 <?php
 

@@ -805,3 +805,30 @@ span.graphPopupWindow {
 }
 
 
+.weathersection {
+  position: relative;
+  display: block;
+  border: 1px solid rgba(128, 128, 128, 0.44);
+  border-radius: 5px;
+  padding: 6px;
+  margin-top: 10px;
+  text-align: right;
+}
+
+.weathersection div {
+  position: relative;
+  display: inline;
+  padding: 2px;
+}
+
+.weathersectiondesc {
+  top: -15px;
+  left: 0px;
+  background-color: white;
+}
+
+.weatherlinkback {
+  margin-top: 10px;
+  font-size: 0.9em;
+  text-align: right; 
+}
