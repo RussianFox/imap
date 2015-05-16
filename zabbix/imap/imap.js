@@ -1019,7 +1019,8 @@
 				if (_imap.markersList[host_id].host_info.inventory.url_c) shh = shh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
 			};
 			jQuery('#hostPopup'+host_id+' .host_links').html(shh);
-			
+			_imap.markersList[host_id].marker._popup.setContent(jQuery('#hostPopup'+host_id)[0].outerHTML);
+			createHostContextMenu(host_id);
 		};
 	};
 	
@@ -1238,7 +1239,11 @@
 	  
   
 		jQuery('#hostItems'+hh).html();
-		
+
+		return false;
+	};
+	
+	function createHostContextMenu(hh) {
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -1275,8 +1280,8 @@
 					{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
 					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
 					{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
-				  
-				] };
+				    ]
+				};
 				
 				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
 				jQuery(container).html(mlocale('Tools'));
@@ -1284,9 +1289,6 @@
 				jQuery('#hostItems'+hh).append(container);
 			}
 		});
-		
-		return false;
-
 	};
 	
 	function menuPopup2Transform(data) {
