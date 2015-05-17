@@ -2,13 +2,18 @@
 /* Ключ API для карт Bing */
 bingAPIkey='';
 
-/* true for show hardware icons */
-/* Значение true для показа иконок оборудования */
-_imap.settings.show_icons = true;
+
+/*Show Panoramio photos from this user only*/
+/*Показывать фото в Panoramio только от этого пользователя*/
+/*_imap.panoramiouserid = '959842942402428529';*/
+
+
 
 /* true for use slider in zoom control, false - only buttons '+' & '-' */
 /* Значение true для использования слайдера зума, false - просто показывать кнопки + и - */
 _imap.settings.use_zoom_slider = true;
+
+
 
 /* false - if you don't use links for hosts */
 /* Значение false для использования линий связи между хостами */
@@ -18,17 +23,26 @@ _imap.settings.links_enabled = true;
 /* Поле инвентарных данных, используемое для иконки */
 _imap.settings.hardware_field = 'type';
 
-/* How many markers can spiderfy on non-max zoom map */
-/* Ограничение количества маркеров при раскрытии кластера на немаксимальном зуме карты*/
-_imap.settings.maxMarkersSpiderfy = 50;
+/* true - use hardware icons in markers */
+/* true - использовать иконки оборудования для маркеров */
+_imap.settings.useIconsInMarkers = false;
+
+/* true - host's labels will show allways, false - only on mouse over */
+/* true - метки хостов будут всегда показываться, false - только при наведении курсора мыши */
+_imap.settings.showMarkersLabels = false;
+
+
 
 /* Excluding inventory fields in popup of hosts on map */
 /* Поля инвентарных данных, которые не нужно показывать в сплывающем окне хоста на карте */
 _imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
 
-/* true - use hardware icons in markers */
-/* true - использовать иконки оборудования для маркеров */
-_imap.settings.useIconsInMarkers = false;
+
+/* How many markers can spiderfy on non-max zoom map */
+/* Ограничение количества маркеров при раскрытии кластера на немаксимальном зуме карты*/
+_imap.settings.maxMarkersSpiderfy = 50;
+
+
 
 /* Zoom on map initialize */
 /* Уровень увеличения карты при инициализации */
@@ -37,6 +51,10 @@ _imap.settings.startZoom = 4;
 /* Coordinates on map initialize */
 /* Координаты карты при инициализации */
 _imap.settings.startCoordinates = [59.95, 30.29];
+
+/* Force a start layer */
+/* Принудительно установить слой при загрузке */
+/*_imap.settings.startbaselayer = "Google"; */
 
 /* false - map animation is disabled */
 /* false - отключает анимацию на карте */
@@ -53,6 +71,8 @@ _imap.settings.intervalLoadLinks = 60;
 /* Interval triggers update */
 /* Интервал обновления триггеров */
 _imap.settings.intervalLoadTriggers = 30;
+
+
 
 /* Use this object for settings control corners on map (order is important)
  	_imap.mapcorners['name of control'] = corner; */
@@ -80,16 +100,3 @@ _imap.mapcorners['zoom'] = 2;
 /* Если вы хотите удалить какой-то из контролов */
 /* delete (_imap.mapcorners['panoramio']); */
 
-
-/* true - host's labels will show allways, false - only on mouse over */
-/* true - метки хостов будут всегда показываться, false - только при наведении курсора мыши */
-_imap.settings.showMarkersLabels = false;
-
-
-/* Force a start layer */
-/* Принудительно установить слой при загрузке */
-/*_imap.settings.startbaselayer = "Google"; */
-
-/*Show Panoramio photos from this user only*/
-/*Показывать фото в Panoramio только от этого пользователя*/
-/*_imap.panoramiouserid = '959842942402428529';*/
