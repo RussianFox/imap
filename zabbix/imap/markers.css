@@ -804,31 +804,28 @@ span.graphPopupWindow {
 	border-color: rgba(111, 239, 255, 0.22);
 }
 
-
-.weathersection {
-  position: relative;
-  display: block;
-  border: 1px solid rgba(128, 128, 128, 0.44);
-  border-radius: 5px;
-  padding: 6px;
-  margin-top: 10px;
-  text-align: right;
+.link_name {
+	font-weight: bold;
+	font-size: 1.2em;
+	margin-bottom:10px;
 }
 
-.weathersection div {
-  position: relative;
-  display: inline;
-  padding: 2px;
+.link_control {
+	background-color: rgb(242, 242, 242);
+	padding: 5px;
+	border: 1px solid gray;
+	border-radius: 5px;
+	min-width: 280px;
 }
 
-.weathersectiondesc {
-  top: -15px;
-  left: 0px;
-  background-color: white;
+.link_host_1, .link_host_2 {
+	margin-top: 10px;
+	background-color: rgb(190, 187, 187);
+	border: 1px solid gray;
+	border-radius: 5px;
+	padding: 5px;
 }
 
-.weatherlinkback {
-  margin-top: 10px;
-  font-size: 0.9em;
-  text-align: right; 
+.link_host_1 .hostname, .link_host_2 .hostname {
+	cursor:pointer;
 }
