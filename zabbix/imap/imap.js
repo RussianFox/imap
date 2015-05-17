@@ -801,7 +801,7 @@
 	
 	
 	function addLastTrigger(trigger) {
-		_imap.Controls['lasttriggers'].addTrigger(trigger);
+		if (trigger.priority>=_imap.filter.show_severity) _imap.Controls['lasttriggers'].addTrigger(trigger);
 	};
 	
 	function delLastTrigger(nn) {
