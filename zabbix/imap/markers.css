@@ -567,6 +567,7 @@ width: 10px !important;
 	display:table-cell;
 	padding-left:0.5em;
 	border-bottom:1px dotted grey;
+	width: 100%;
 }
 
 .host_des {
