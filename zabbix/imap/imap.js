@@ -127,11 +127,11 @@
 		
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></label></div>';
-		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.name+'" name=linkname type=text></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.color+'" name=linkcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></label></div>';
+		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl]['line'].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
 		
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="5,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="2,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
@@ -322,7 +322,6 @@
 				searchstring: tx
 			},
 			success: function(data){
-			  
 				jQuery('.links_fields table tr').hide();
 				jQuery('.links_fields table tr').filter(
 					function(index) {
@@ -330,10 +329,8 @@
 						return false;
 					}
 				).show();
-			  
 			}
 		});
-		
 	};
 	
 	/* обновляем линию связи */
@@ -344,13 +341,13 @@
 			if ( (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][0]].marker)) && (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][1]].marker)) ) {
 				if ((_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][0]].marker)) || (_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][1]].marker))) {
 					if (_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][0]].marker) != _imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][1]].marker)) {
-						_imap.lines[nn][2].spliceLatLngs(0, 2);
-						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][0]].marker._latlng);
-						_imap.lines[nn][2].addLatLng(_imap.markersList[_imap.lines[nn][1]].marker._latlng);
+						_imap.lines[nn]['line'].spliceLatLngs(0, 2);
+						_imap.lines[nn]['line'].addLatLng(_imap.markersList[_imap.lines[nn][0]].marker._latlng);
+						_imap.lines[nn]['line'].addLatLng(_imap.markersList[_imap.lines[nn][1]].marker._latlng);
 						
 						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_imap.settings._zoom_meters[_imap.map.getZoom()]) {
-							if (!_imap.links.hasLayer(_imap.lines[nn][2])) {
-								_imap.links.addLayer(_imap.lines[nn][2]);
+							if (!_imap.links.hasLayer(_imap.lines[nn]['line'])) {
+								_imap.links.addLayer(_imap.lines[nn]['line']);
 							};
 							return;
 						};
@@ -358,7 +355,7 @@
 				};
 			};
 		};
-		_imap.links.removeLayer(_imap.lines[nn][2]);
+		_imap.links.removeLayer(_imap.lines[nn]['line']);
 	};
 	
 	function updateLines() {
@@ -389,7 +386,7 @@
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
 		if (_imap.lines[nl.id]) {
-			_imap.links.removeLayer(_imap.lines[nl.id][2]);
+			_imap.links.removeLayer(_imap.lines[nl.id]['line']);
 		};
 		if ((nl.host1 == undefined)||(nl.host2 == undefined)||(nl.id == undefined)) return false;
 		if (nl.dash == '0') nl.dash = '';
@@ -397,12 +394,12 @@
 		if (nl.opacity == '0') nl.opacity = 50;
 		nl.opacity = nl.opacity/100;
 		if (nl.weight == '0') nl.weight = 5;
-		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 2:L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8})};
+		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 'line':L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8}), 'popup':L.popup()};
 		if (nl.name == '0') nl.name = '';
-		_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
-		_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
+		_imap.lines[nl.id]['line'].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
+		_imap.lines[nl.id]['line'].options.name = escapeHtml(nl.name);
 		
-		_imap.lines[nl.id][2].on('click',function(e){linkPopup(nl.id,e);});
+		_imap.lines[nl.id]['line'].on('click',function(e){linkPopup(nl.id,e);});
 		updateLine(nl.id);
 		return true;
 	};
@@ -410,7 +407,7 @@
 	function linkPopup(link_id,event) {
 		var container = jQuery('<div/>');
 		
-		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id][2].options.name+'</div>');
+		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id]['line'].options.name+'</div>');
 		
 		jQuery(container).append('<div class="link_control"><a href=# onClick="linkOptions('+link_id+'); return false;">Edit link</a></div>');
 		
@@ -418,13 +415,12 @@
 
 		jQuery(container).append('<div class="link_host_2"><span onClick="viewHostOnMap('+_imap.lines[link_id][1]+')" class=hostname>'+getHostname(+_imap.lines[link_id][1])+'</span></div>');
 		
-		var popup = L.popup().setLatLng([event.latlng.lat,event.latlng.lng]).setContent(container[0]);
-		popup.addTo(_imap.map);
+		_imap.lines[link_id]['popup'].setLatLng([event.latlng.lat,event.latlng.lng]).setContent(container[0]).openOn(_imap.map);
 		
 	};
 	
 	function delLine(nn) {
-		_imap.links.removeLayer(_imap.lines[nn][2]);
+		_imap.links.removeLayer(_imap.lines[nn]['line']);
 		delete _imap.lines[nn];
 	};
 	
@@ -1504,7 +1500,7 @@
 		_imap.weatherrequestid++;
 		var popup = L.popup().setLatLng([latlng.lat,latlng.lng]);
 		popup.setContent('<div id=weatherdiv><img width=50px src="imap/images/image-loading.gif"></div>');
-		popup.addTo(_imap.map);
+		popup.openOn(_imap.map);
 		var reqid = _imap.weatherrequestid;
 		
 		jQuery.ajax({
@@ -1524,7 +1520,7 @@
 				};
 			},
 			error: function(data){
-				jQuery("weatherdiv").html('Error request');
+				popup.setContent('Error request');
 			}
 		});
 
@@ -1636,49 +1632,13 @@
 		jQuery(wcontainer).append(mlocale('Wind speed')+': '+windSpeed+', '+mlocale('Wind points')+': '+windBals+' ('+windType(windBals)+')<br>');
 		jQuery(wcontainer).append(mlocale('Wind direction')+': '+windDeg+'° ('+windDirection+')<br>');
 		jQuery(wcontainer).append(mlocale('Humidity')+": "+weather.main.humidity+'% <br>');
-		jQuery(wcontainer).append(mlocale('Pressure')+": "+convert_data(weather.main.pressure,'mmhg')+'('+convert_data(weather.main.pressure,'hpa')+') <br>');
+		jQuery(wcontainer).append(mlocale('Pressure')+": "+convert_data(weather.main.pressure,'mmhg')+' ('+convert_data(weather.main.pressure,'hpa')+') <br>');
 		jQuery(wcontainer).append(mlocale('Sunrise')+": "+convert_data(weather.sys.sunrise,'timeonly')+' '+mlocale('Sunset')+': '+convert_data(weather.sys.sunset,'timeonly')+' <br>');
 		jQuery(wcontainer).append(mlocale('Data obtained')+": "+convert_data(weather.dt,'date')+' <br>');
 		
 		jQuery(wcontainer).append('<div style="text-align:right; margin-top:5px; font-size:0.9em;">Powered by <a href="http://openweathermap.org/terms" title="Free Weather API" target="_blank">OpenWeatherMap</a></div>');
 		
 		return wcontainer;
-	};
-	
-	function worldweatheronline(latlng) {
-	  
-		var tempMax = 23;
-		var tempMin = 10;
-	  
-		var weatherImage = 'http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png';
-		var weatherDesk = 'sunny';
-		var weatherCode = '113';
-		
-		var windDirection = 'WSW';
-		var windDeg = 241;
-		var windImage = -50*sect(windDeg);
-		var windSpeed = 15;
-		
-		var linkback = 'Powered by <a href="http://www.worldweatheronline.com/" title="Free Weather API" target="_blank">World Weather Online</a>';
-		
-		var wcontainer = jQuery('<div/>');
-		jQuery(wcontainer).append('<div style="display:inline-block; margin-right:10px; text-align: center;"><img src="'+weatherImage+'"><br>'+weatherDesk+' </div>');
-		
-		var ocontainer = jQuery('<div/>').css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
-		var container = jQuery('<div/>').append(windDeg+'\'<br>'+windDirection)
-		.css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px '+windImage+'px')
-		.css('vertical-align','middle').css('text-align','center').css('font-weight','bold').css('line-height','25px').css('font-size','14px');
-		jQuery(ocontainer).append(container);
-		
-		jQuery(wcontainer).append(ocontainer);
-		
-		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Temperature</div>'+tempMin+' - '+tempMax+'</div>');
-		
-		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Wind</div>Speed '+windSpeed+'<br>Direction '+windDirection+' '+windDeg+'</div>');
-		
-		jQuery(wcontainer).append('<div class=weatherlinkback>'+linkback+'</div>');
-		
-
 	};
 	
 	function mapcontextmenu(e,latlng) {
