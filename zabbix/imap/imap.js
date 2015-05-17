@@ -194,7 +194,6 @@
 		
 		jQuery("input[type='number']").css('width','80%');
 		jQuery("input[type='number']").stepper();
-		
 	};
 	
 	/* Ошибка ajax-запроса */
@@ -403,9 +402,25 @@
 		_imap.lines[nl.id][2].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
 		_imap.lines[nl.id][2].options.name = escapeHtml(nl.name);
 		
-		_imap.lines[nl.id][2].on('click',function(){linkOptions(nl.id);});
+		_imap.lines[nl.id][2].on('click',function(e){linkPopup(nl.id,e);});
 		updateLine(nl.id);
 		return true;
+	};
+	
+	function linkPopup(link_id,event) {
+		var container = jQuery('<div/>');
+		
+		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id][2].options.name+'</div>');
+		
+		jQuery(container).append('<div class="link_control"><a href=# onClick="linkOptions('+link_id+'); return false;">Edit link</a></div>');
+		
+		jQuery(container).append('<div class="link_host_1"><span onClick="viewHostOnMap('+_imap.lines[link_id][0]+')" class=hostname>'+getHostname(+_imap.lines[link_id][0])+'</span></div>');
+
+		jQuery(container).append('<div class="link_host_2"><span onClick="viewHostOnMap('+_imap.lines[link_id][1]+')" class=hostname>'+getHostname(+_imap.lines[link_id][1])+'</span></div>');
+		
+		var popup = L.popup().setLatLng([event.latlng.lat,event.latlng.lng]).setContent(container[0]);
+		popup.addTo(_imap.map);
+		
 	};
 	
 	function delLine(nn) {
@@ -1056,6 +1071,9 @@
 		jQuery(container).click(function(event){ 
 		  event.stopPropagation();
 		});
+		jQuery(container).contextmenu(function(event){
+		  event.stopPropagation(); 
+		});
 		jQuery(container).dblclick(function(event){
 		  event.stopPropagation(); 
 		});
@@ -1342,7 +1360,7 @@
 	function menuPopup2(data, event) {
 		jQuery('#menuPopup2').remove();
 		var container = jQuery(menuPopup2Transform(data)).menu();
-		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY).css('left',event.pageX)
+		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY-2).css('left',event.pageX-2)
 		.mouseleave(function(){
 			jQuery(this).delay(1000).hide(0, function(){ jQuery(this).remove(); });
 		})
@@ -1848,7 +1866,7 @@
 				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
 				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
 				jQuery(container).scroll(function(event){ event.stopPropagation(); });
-				
+				jQuery(container).contextmenu(function(event){ event.stopPropagation(); });
 				return container;
 			}
 		});
@@ -1887,7 +1905,10 @@
 				  event.stopPropagation(); 
 				  
 				});
-				
+				jQuery(container).contextmenu(function(event){
+				  event.stopPropagation(); 
+				  
+				});
 				return container;
 			}
 		});
@@ -2073,19 +2094,18 @@
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
-				  
+				});
+				jQuery(container).contextmenu(function(event){
+				  event.stopPropagation(); 
 				});
 				jQuery(container).dblclick(function(event){
 				  event.stopPropagation(); 
-				  
 				});
 				jQuery(container).mousemove(function(event){
 				  event.stopPropagation(); 
-				  
 				});
 				jQuery(container).scroll(function(event){
 				  event.stopPropagation(); 
-				  
 				});
 				
 				this.container = container;
