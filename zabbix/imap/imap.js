@@ -71,7 +71,6 @@
 			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
-			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
@@ -127,11 +126,11 @@
 		
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.name+'" name=linkname type=text></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.color+'" name=linkcolor type=colorpicker></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></label></div>';
-		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl]['line'].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl]['line'].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl].options.name+'" name=linkname type=text></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl].options.color+'" name=linkcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link alert color')+'<br><input class=linkoption value="'+_imap.lines[hl].options.alertcolor+'" name=linkalertcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
 		
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="5,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="2,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
@@ -337,6 +336,11 @@
 	function updateLine(nn) {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
+		
+		var needColor = (_imap.lines[nn].alert ? _imap.lines[nn].options.alertcolor : _imap.lines[nn].options.color);
+		_imap.lines[nn]['line'].setStyle({color:needColor, dashArray: _imap.lines[nn].options.dash, alertcolor:_imap.lines[nn].options.alertcolor, weight: _imap.lines[nn].options.weight, smoothFactor:8});
+		_imap.lines[nn]['line'].bindLabel('<b>' + escapeHtml(_imap.lines[nn].options.name) + '</b><br>' + getHostname(_imap.lines[nn][0]) + '<-->' + getHostname(_imap.lines[nn][1]));
+
 		if ( (_imap.markersList[_imap.lines[nn][0]]) && (_imap.markersList[_imap.lines[nn][1]]) ) {
 			if ( (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][0]].marker)) && (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][1]].marker)) ) {
 				if ((_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][0]].marker)) || (_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][1]].marker))) {
@@ -385,21 +389,20 @@
 	function loadLine(nl) {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
-		if (_imap.lines[nl.id]) {
-			_imap.links.removeLayer(_imap.lines[nl.id]['line']);
-		};
+
 		if ((nl.host1 == undefined)||(nl.host2 == undefined)||(nl.id == undefined)) return false;
 		if (nl.dash == '0') nl.dash = '';
 		if (nl.color == '0') nl.color = '#0034ff';
-		if (nl.opacity == '0') nl.opacity = 50;
-		nl.opacity = nl.opacity/100;
+		if (nl.alertcolor == '0') nl.alertcolor = '#ff0000';
 		if (nl.weight == '0') nl.weight = 5;
-		_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 'line':L.polyline([], {color: nl.color, name:'', dashArray: nl.dash, opacity:nl.opacity, weight: nl.weight, smoothFactor:8}), 'popup':L.popup()};
 		if (nl.name == '0') nl.name = '';
-		_imap.lines[nl.id]['line'].bindLabel('<b>' + escapeHtml(nl.name) + '</b><br>' + getHostname(_imap.lines[nl.id][0]) + '<-->' + getHostname(_imap.lines[nl.id][1]));
-		_imap.lines[nl.id]['line'].options.name = escapeHtml(nl.name);
-		
-		_imap.lines[nl.id]['line'].on('click',function(e){linkPopup(nl.id,e);});
+		if (!_imap.lines[nl.id]) {
+			_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 'line':L.polyline([], {linkid:nl.id}), 'popup':L.popup()};
+			_imap.lines[nl.id].alert = false;
+			_imap.lines[nl.id]['line'].on('click',function(e){linkPopup(this.options.linkid,e);});
+		};
+		_imap.lines[nl.id].options = {color: nl.color, name:nl.name, id:nl.id, dashArray: nl.dash, alertcolor:nl.alertcolor, weight: nl.weight, smoothFactor:8};
+
 		updateLine(nl.id);
 		return true;
 	};
@@ -407,7 +410,7 @@
 	function linkPopup(link_id,event) {
 		var container = jQuery('<div/>');
 		
-		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id]['line'].options.name+'</div>');
+		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id].options.name+'</div>');
 		
 		jQuery(container).append('<div class="link_control"><a href=# onClick="linkOptions('+link_id+'); return false;">Edit link</a></div>');
 		
@@ -783,7 +786,7 @@
 	function unshowMarker(nn) {
 	  
 		for (var mm in _imap.markersList[+nn].triggers) {
-			delLastTrigger(+mm);
+			delLastTrigger(_imap.markersList[+nn].triggers[+mm]);
 		};
 	  
 		if (!_imap.markersList[+nn].marker) return;
@@ -810,13 +813,43 @@
 		return (out);
 	};
 	
-	
-	function addLastTrigger(trigger) {
-		if (trigger.priority>=_imap.filter.show_severity) _imap.Controls['lasttriggers'].addTrigger(trigger);
+	function objectAlert(obj, objid, triggerid) {
+		if (obj=='hostlink') {
+			if (_imap.lines[objid]) {
+				_imap.lines[objid].alert = true;
+				updateLine(objid);
+			};
+		};
 	};
 	
-	function delLastTrigger(nn) {
-		_imap.Controls['lasttriggers'].removeTrigger(+nn);
+	function objectNoAlert(obj, objid, triggerid) {
+		if (obj=='hostlink') {
+			if (_imap.lines[objid]) {
+				_imap.lines[objid].alert = false;
+				updateLine(objid);
+			};
+		};
+	};
+	
+	function addLastTrigger(trigger) {
+		if (trigger.priority>=_imap.filter.show_severity) {
+			_imap.Controls['lasttriggers'].addTrigger(trigger);
+			if (trigger.links.length) {
+				for (var nn=0; nn<trigger.links.length; nn++) {
+					objectAlert(trigger.links[nn].type,trigger.links[nn].objectid,trigger.triggerid);
+				};
+			};
+		};
+	};
+	
+	function delLastTrigger(trigger) {
+		if (!trigger) return;
+		_imap.Controls['lasttriggers'].removeTrigger(+trigger.triggerid);
+		if (trigger.links.length) {
+			for (var nn=0; nn<trigger.links.length; nn++) {
+				objectNoAlert(trigger.links[nn].type,trigger.links[nn].objectid,trigger.triggerid);
+			};
+		};
 	};
 	
 	function loadTriggers() {
@@ -863,7 +896,7 @@
 					for (var mm in _imap.markersList[+nn].triggers) {
 						if (_imap.markersList[+nn].triggers[+mm].lhi<lhi) {
 							delete _imap.markersList[+nn].triggers[+mm];
-							delLastTrigger(+mm);
+							delLastTrigger(_imap.markersList[+nn].triggers[+mm]);
 							luhost[+nn] = +nn;
 						};
 					};
@@ -1282,7 +1315,11 @@
 					};
 				};
 				
-				var lastdd = { label: mlocale('Latest data'), url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
+				if (_imap.zabbixversion.substr(0,3)=='2.2') {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?form_refresh=1&groupid=0&hostid='+hh); return false; } };
+				} else {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
+				};
 				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
 				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
 				var chost = { label: mlocale('Host config'), items: [
