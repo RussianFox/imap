@@ -1268,7 +1268,12 @@
 					};
 				};
 				
-				var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostid'+((_imap.zabbixversion.substr(0,3)=='2.2') ? '' : 's%5B%5D')+'='+hh+'&groupid=0', clickCallback: function(){ popupFrame('latest.php?hostid'+((_imap.zabbixversion.substr(0,3)=='2.2') ? '' : 's%5B%5D')+'='+hh+'&groupid=0'); return false; } };
+				if (_imap.zabbixversion.substr(0,3)=='2.2') {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?form_refresh=1&groupid=0&hostid='+hh); return false; } };
+				} else {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
+				};
+				
 				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
 				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
 				var chost = { label: mlocale('Host config'), items: [
