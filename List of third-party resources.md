@@ -1,3 +1,5 @@
+##List of third-party resources
+
 [Leaflet](http://leafletjs.com/)
 
 [Leaflet plugins](https://github.com/shramov/leaflet-plugins)
