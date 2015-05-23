@@ -413,7 +413,6 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
-	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
 	textdomain("frontend");
 	
@@ -516,7 +515,7 @@ foreach ($needThisFiles as $file) {
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
 	_imap.settings.use_search = true;
-	_imap.settings.use_zoom_slider = true;
+	_imap.settings.use_zoom_slider = false;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
@@ -633,7 +632,12 @@ foreach ($needThisFiles as $file) {
 	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
-
+	if (file_exists('imap/js')) {
+		$files = scandir('imap/js');
+		foreach($files as $file) {
+			if (substr('imap/js/'.$file,-3)=='.js') echo '<script type="text/javascript" src="imap/js/'.$file.'"></script>';
+		};
+	};
 
 textdomain("frontend");
 if ($output!='block') {
