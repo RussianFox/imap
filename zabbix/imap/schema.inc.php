@@ -1,6 +1,6 @@
 <?php
 return array(
-	'hosts_links' => array(
+	'imap_hosts_links' => array(
 		'key' => 'host1,host2',
 		'fields' => array(
 			'id' => array(
@@ -26,8 +26,7 @@ return array(
 			),
 		),
 	),
-	'hosts_links_settings' => array(
-		'key' => 'host1,host2',
+	'imap_hosts_links_settings' => array(
 		'fields' => array(
 			'ids' => array(
 				'null' => false,
@@ -39,12 +38,12 @@ return array(
 				'type' => DB::FIELD_TYPE_CHAR,
 				'length' => 30,
 			),
-			'weight' => array(
+			'alertcolor' => array(
 				'null' => true,
-				'type' => DB::FIELD_TYPE_INT,
-				'length' => 10,
+				'type' => DB::FIELD_TYPE_CHAR,
+				'length' => 30,
 			),
-			'opacity' => array(
+			'weight' => array(
 				'null' => true,
 				'type' => DB::FIELD_TYPE_INT,
 				'length' => 10,
@@ -53,6 +52,31 @@ return array(
 				'null' => true,
 				'type' => DB::FIELD_TYPE_CHAR,
 				'length' => 100,
+			),
+		),
+	),
+	'imap_triggers_links' => array(
+		'key' => 'id',
+		'fields' => array(
+			'id' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'triggerid' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'objectid' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'type' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_CHAR,
+				'length' => 50,
 			),
 		),
 	),

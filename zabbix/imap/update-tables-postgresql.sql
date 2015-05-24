@@ -1,3 +1,7 @@
+ALTER TABLE "hosts_links" RENAME TO "imap_hosts_links" ;
+
+ALTER SEQUENCE "hosts_links_seq" RENAME TO "imap_hosts_links_seq" ;
+
 CREATE TABLE imap_hosts_links_settings (
     ids bigint NOT NULL,
     color character varying(30) DEFAULT '#0000FF'::character varying NOT NULL,
@@ -7,16 +11,6 @@ CREATE TABLE imap_hosts_links_settings (
 );
 ALTER TABLE ONLY imap_hosts_links_settings ADD CONSTRAINT imap_hosts_links_settings_pkey PRIMARY KEY (ids);
 
-CREATE SEQUENCE imap_hosts_links_seq;
-CREATE TABLE imap_hosts_links (
-    id bigint DEFAULT nextval('imap_hosts_links_seq'::regclass) NOT NULL,
-    name character varying(300) DEFAULT NULL::character varying,
-    host1 bigint NOT NULL,
-    host2 bigint NOT NULL
-);
-ALTER TABLE ONLY imap_hosts_links ADD CONSTRAINT imap_hosts_links_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY imap_hosts_links ADD CONSTRAINT imap_hosts_unique UNIQUE (host1, host2);
-
 CREATE SEQUENCE imap_triggers_links_seq;
 CREATE TABLE imap_triggers_links (
     id bigint DEFAULT nextval('imap_triggers_links_seq'::regclass) NOT NULL,
@@ -25,3 +19,7 @@ CREATE TABLE imap_triggers_links (
     objecttype character varying(50) DEFAULT NULL::character varying NOT NULL
 );
 ALTER TABLE ONLY imap_triggers_links ADD CONSTRAINT imap_triggers_links_pkey PRIMARY KEY (id);
+
+INSERT INTO imap_hosts_links_settings SELECT ids, color, '#FF0000', weight, dash FROM hosts_links_settings ;
+
+DROP TABLE "hosts_links_settings" ;

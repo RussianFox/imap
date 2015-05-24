@@ -37,9 +37,11 @@ Interactive map for Zabbix
 
 ### Для MySQL
 
+Для пользователей предыдущих версий нужно использовать файл update-tables-mysql.sql
+
 Для работы связей между хостами нам нужно добавить две таблицы в базу данных Zabbix.
 
-В папке imap лежит файл tables.sql Вы можете открыть phpmyadmin, выбрать базу данных Zabbix, и выбрать этот файл в разделе Import
+В папке imap лежит файл tables-mysql.sql Вы можете открыть phpmyadmin, выбрать базу данных Zabbix, и выбрать этот файл в разделе Import
 
 Второй способ для любителей командной строки:
 
@@ -49,6 +51,8 @@ Interactive map for Zabbix
 
 
 ### Для PostgreSQL
+
+Для пользователей предыдущих версий нужно использовать файл update-tables-postgresql.sql
 
 От рута запустить
 

@@ -13,6 +13,32 @@ textdomain("frontend");
 $page['file'] = 'imap.php';
 $page['hist_arg'] = array('groupid', 'hostid', 'show_severity','control_map','with_triggers_only');
 
+$page['type'] = detect_page_type();
+
+$fields = array(
+	'lat' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'lng' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'with_triggers_only' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
+	'control_map' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
+	'severity_min' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1,2,3,4,5'),	null),
+	'output' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'action_ajax' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'hostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'thostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'groupid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'hardware' =>			array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
+	'linkid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'linkoptions' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'hardwareField' =>		array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
+	'searchstring' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'objectid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'objecttype' =>			array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
+	'triggerid' =>			array(T_ZBX_STR, 	O_OPT, 		null,		null,			null)
+);
+check_fields($fields);
+
+//'triggerid' => $trigger, 'objectid' => $objectid, 'type' => $objecttype
+
 if (function_exists('get_request')) {
 	$lat = get_request('lat', null);
 	$lng = get_request('lng', null);
@@ -24,13 +50,14 @@ if (function_exists('get_request')) {
 	$hostid = get_request('hostid', null);
 	$thostid = get_request('thostid', null);
 	$groupid = get_request('groupid', null);
-	$lat = get_request('lat', null);
-	$lng = get_request('lng', null);
 	$hardware = ''.get_request('hardware', '');
 	$linkid = get_request('linkid', null);
 	$linkoptions = get_request('linkoptions', null);
 	$hardwareField = get_request('hardwareField','type');
 	$searchstring = get_request('searchstring','');
+	$triggerid = get_request('triggerid','');
+	$objectid = get_request('objectid','');
+	$objecttype = get_request('objecttype','');
 };
 
 if (function_exists('getRequest')) {
@@ -44,13 +71,14 @@ if (function_exists('getRequest')) {
 	$hostid = getRequest('hostid', null);
 	$thostid = getRequest('thostid', null);
 	$groupid = getRequest('groupid', null);
-	$lat = getRequest('lat', null);
-	$lng = getRequest('lng', null);
 	$hardware = ''.getRequest('hardware', '');
 	$linkid = getRequest('linkid', null);
 	$linkoptions = getRequest('linkoptions', null);
 	$hardwareField = getRequest('hardwareField');
 	$searchstring = getRequest('searchstring','');
+	$triggerid = getRequest('triggerid','');
+	$objectid = getRequest('objectid','');
+	$objecttype = getRequest('objecttype','');
 };
 
 if (function_exists('get_current_nodeid')) { 
@@ -65,29 +93,6 @@ if ($output!='ajax') {
 	require_once dirname(__FILE__).'/../include/page_header.php';
 };
 
-$fields = array(
-	'groupid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'hostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'thostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'linkid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'severity_min' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
-	'fullscreen' =>			array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'control_map' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'with_triggers_only' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'output' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'jsscriptid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	// ajax
-	'favobj' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favref' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favid' =>			array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
-	'favcnt' =>			array(T_ZBX_INT, O_OPT, null,	null,		null),
-	'pmasterid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'favaction' =>			array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
-	'favstate' =>			array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
-	'favdata' =>			array(T_ZBX_STR, O_OPT, null,	null,		null),
-	'hardwareField' =>		array(T_ZBX_STR, O_OPT, null,	null,		null)
-);
-check_fields($fields);
 
 /*
  * Filter
@@ -127,7 +132,7 @@ function rightsErrorAjax() {
 function rightsForLink($idl) {
 	$glinks = DBfetchArray(DBselect(
 	'SELECT host1, host2
-	FROM hosts_links WHERE hosts_links.id = '.$idl
+	FROM imap_hosts_links WHERE imap_hosts_links.id = '.$idl
 	));
 	if (API::Host()->isWritable(array(1*$glinks[0]['host1'])) and API::Host()->isWritable(array(1*$glinks[0]['host2']))) return (true);
 	return (false);
@@ -159,6 +164,30 @@ if ($output=='ajax') {
 		$options['hostids'] = array();
 	};
 
+	if ($action_ajax=='select_triggers') {
+		$options['expandDescription'] = true;
+		$triggers = API::Trigger()->get($options);
+
+		$idtriggers = array();
+		$ntriggers = array();
+		foreach ($triggers as $tr) {
+			$ntr = $tr;
+			$ntr['links'] = array();
+			$ntriggers[$ntr['triggerid']] = $ntr;
+			$idtriggers[] = $ntr['triggerid'];
+		};
+		
+		$res = DBimap::find('imap_triggers_links', array('triggerid' => $idtriggers));
+		
+		foreach ($res as $rest) {
+			$ntriggers[$rest['triggerid']]['links'][] = $rest;
+		};
+		
+		$responseData = json_encode($ntriggers);
+		echo $responseData;
+		exit;
+	};
+	
 	if ($action_ajax=='get_triggers') {
 		$options['expandData'] = true;
 		$options['expandDescription'] = true;
@@ -174,12 +203,34 @@ if ($output=='ajax') {
 		};
 		$triggers = API::Trigger()->get($options);
 
+		$idtriggers = array();
 		$ntriggers = array();
 		foreach ($triggers as $tr) {
-			$ntriggers[] = $tr;
+			$ntr = $tr;
+			$ntr['links'] = array();
+			$ntriggers[$ntr['triggerid']] = $ntr;
+			$idtriggers[] = $ntr['triggerid'];
+		};
+		
+		$res = DBimap::find('imap_triggers_links', array('triggerid' => $idtriggers));
+		
+		foreach ($res as $rest) {
+			$ntriggers[$rest['triggerid']]['links'][] = $rest;
 		};
 		
 		$responseData = json_encode($ntriggers);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='setup_obj_triggers') {
+		$res = DBimap::delete('imap_triggers_links', array('objectid'=>array($objectid),'objecttype'=>array($objecttype)));
+		$reqm = array();
+		foreach ($triggerid as $trigger) {
+			$reqm[] = array( 'triggerid' => $trigger, 'objectid' => $objectid, 'objecttype' => $objecttype );
+		};
+		$res = DBimap::insert('imap_triggers_links', $reqm);
+		$responseData = json_encode(array('result'=>$triggerid), FALSE);
 		echo $responseData;
 		exit;
 	};
@@ -303,8 +354,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_link') {
 		
-		$res1 = DBimap::find('hosts_links', array('id' => $linkid));
-		$res2 = DBimap::find('hosts_links_settings', array('ids' => $linkid));
+		$res1 = DBimap::find('imap_hosts_links', array('id' => $linkid));
+		$res2 = DBimap::find('imap_hosts_links_settings', array('ids' => $linkid));
 		
 		$res = array();
 		
@@ -317,7 +368,7 @@ if ($output=='ajax') {
 			if (!$res1t['dash']) $res1t['dash']=0;
 			if (!$res1t['weight']) $res1t['weight']=0;
 			if (!$res1t['color']) $res1t['color']=0;
-			if (!$res1t['opacity']) $res1t['opacity']=0;
+			if (!$res1t['alertcolor']) $res1t['alertcolor']=0;
 			$res[] = $res1t;
 		};
 		
@@ -328,8 +379,8 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='get_links') {
 		
-		$res1 = DBimap::find('hosts_links');
-		$res2 = DBimap::find('hosts_links_settings');
+		$res1 = DBimap::find('imap_hosts_links');
+		$res2 = DBimap::find('imap_hosts_links_settings');
 		
 		$res = array();
 		
@@ -342,7 +393,7 @@ if ($output=='ajax') {
 			if (!$res1t['dash']) $res1t['dash']=0;
 			if (!$res1t['weight']) $res1t['weight']=0;
 			if (!$res1t['color']) $res1t['color']=0;
-			if (!$res1t['opacity']) $res1t['opacity']=0;
+			if (!$res1t['alertcolor']) $res1t['alertcolor']=0;
 			$res[] = $res1t;
 		};
 		
@@ -352,13 +403,12 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='add_links') {
-		
 		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
 				if (API::Host()->isWritable(array($hostid))) {
 					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
-					$res = DBimap::insert('hosts_links', array($newlink));
+					$res = DBimap::insert('imap_hosts_links', array($newlink));
 				};
 			};
 
@@ -373,11 +423,11 @@ if ($output=='ajax') {
 		$link=$linkid;
 		
 		$newlink = array( 'values' => array('name' => $linkoptions['linkname'] ), 'where' => array( 'id' => $link ) );
-		$res = DBimap::update('hosts_links', array($newlink));
+		$res = DBimap::update('imap_hosts_links', array($newlink));
 		
-		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('imap_hosts_links_settings', array('ids'=>array($link)));
 		
-		$res = DBimap::insert('hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'opacity' => $linkoptions['linkopacity'] )));
+		$res = DBimap::insert('imap_hosts_links_settings', array(array( 'ids' => $link, 'color' => $linkoptions['linkcolor'], 'weight' => $linkoptions['linkweight'], 'alertcolor' => $linkoptions['linkalertcolor'] )));
 		
 		$responseData = json_encode(array('result'=>htmlspecialchars($res),'linkoptions'=>$linkoptions), FALSE);
 		echo $responseData;
@@ -388,14 +438,14 @@ if ($output=='ajax') {
 		
 		if (!rightsForLink($linkid)) rightsErrorAjax();
 		$link=$linkid;
-		$res = DBimap::delete('hosts_links_settings', array('ids'=>array($link)));
-		$res = DBimap::delete('hosts_links', array('id'=>array($link)));
+		$res = DBimap::delete('imap_hosts_links_settings', array('ids'=>array($link)));
+		$res = DBimap::delete('imap_hosts_links', array('id'=>array($link)));
 		
 		$responseData = json_encode(array('result'=>TRUE), FALSE);
 		echo $responseData;
 		exit;
 	};
-	
+	exit;
 };
 
 if ($output!='block') {
@@ -418,7 +468,6 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
-	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
 	textdomain("frontend");
 	
@@ -436,11 +485,11 @@ textdomain("imap");
 
 //проверяем наличие таблиц в БД
 $check_links = true;
-if (!DBselect('SELECT 1 FROM hosts_links')) {
+if (!DBselect('SELECT 1 FROM imap_hosts_links')) {
 	$check_links=false;
 	clear_messages(1);
 };
-if (!DBselect('SELECT 1 FROM hosts_links_settings')) {
+if (!DBselect('SELECT 1 FROM imap_hosts_links_settings')) {
 	$check_links=false;
 	clear_messages(1);
 };
@@ -521,7 +570,7 @@ foreach ($needThisFiles as $file) {
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
 	_imap.settings.use_search = true;
-	_imap.settings.use_zoom_slider = true;
+	_imap.settings.use_zoom_slider = false;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
@@ -595,7 +644,8 @@ foreach ($needThisFiles as $file) {
 	locale['Link name'] = "<?php echo _("Link name"); ?>";
 	locale['Link color'] = "<?php echo _("Link color"); ?>";
 	locale['Link width'] = "<?php echo _("Link width"); ?>";
-	locale['Link opacity'] = "<?php echo _("Link opacity"); ?>";
+	locale['Edit link'] = "<?php echo _("Edit link"); ?>";
+	locale['Link alert color'] = "<?php echo _("Link alert color"); ?>";
 	locale['Link dash'] = "<?php echo _("Link dash"); ?>";
 	locale['Delete confirm'] = "<?php echo _("Delete confirm"); ?>";
 	locale['Successful'] = "<?php echo _("Successful"); ?>";
@@ -620,6 +670,8 @@ foreach ($needThisFiles as $file) {
 	locale['Sunrise'] = "<?php echo _("Sunrise"); ?>";
 	locale['Data obtained'] = "<?php echo _("Data obtained"); ?>";
 	locale['Show weather'] = "<?php echo _("Show weather"); ?>";
+	locale['Bind triggers'] = "<?php echo _("Bind triggers"); ?>";
+	locale['Bind item'] = "<?php echo _("Bind item"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
@@ -630,7 +682,7 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js<?php echo '?'.rand(); ?>"></script>
+<script type="text/javascript" src="imap/imap.js"></script>
 
 <?php
 
@@ -638,6 +690,12 @@ foreach ($needThisFiles as $file) {
 	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
+	if (file_exists('imap/js')) {
+		$files = scandir('imap/js');
+		foreach($files as $file) {
+			if (substr('imap/js/'.$file,-3)=='.js') echo '<script type="text/javascript" src="imap/js/'.$file.'"></script>';
+		};
+	};
 
 
 textdomain("frontend");

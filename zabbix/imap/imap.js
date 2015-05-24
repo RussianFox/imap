@@ -2,13 +2,14 @@
 	jQuery('#imapworkarea').show();
 	jQuery('#imapworkareaError').hide();
 
-	_imap.links = L.layerGroup();
+	_imap.linksLayer = L.layerGroup();
 	
 	_imap.markersList = new Object;
+	_imap.triggers = new Object;
 	_imap.map = false;
 	_imap.bbox = false;
 	_imap.searchpopup;
-	_imap.lines = new Object;
+	_imap.links = new Object;
 	_imap.vars = new Object;
 	_imap.vars.it_first = true;
 	_imap.vars.linksVisible = false;
@@ -16,6 +17,7 @@
 	_imap.searchmarkers = L.layerGroup();
 	_imap.googlestreetviewer = false;
 	_imap.googlestreetviewer_marker = false;
+	_imap.messages = {count:0, text:{}};
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -126,11 +128,11 @@
 		
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl].options.name+'" name=linkname type=text></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl].options.color+'" name=linkcolor type=colorpicker></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
-		ttx = ttx + '<div class="item"><label>'+mlocale('Link alert color')+'<br><input class=linkoption value="'+_imap.lines[hl].options.alertcolor+'" name=linkalertcolor type=colorpicker></label></div>';
-		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.links[hl].options.name+'" name=linkname type=text></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.links[hl].options.color+'" name=linkcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.links[hl].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link alert color')+'<br><input class=linkoption value="'+_imap.links[hl].options.alertcolor+'" name=linkalertcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.links[hl].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.links[hl].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
 		
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="5,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="2,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
@@ -226,7 +228,40 @@
 		});
 	};
 	
-	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
+	function get_last_messages() {
+		var onlymes = 1;
+		if (!getCookie('countertoday')) {
+			onlymes = 0;
+		};
+		jQuery.ajax({
+			url: 'http://imapmessages.lisss.ru',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				version: _imap.version,
+				zabbix: _imap.zabbixversion,
+				onlymes: onlymes
+			},
+			success: function(data){
+				if (onlymes == 0) setCookie('countertoday', '1', {expires: (3600*24), path: '/'});
+				var lastmes = +getCookie('imap_messages_last_num');
+				if (!lastmes) lastmes = 0;
+				var newlastmes = 0;
+				jQuery.each(data,function(num,text){
+					_imap.messages.text[num] = text;
+					if (num>lastmes) {
+						_imap.messages.count++;
+						newlastmes = Math.max(num,newlastmes);
+					};
+				});
+				_imap.messages.lastnum = newlastmes;
+				jQuery('.imap_messages_count').html(_imap.messages.count>0?_imap.messages.count:'');
+			},
+			error: function(data){
+				
+			}
+		});
+	};
 	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
@@ -333,25 +368,25 @@
 	};
 	
 	/* обновляем линию связи */
-	function updateLine(nn) {
+	function updateLink(nn) {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
 		
-		var needColor = (_imap.lines[nn].alert ? _imap.lines[nn].options.alertcolor : _imap.lines[nn].options.color);
-		_imap.lines[nn]['line'].setStyle({color:needColor, dashArray: _imap.lines[nn].options.dash, alertcolor:_imap.lines[nn].options.alertcolor, weight: _imap.lines[nn].options.weight, smoothFactor:8});
-		_imap.lines[nn]['line'].bindLabel('<b>' + escapeHtml(_imap.lines[nn].options.name) + '</b><br>' + getHostname(_imap.lines[nn][0]) + '<-->' + getHostname(_imap.lines[nn][1]));
+		var needColor = (_imap.links[nn].alert ? _imap.links[nn].options.alertcolor : _imap.links[nn].options.color);
+		_imap.links[nn]['line'].setStyle({color:needColor, dashArray: _imap.links[nn].options.dash, alertcolor:_imap.links[nn].options.alertcolor, opacity:1, weight: _imap.links[nn].options.weight, smoothFactor:8});
+		_imap.links[nn]['line'].bindLabel('<b>' + escapeHtml(_imap.links[nn].options.name) + '</b><br>' + getHostname(_imap.links[nn][0]) + '<-->' + getHostname(_imap.links[nn][1]));
 
-		if ( (_imap.markersList[_imap.lines[nn][0]]) && (_imap.markersList[_imap.lines[nn][1]]) ) {
-			if ( (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][0]].marker)) && (_imap.markers.hasLayer(_imap.markersList[_imap.lines[nn][1]].marker)) ) {
-				if ((_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][0]].marker)) || (_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][1]].marker))) {
-					if (_imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][0]].marker) != _imap.markers.getVisibleParent(_imap.markersList[_imap.lines[nn][1]].marker)) {
-						_imap.lines[nn]['line'].spliceLatLngs(0, 2);
-						_imap.lines[nn]['line'].addLatLng(_imap.markersList[_imap.lines[nn][0]].marker._latlng);
-						_imap.lines[nn]['line'].addLatLng(_imap.markersList[_imap.lines[nn][1]].marker._latlng);
+		if ( (_imap.markersList[_imap.links[nn][0]]) && (_imap.markersList[_imap.links[nn][1]]) ) {
+			if ( (_imap.markers.hasLayer(_imap.markersList[_imap.links[nn][0]].marker)) && (_imap.markers.hasLayer(_imap.markersList[_imap.links[nn][1]].marker)) ) {
+				if ((_imap.markers.getVisibleParent(_imap.markersList[_imap.links[nn][0]].marker)) || (_imap.markers.getVisibleParent(_imap.markersList[_imap.links[nn][1]].marker))) {
+					if (_imap.markers.getVisibleParent(_imap.markersList[_imap.links[nn][0]].marker) != _imap.markers.getVisibleParent(_imap.markersList[_imap.links[nn][1]].marker)) {
+						_imap.links[nn]['line'].spliceLatLngs(0, 2);
+						_imap.links[nn]['line'].addLatLng(_imap.markersList[_imap.links[nn][0]].marker._latlng);
+						_imap.links[nn]['line'].addLatLng(_imap.markersList[_imap.links[nn][1]].marker._latlng);
 						
-						if (_imap.markersList[_imap.lines[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.lines[nn][1]].marker._latlng)>_imap.settings._zoom_meters[_imap.map.getZoom()]) {
-							if (!_imap.links.hasLayer(_imap.lines[nn]['line'])) {
-								_imap.links.addLayer(_imap.lines[nn]['line']);
+						if (_imap.markersList[_imap.links[nn][0]].marker._latlng.distanceTo(_imap.markersList[_imap.links[nn][1]].marker._latlng)>_imap.settings._zoom_meters[_imap.map.getZoom()]) {
+							if (!_imap.linksLayer.hasLayer(_imap.links[nn]['line'])) {
+								_imap.linksLayer.addLayer(_imap.links[nn]['line']);
 							};
 							return;
 						};
@@ -359,23 +394,23 @@
 				};
 			};
 		};
-		_imap.links.removeLayer(_imap.lines[nn]['line']);
+		_imap.linksLayer.removeLayer(_imap.links[nn]['line']);
 	};
 	
-	function updateLines() {
+	function updateLinks() {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
-		for (var nn in _imap.lines) {
-			updateLine(+nn);
+		for (var nn in _imap.links) {
+			updateLink(+nn);
 		};
 	};
 	
-	function updateLinesMarker(mm) {
+	function updateLinksMarker(mm) {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
-		for (var nn in _imap.lines) {
-			if ( (mm == _imap.lines[+nn][0]) | (mm == _imap.lines[+nn][1]) ) {
-				updateLine(+nn);
+		for (var nn in _imap.links) {
+			if ( (mm == _imap.links[+nn][0]) | (mm == _imap.links[+nn][1]) ) {
+				updateLink(+nn);
 			};
 		};
 	};
@@ -396,35 +431,52 @@
 		if (nl.alertcolor == '0') nl.alertcolor = '#ff0000';
 		if (nl.weight == '0') nl.weight = 5;
 		if (nl.name == '0') nl.name = '';
-		if (!_imap.lines[nl.id]) {
-			_imap.lines[nl.id] = {0:nl.host1, 1:nl.host2, 'line':L.polyline([], {linkid:nl.id}), 'popup':L.popup()};
-			_imap.lines[nl.id].alert = false;
-			_imap.lines[nl.id]['line'].on('click',function(e){linkPopup(this.options.linkid,e);});
+		if (!_imap.links[nl.id]) {
+			_imap.links[nl.id] = {0:nl.host1, 1:nl.host2, 'line':L.polyline([], {linkid:nl.id}), 'popup':L.popup()};
+			_imap.links[nl.id].alert = false;
+			_imap.links[nl.id]['line'].on('click',function(e){linkPopup(this.options.linkid,e);});
 		};
-		_imap.lines[nl.id].options = {color: nl.color, name:nl.name, id:nl.id, dashArray: nl.dash, alertcolor:nl.alertcolor, weight: nl.weight, smoothFactor:8};
+		_imap.links[nl.id].options = {color: nl.color, name:nl.name, id:nl.id, dashArray: nl.dash, alertcolor:nl.alertcolor, weight: nl.weight, smoothFactor:8};
 
-		updateLine(nl.id);
+		updateLink(nl.id);
 		return true;
 	};
 	
 	function linkPopup(link_id,event) {
 		var container = jQuery('<div/>');
 		
-		jQuery(container).append('<div class="link_name">'+_imap.lines[link_id].options.name+'</div>');
+		jQuery(container).append('<div class="link_name">'+_imap.links[link_id].options.name+'</div>');
 		
-		jQuery(container).append('<div class="link_control"><a href=# onClick="linkOptions('+link_id+'); return false;">Edit link</a></div>');
+		var lcontrol = jQuery('<div/>',{class:'link_control'});
 		
-		jQuery(container).append('<div class="link_host_1"><span onClick="viewHostOnMap('+_imap.lines[link_id][0]+')" class=hostname>'+getHostname(+_imap.lines[link_id][0])+'</span></div>');
+		jQuery('<a/>',{class:'button', href:'#'}).html(mlocale("Edit link")).click(function(){ linkOptions(+link_id); return false; }).appendTo(jQuery(lcontrol));
+		jQuery('<a/>',{class:'button', href:'#'}).html(mlocale("Bind triggers"))
+								.click(function(){
+											selectTriggers(
+												{0:_imap.markersList[+_imap.links[link_id][0]],1:_imap.markersList[+_imap.links[link_id][1]]},
+												'hostlink',+link_id,
+												saveLinksTriggers,
+												{id:+link_id}
+											);
+											return false;								  
+										  }
+								      )
+								.appendTo(jQuery(lcontrol));
+		jQuery('<a/>',{class:'button', href:'#'}).html(mlocale("Bind item")).click(function(){ return false; }).appendTo(jQuery(lcontrol));
+		
+		jQuery(container).append(jQuery(lcontrol));
+		
+		jQuery(container).append('<div class="link_host_1"><span onClick="viewHostOnMap('+_imap.links[link_id][0]+')" class=hostname>'+getHostname(+_imap.links[link_id][0])+'</span></div>');
 
-		jQuery(container).append('<div class="link_host_2"><span onClick="viewHostOnMap('+_imap.lines[link_id][1]+')" class=hostname>'+getHostname(+_imap.lines[link_id][1])+'</span></div>');
+		jQuery(container).append('<div class="link_host_2"><span onClick="viewHostOnMap('+_imap.links[link_id][1]+')" class=hostname>'+getHostname(+_imap.links[link_id][1])+'</span></div>');
 		
-		_imap.lines[link_id]['popup'].setLatLng([event.latlng.lat,event.latlng.lng]).setContent(container[0]).openOn(_imap.map);
+		_imap.links[link_id]['popup'].setLatLng([event.latlng.lat,event.latlng.lng]).setContent(container[0]).openOn(_imap.map);
 		
 	};
 	
 	function delLine(nn) {
-		_imap.links.removeLayer(_imap.lines[nn]['line']);
-		delete _imap.lines[nn];
+		_imap.linksLayer.removeLayer(_imap.links[nn]['line']);
+		delete _imap.links[nn];
 	};
 	
 	function getRandomLatLng(map) {
@@ -563,7 +615,7 @@
 				if (data.result) {
 					if (!_imap.markersList[hh].marker) {
 						jQuery('.host_in_list').filter('[hostid='+hh+']').remove();
-						loadHost(hh);
+						loadHost(+hh);
 						return;
 					};
 					_imap.markers.removeLayer(_imap.markersList[hh].marker);
@@ -682,7 +734,13 @@
 	};
 	
 	function mapBbox() {
-		if (_imap.settings.pause_map_control) return;
+	  
+		_imap.bbox = false;
+		jQuery.each(_imap.markers.getLayers(),function(){
+			_imap.bbox = addBbox(this._latlng.lat, this._latlng.lng, _imap.bbox);
+		  
+		});
+	  
 		if (_imap.bbox) {
 			var ll1 = L.latLng(_imap.bbox.minlat, _imap.bbox.maxlon);
 			var ll2 = L.latLng(_imap.bbox.maxlat, _imap.bbox.minlon);
@@ -769,34 +827,24 @@
 	};
 
 	function showMarker(nn) {
-	  
+		_imap.markersList[+nn].show = true;
 		for (var mm in _imap.markersList[+nn].triggers) {
-			addLastTrigger(_imap.markersList[+nn].triggers[+mm]);
+			updateLastTrigger(_imap.triggers[+mm]);
 		};
-	  
+		
 		if (!_imap.markersList[+nn].marker) return;
-		if (_imap.markersList[+nn].marker.options.show) return;
-		_imap.markers.addLayer(_imap.markersList[+nn].marker);
-		_imap.markersList[+nn].marker.options.del = false;
-		_imap.markersList[+nn].marker.options.show = true;
-		updateIcon(+nn);
-		updateLinesMarker(nn);
+		
+		updateMarker(+nn);
 	};
 	
 	function unshowMarker(nn) {
-	  
+		_imap.markersList[+nn].show = false;
 		for (var mm in _imap.markersList[+nn].triggers) {
-			delLastTrigger(_imap.markersList[+nn].triggers[+mm]);
+			updateLastTrigger(_imap.triggers[+mm]);
 		};
-	  
+		
 		if (!_imap.markersList[+nn].marker) return;
-		if (!_imap.markersList[+nn].marker.options.show) return;
-		_imap.markersList[+nn].marker.options.del = true;
-		updateIcon(+nn);
-		_imap.markers.removeLayer(_imap.markersList[+nn].marker);
-		_imap.markersList[+nn].marker.options.del = false;
-		_imap.markersList[+nn].marker.options.show = false;
-		updateLinesMarker(nn);
+		updateMarker(+nn);
 	};
 	
 	function dump(obj) {
@@ -815,41 +863,189 @@
 	
 	function objectAlert(obj, objid, triggerid) {
 		if (obj=='hostlink') {
-			if (_imap.lines[objid]) {
-				_imap.lines[objid].alert = true;
-				updateLine(objid);
+			if (_imap.links[objid]) {
+				_imap.links[objid].alert = true;
+				updateLink(objid);
 			};
 		};
 	};
 	
 	function objectNoAlert(obj, objid, triggerid) {
 		if (obj=='hostlink') {
-			if (_imap.lines[objid]) {
-				_imap.lines[objid].alert = false;
-				updateLine(objid);
+			if (_imap.links[objid]) {
+				_imap.links[objid].alert = false;
+				updateLink(objid);
 			};
+		};
+	};
+	
+	function updateLastTrigger(trigger) {
+		if (!_imap.triggers[+trigger.triggerid]) return;
+	  
+		var showtrigger = false;
+		
+		if (trigger.priority>=_imap.filter.show_severity) {
+			if (_imap.markersList[+trigger.hostid]) {
+				if (_imap.markersList[+trigger.hostid].show) showtrigger = true;
+			};
+			jQuery.each(trigger.links,function() {
+				objectNoAlert(this.type,this.objectid,trigger.triggerid);
+				showtrigger = true;
+			});
+		};
+		if (showtrigger) {
+			_imap.Controls['lasttriggers'].addTrigger(trigger);
+		} else {
+			_imap.Controls['lasttriggers'].removeTrigger(+trigger.triggerid);
 		};
 	};
 	
 	function addLastTrigger(trigger) {
-		if (trigger.priority>=_imap.filter.show_severity) {
-			_imap.Controls['lasttriggers'].addTrigger(trigger);
-			if (trigger.links.length) {
-				for (var nn=0; nn<trigger.links.length; nn++) {
-					objectAlert(trigger.links[nn].type,trigger.links[nn].objectid,trigger.triggerid);
-				};
+	  
+		if (trigger.priority<_imap.filter.show_severity) return;
+	  
+		if (_imap.triggers[+trigger.triggerid]) _imap.triggers[+trigger.triggerid].lhi = trigger.lhi;
+	  
+		if (_imap.triggers[+trigger.triggerid] === trigger) {
+			return;
+		} else {
+			_imap.triggers[+trigger.triggerid] = trigger;
+		};
+		if (_imap.markersList[+trigger.hostid]) {
+			if (!_imap.markersList[+trigger.hostid].triggers[+trigger.triggerid]) {
+				_imap.markersList[+trigger.hostid].triggers[+trigger.triggerid] = true;
+				updateMarker(+trigger.hostid);
 			};
 		};
+		
+		updateLastTrigger(trigger);
 	};
 	
 	function delLastTrigger(trigger) {
-		if (!trigger) return;
+		if (!_imap.triggers[+trigger.triggerid]) return;
+		
 		_imap.Controls['lasttriggers'].removeTrigger(+trigger.triggerid);
-		if (trigger.links.length) {
-			for (var nn=0; nn<trigger.links.length; nn++) {
-				objectNoAlert(trigger.links[nn].type,trigger.links[nn].objectid,trigger.triggerid);
+		
+		if (_imap.markersList[+trigger.hostid]) {
+			if ( _imap.markersList[+trigger.hostid].triggers[+trigger.triggerid] ) delete _imap.markersList[+trigger.hostid].triggers[+trigger.triggerid];
+			if (_imap.markersList[+trigger.hostid].marker) {
+				updateMarker(+trigger.hostid);
 			};
 		};
+		
+		jQuery.each(trigger.links,function(){
+			objectNoAlert(this.type,this.objectid,trigger.triggerid);
+		});
+	};
+	
+	function saveLinksTriggers(IDs,objType,objId) {
+		jQuery.ajax({
+			url: 'imap.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action_ajax: 'setup_obj_triggers',
+				triggerid: IDs,
+				objectid: objId,
+				objecttype: objType,
+				output: 'ajax'
+			},
+			success: function(data){
+				var n=1;
+			},
+			error: function(data) {
+				ajaxError(mlocale('Failed to update data'));
+				jQuery('<div/>').html(data.responseText).dialog();
+			}
+		});
+	};
+	
+	function selectTriggers(hosts,objType,objId,functionOnSelect) {
+		_imap.selecting = new Object;
+		var container = jQuery('<div/>');
+		var hostselector = jQuery('<select/>');
+		jQuery.each(hosts, function(){
+			var host = this.marker.options;
+			jQuery('<option value="'+host.host_id+'">'+host.host_name+'</option>').appendTo(jQuery(hostselector));
+		});
+		var hostselectordiv = jQuery('<div/>');
+		var hostselectorlabel = jQuery('<label/>');
+		
+		jQuery(hostselector).change(function(){
+			jQuery('#listTriggersForSelect').html('');
+			var host = jQuery(this).val();
+			jQuery.ajax({
+				url: 'imap.php',
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					hostid: +host,
+					action_ajax: 'select_triggers',
+					output: 'ajax'
+				},
+				success: function(data){
+					jQuery.each(data, function() {
+						var trigger = this;
+						
+						jQuery.each(this.links,function(){ 
+						  
+							if ( (this.type==objType) && (this.objectid==objId) ) {
+								_imap.selecting[this.triggerid]=true;
+							};
+						  
+						})
+						
+						var ltrigger = jQuery('<label/>');
+						var etrigger = jQuery('<input/>',{id:'selecting'+trigger.triggerid, value:+trigger.triggerid, type:'checkbox'}).click(function(){
+						  
+							if ( jQuery(this).is(':checked') ) {
+								_imap.selecting[jQuery(this).val()]=true;
+							} else {
+								_imap.selecting[jQuery(this).val()]=false;
+							};
+						  
+						});
+						
+						jQuery(ltrigger).append(etrigger).append(' '+trigger.description).appendTo('#listTriggersForSelect');
+					});
+					jQuery.each(_imap.selecting,function(key,z){
+					  
+						if (z) {
+							jQuery('#selecting'+key).click();
+						};
+					  
+					});
+				}
+			});
+		});
+		
+		jQuery(hostselectorlabel).append(mlocale('Select host')+' ').append(jQuery(hostselector)).appendTo(hostselectordiv);
+		jQuery(container).append(jQuery(hostselectordiv)).append('<div id=listTriggersForSelect></div>');
+		
+		
+		
+		jQuery(container).dialog({
+			title: mlocale('Triggers selection'),
+			buttons: [
+				{	text:"Ok",
+					click: function() {
+						var str = Array();
+						jQuery.each(_imap.selecting,function(key,z){ if (z) str[str.length]=key });
+						functionOnSelect(str,objType,objId);
+						jQuery(this).remove();
+					}
+				},
+				{	text:"Cancel",
+					click: function() {
+						jQuery(this).remove();
+					}
+				},
+			],
+			close: function(){jQuery(this).remove(); return false;}
+		  
+		});
+		jQuery(hostselector).change();
+		
 	};
 	
 	function loadTriggers() {
@@ -869,39 +1065,25 @@
 			success: function(data){
 				var lhi = _imap.loadingtriggersid;
 				
-				var luhost = new Object;
+				/*jQuery.each(_imap.triggers,function(){
+					_imap.triggers[+this.triggerid].lhi = lhi;
+				});*/
 				
-				/*
-				for (var nn in _imap.markersList) {
-					for (var mm in _imap.markersList[+nn].triggers) {
-						_imap.markersList[+nn].triggers[+mm].del = true;
+				jQuery.each(data,function(){
+					if (this.value==1) {
+						this.lhi = lhi;
+						addLastTrigger(this);
 					};
-				};
-				*/
+				});
 				
-				for (var nn in data) {
-					var trigger = data[+nn];
-					if (!trigger) continue;
-					if (!trigger.value==1) continue;
-					if (!_imap.markersList[trigger.hostid]) continue;
-					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
-					_imap.markersList[trigger.hostid].triggers[trigger.triggerid].lhi = lhi;
-					addLastTrigger(trigger);
-					luhost[trigger.hostid] = trigger.hostid;
-				};
-				
-				
-				
-				for (var nn in _imap.markersList) {
-					for (var mm in _imap.markersList[+nn].triggers) {
-						if (_imap.markersList[+nn].triggers[+mm].lhi<lhi) {
-							delete _imap.markersList[+nn].triggers[+mm];
-							delLastTrigger(_imap.markersList[+nn].triggers[+mm]);
-							luhost[+nn] = +nn;
-						};
+				jQuery.each(_imap.triggers,function(){
+					if (this.lhi < lhi) {
+						delLastTrigger(_imap.triggers[+this.triggerid]);
+						delete _imap.triggers[+this.triggerid];
 					};
-				};
+				});
 				
+/*
 				for (var nn in _imap.markersList) {
 					if (!_imap.markersList[+nn].marker) continue;
 					updateMarker(+nn);
@@ -917,9 +1099,10 @@
 						_imap.bbox = addBbox(_imap.markersList[+nn].marker._latlng.lat,_imap.markersList[+nn].marker._latlng.lng,_imap.bbox);
 					};
 				};
-				
+*/
+
 				if (_imap.settings.do_map_control | _imap.vars.it_first) {
-					mapBbox(_imap.bbox);
+					mapBbox();
 				};
 				
 				if (_imap.vars.it_first) {
@@ -999,19 +1182,22 @@
 
 	function updatePopup(host_id) {
 	  
+		if (!jQuery('#hostPopup'+host_id)[0]) return;
 		var rstr = '';
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
-			for (var nn in _imap.markersList[host_id].triggers) {
-				var trigger = _imap.markersList[host_id].triggers[+nn];
-				rstr = rstr + '<div id="trigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;trigger&quot;,&quot;triggerid&quot;:&quot;'+trigger.triggerid+'&quot;,&quot;showEvents&quot;:true}">'+escapeHtml(trigger.description)+'</span>';
-				if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'trigger\','+host_id+','+trigger.triggerid+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
+			jQuery.each(_imap.markersList[host_id].triggers, function(nn)
+				{
+					var trigger = _imap.triggers[+nn];
+					rstr = rstr + '<div id="trigger'+trigger.triggerid+'" class="trigger triggerst'+trigger.priority+'"><span class="link_menu" data-menu-popup="{&quot;type&quot;:&quot;trigger&quot;,&quot;triggerid&quot;:&quot;'+trigger.triggerid+'&quot;,&quot;showEvents&quot;:true}">'+escapeHtml(trigger.description)+'</span>';
+					if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'trigger\','+host_id+','+trigger.triggerid+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
 
-				rstr = rstr + '<div class=acknowledge>';
-				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
-				rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div></div>';
-				
-				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
-			};
+					rstr = rstr + '<div class=acknowledge>';
+					if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" onClick="popupFrame(\'acknow.php?'+getSID()+'eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'\'); return false;" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
+					rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div></div>';
+					
+					status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
+				}
+			);
 		};
 		jQuery('#hostPopup'+host_id+' .triggers').html(rstr);
 	  
@@ -1125,23 +1311,43 @@
 		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
 		
 		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
-			for (var nn in _imap.markersList[host_id].triggers) {
-				var trigger = _imap.markersList[host_id].triggers[+nn];
+			jQuery.each(_imap.markersList[host_id].triggers,function(nn){
+				var trigger = _imap.triggers[+nn];
 				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
-			};
+			})
 		};
 		
 		_imap.markersList[host_id].marker.options.status = status;
 		if (!_imap.markersList[host_id].marker.label) {
-			_imap.markersList[host_id].marker.bindLabel('', {noHide: _imap.settings.showMarkersLabels, direction: 'auto', offset:[25,-15], className: 'leafletlabel'})
+			_imap.markersList[host_id].marker.bindLabel('', {noHide: _imap.settings.showMarkersLabels, direction: 'auto', offset:[25,-15]})
 		};
 		hardware = '<img style="max-height:1.5em;" onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>';
-		_imap.markersList[host_id].marker.label.setContent((_imap.settings.useIconsInMarkers ? '' : hardware+' ')+escapeHtml(_imap.markersList[host_id].marker.options.host_name));
+		_imap.markersList[host_id].marker.label.setContent((_imap.settings.useIconsInMarkers ? '' : hardware+' ')+'<b>'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</b>');
 		if (_imap.settings.useIconsInMarkers) {
 			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
 		} else {
 			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+_imap.markersList[host_id].marker.options.status + ' icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
 		};
+		var needshow = false;
+		
+		if (_imap.markersList[+host_id].show) {
+			needshow = true;
+		};
+		
+		if ( (_imap.settings.show_with_triggers_only) && (_imap.markersList[host_id].marker.options.status<_imap.settings.min_status) ) {
+			needshow = false;
+		};
+		
+		if ( (needshow) && (!_imap.markers.hasLayer(_imap.markersList[+host_id].marker)) ) {
+			_imap.markers.addLayer(_imap.markersList[+host_id].marker);
+			updateLinksMarker(+host_id);
+		};
+			
+		if ( (!needshow) && (_imap.markers.hasLayer(_imap.markersList[+host_id].marker)) ) {
+			_imap.markers.removeLayer(_imap.markersList[+host_id].marker);
+			updateLinksMarker(+host_id);
+		};
+		updateIcon(+host_id);
 	};
 	
 	function loadLinks(hl) {
@@ -1191,11 +1397,11 @@
 		var host_name = host.name;
 		if (!jQuery('div.host_in_list').is('[hostid="'+host_id+'"]')) {
 			jQuery('#hosts_list').append('<div class="host_in_list" hostname="'+host_name+'" hostid="'+host_id+'">'+host_name+'</div>');
-			if ((host.inventory.location_lat=='') || (host.inventory.location_lat=='')) {
+			if ((host.inventory.location_lat=='') || (host.inventory.location_lon=='')) {
 				jQuery('div.host_in_list').filter('[hostid="'+host_id+'"]').prepend('<img Title="'+mlocale('This host does not have coordinates')+'" onClick="getHostLocation('+host_id+')" class="host_crosschair" src="imap/images/target.png"> ');
 			};
 		};
-		if ((host.inventory.location_lat=='') || (host.inventory.location_lat=='')) {
+		if ((host.inventory.location_lat=='') || (host.inventory.location_lon=='')) {
 			var host_lat = false;
 			var host_lon = false;
 		} else {
@@ -1210,13 +1416,13 @@
 		var nottrigger_t = (nottrigger?'nottrigger ':'');
 		
 		if (!_imap.markersList[host_id]) {
-			_imap.markersList[host_id] = {marker: false, triggers: new Object, lhi:lhi, clust:false};
+			_imap.markersList[host_id] = {marker: false, show:true, triggers: new Object, lhi:lhi, clust:false};
 		};
 		
 		if ( (host_lat) && (host_lon) ) {
 			if (!_imap.markersList[host_id].marker) {
 				_imap.markersList[host_id].marker = L.marker([host_lat,host_lon],{status:0, host_id:host_id});
-				_imap.markersList[host_id].marker.on('move',function(){ updateLinesMarker(this.options.host_id); });
+				_imap.markersList[host_id].marker.on('move',function(){ updateLinksMarker(this.options.host_id); });
 				_imap.markersList[host_id].marker.on('popupopen', function() { openPopupHost(this.options.host_id); });
 				_imap.markersList[host_id].marker.on('popupclose', function() { closePopupHost(this.options.host_id); });
 				new_host = true;
@@ -1234,11 +1440,14 @@
 		_imap.markersList[host_id].lhi = lhi;
 		
 		if (new_host) {
+			jQuery.each(_imap.triggers,function(){
+				if (this.hostid == host_id) {
+					_imap.markersList[host_id].triggers[this.triggerid] = true;
+					updateLastTrigger(_imap.triggers[this.triggerid]);
+				};
+			});
 			createPopup(host_id);
-			if (!_imap.settings.show_with_triggers_only) {
-				updateMarker(host_id);
-				if (hostsFilter(host_id)) showMarker(host_id);
-			};
+			showMarker(host_id);
 		};
 	};
 	
@@ -1246,16 +1455,30 @@
 		jQuery('#hostItems'+hh).html();
 	};
 	
-	function popupFrame(url) {
+	function getSID(textonly) {
+		var sid = getCookie('zbx_sessionid');
+		if (textonly) return sid.substring(16,32);
+		return 'sid='+sid.substring(16,32)+'&';
+	};
+	
+	function popupFrame(url,text) {
 		container = L.DomUtil.create('span', 'graphPopupWindow');
-		jQuery(container).append(
-			jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
-		).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
+		jQuery(container).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
 		.on('close',function(){ jQuery(this).remove(); });
+		
+		if (text) {
+			jQuery.get( url, function( data ) {
+				jQuery(container).append(data);
+			},'text');
+		} else {
+			jQuery(container).append(
+				jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
+			);
+		};
 	};
 	
 	function openPopupHost(hh) {
-
+		if (!_imap.markersList[+hh].marker) return;
 		_imap.markersList[+hh].marker.openPopup();
 	  
 		jQuery.ajax({
@@ -1306,9 +1529,9 @@
 				for (nn in data) {
 					if (data[nn].graphid) {
 						graph = data[nn];
-						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, clickCallback: function(){
+						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?'+getSID()+'raphid='+graph.graphid, clickCallback: function(){
 							var tn = jQuery(this).data('graphId');
-							popupFrame('charts.php?ispopup=1&graphid='+tn);
+							popupFrame('charts.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&graphid='+tn);
 							return false;
 						  
 						}, data: {graphId: +graph.graphid} };
@@ -1316,21 +1539,21 @@
 				};
 				
 				if (_imap.zabbixversion.substr(0,3)=='2.2') {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?form_refresh=1&groupid=0&hostid='+hh); return false; } };
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&groupid=0&hostid='+hh); return false; } };
 				} else {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&&hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
 				};
-				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
-				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
+				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
 				var chost = { label: mlocale('Host config'), items: [
 				  
-					{ label: mlocale('Host'), url: 'hosts.php?form=update&hostid='+hh},
-					{ label: mlocale('Applications'), url: 'applications.php?hostid='+hh},
-					{ label: mlocale('Items'), url: 'items.php?hostid='+hh},
-					{ label: mlocale('Triggers'), url: 'triggers.php?hostid='+hh},
-					{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
-					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
-					{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
+					{ label: mlocale('Host'), url: 'hosts.php?'+getSID()+'form=update&hostid='+hh},
+					{ label: mlocale('Applications'), url: 'applications.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Items'), url: 'items.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Triggers'), url: 'triggers.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Graphs'), url: 'graphs.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Web scenarios'), url: 'httpconf.php?'+getSID()+'hostid='+hh}
 				    ]
 				};
 				
@@ -1745,6 +1968,9 @@
 			},
 			error: function(data){
 				ajaxError(mlocale('Failed to get data'));
+				var container = jQuery('<div/>');
+				jQuery(container).html(data.responseText);
+				jQuery(container).dialog();
 			}
 		});
 	};
@@ -1840,7 +2066,74 @@
 		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
 		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
-		counter();
+		get_last_messages();
+		
+
+		var imapMenu = L.Control.extend({
+			options: {
+				position: 'topleft'
+			},
+
+			onAdd: function (map) {
+				// create the control container with a particular class name
+				var container = L.DomUtil.create('div', 'imenu-control');
+				
+
+				
+				jQuery('<a/>',{class:'gp-ui icon197 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					mapBbox();
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon113 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					
+					var tabs = jQuery('<div/>',{id:'imap_information'});
+					
+					jQuery('<ul/>')
+					.append('<li><a href="#imap_information-1">About</a></li>')
+					.append('<li><a href="#imap_information-2">Components</a></li>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-1'})
+					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="http://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-2'})
+					.html(_imap.thirdtoolsinformation)
+					.appendTo(tabs);
+					
+					jQuery(tabs)
+					.tabs()
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Information') });
+					jQuery('#imap_information').css('padding','0px');
+					
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon125 button',href:'#'}).append(jQuery('<span/>',{class:'imap_messages_count'}).html(_imap.messages.count>0?_imap.messages.count:'')).appendTo(jQuery(container)).click(function(){
+					var text = '';
+					jQuery.each(_imap.messages.text,function(num){
+						text = '<div class="imap_dev_mes">'+this+'</div>'+text;
+					});
+					jQuery('<div/>')
+					.html(text)
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Messages') });
+					jQuery('.imap_messages_count').html('');
+					var lastmesnum = getCookie('imap_messages_last_num');
+					if (!lastmesnum) lastmesnum=0;
+					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24), path: '/'});
+					return false;				  
+				});
+				
+				jQuery(container).click(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				jQuery(container).contextmenu(function(event){ event.stopPropagation(); });
+				return container;
+			}
+		});
+		
 		
 		var SearchControl = L.Control.extend({
 			options: {
@@ -1973,7 +2266,6 @@
 				var minlat = bounds.getSouth();
 				var maxlng = bounds.getEast();
 				var minlng = bounds.getWest();
-				var url = 'http://www.panoramio.com/map/get_panoramas.php?set='+set+'&from=0&to=20&minx='+minlng+'&miny='+minlat+'&maxx='+maxlng+'&maxy='+maxlat+'&size='+size+'&mapfilter=true&callback=?';
 				var cor = this;
 				var requestid = this.requestid;
 				jQuery.ajax({
@@ -2138,7 +2430,7 @@
 				var container = jQuery('<div/>',{'id':'lasttrigger'+trigger.triggerid, 'class':'trigger triggerst'+trigger.priority, 'status':trigger.priority, 'time':trigger.lastchange});
 
 				rstr = '' + '<div><span class="link_menu" onClick="viewHostOnMap('+trigger.hostid+',true);">'+trigger.hostname+'<span></div><span>'+escapeHtml(trigger.description)+'</span> <div class=acknowledge>';
-				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
+				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" onClick="popupFrame(\'acknow.php?'+getSID()+'eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'\'); return false;" href="acknow.php?'+getSID()+'eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
 				rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 				
 				jQuery(container).append(rstr);
@@ -2199,12 +2491,12 @@
 		
 		_imap.Controls['layers'] = L.control.layers(baseMaps, overlayMaps, {position: setMapCorner(_imap.mapcorners['layers'])});
 
-		_imap.map.on('moveend',function(){ updateLines(); });
-		_imap.map.on('zoomend',function(){ updateLines(); });
+		_imap.map.on('moveend',function(){ updateLinks(); });
+		_imap.map.on('zoomend',function(){ updateLinks(); });
 		_imap.map.on('layerremove',function(event){ 
 			if (event.layer.options) {
 				if (event.layer.options.host_id) {
-					updateLinesMarker(event.layer.options.host_id);
+					updateLinksMarker(event.layer.options.host_id);
 				};
 			};
 		});
@@ -2212,10 +2504,12 @@
 		_imap.map.on('layeradd',function(event){ 
 			if (event.layer.options) {
 				if (event.layer.options.host_id) {
-					updateLinesMarker(event.layer.options.host_id);
+					updateLinksMarker(event.layer.options.host_id);
 				};
 			};
 		});
+		
+		_imap.map.addControl(new imapMenu);
 		
 		for (var nn in _imap.mapcorners) {
 			if (_imap.Controls[nn]) _imap.Controls[nn].addTo(_imap.map);
@@ -2283,26 +2577,26 @@
 			};
 		};
 		_imap.map.addLayer(_imap.markers);
-		_imap.map.addLayer(_imap.links);
+		_imap.map.addLayer(_imap.linksLayer);
 		_imap.map.addLayer(_imap.searchmarkers);
 		_imap.vars.linksVisible=true;
 		
 		_imap.Controls['layers'].addOverlay(_imap.markers,mlocale("Hosts"));
 		
 		if (_imap.settings.links_enabled) {
-			_imap.Controls['layers'].addOverlay(_imap.links,mlocale("Host's links"));
+			_imap.Controls['layers'].addOverlay(_imap.linksLayer,mlocale("Host's links"));
 		};
 		
 	};
 
 	function checkLinksLayer() {
-		if ( (!_imap.vars.linksVisible) && (_imap.map.hasLayer(_imap.links)) ) {
+		if ( (!_imap.vars.linksVisible) && (_imap.map.hasLayer(_imap.linksLayer)) ) {
 		  /* включили */
 			_imap.vars.linksVisible = true;
 			loadLinks();
-			updateLines();
+			updateLinks();
 		};
-		if ( (_imap.vars.linksVisible) && (!_imap.map.hasLayer(_imap.links)) ) {
+		if ( (_imap.vars.linksVisible) && (!_imap.map.hasLayer(_imap.linksLayer)) ) {
 		  /* выключили */
 			_imap.vars.linksVisible = false;
 		};

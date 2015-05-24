@@ -45,18 +45,18 @@ span.st_ok {
 	position:absolute;
 }
 
-.leafletlabel {
+.leaflet-label {
     z-index: 999 !important;
-    border: 0px;
-    background-color: rgba(29, 28, 28, 0.8);
-    color:white;
     font-weight:normal;
     white-space: nowrap;
-    padding:2px;
-    margin:0px;
     font-size: 10px;
     line-height: 12px;
     font: Arial, Helvetica, sans-serif;
+    font: 12px/14px Helvetica,sans-serif;
+}
+
+.leaflet-label img {
+    vertical-align:middle;
 }
 
 .leaflet-label:after {
@@ -666,10 +666,6 @@ span.graphPopupWindow {
   position:relative !important;
 }
 
-.ui-dialog {
-  z-index: 1003;
-}
-
 .menuPopup .ui-menu ul.ui-corner-all {
   max-height: 300px;
   overflow-y: auto;
@@ -812,11 +808,10 @@ span.graphPopupWindow {
 }
 
 .link_control {
-	background-color: rgb(242, 242, 242);
-	padding: 5px;
-	border: 1px solid gray;
-	border-radius: 5px;
-	min-width: 280px;
+	padding-bottom: 8px;
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+	border-bottom-color: #808080;
 }
 
 .link_host_1, .link_host_2 {
@@ -829,4 +824,94 @@ span.graphPopupWindow {
 
 .link_host_1 .hostname, .link_host_2 .hostname {
 	cursor:pointer;
+}
+
+a.button {
+	background-color: rgba(210, 209, 209, 0.51);
+	padding: 3px;
+	border-radius: 3px;
+	border: 1px solid #969494;
+	color: #000;
+	font-weight: bold;
+	text-decoration: none;
+	display: inline-block;
+	margin:5px;
+	min-width:12px;
+	min-height:12px;
+	position:relative;
+}
+
+#listTriggersForSelect label {
+	display: block;
+	border-top: 1px solid gray;
+	margin-top: 3px;
+	padding: 2px;
+	background-color: rgba(211, 211, 211, 0.55);
+}
+
+#listTriggersForSelect {
+	max-height: 250px;
+	overflow-y: auto;
+}
+
+.imenu-control.leaflet-control {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	padding: 5px;
+}
+
+.imenu-control .button {
+	background-color:transparent !important;
+}
+
+.icon96 {
+	background-position: -270px -72px;
+}
+
+.icon113 {
+	background-position: -216px -90px;
+}
+
+.icon125 {
+	background-position: -72px -108px;
+}
+
+.icon197 {
+	background-position: -288px -162px;
+}
+
+.gp-ui {
+	border:0px !important;
+	background-image:url('google-plus-ui-buttons/images/google+-ui-sprite-gray.png');
+}
+.gp-ui:hover {
+	background-image:url('google-plus-ui-buttons/images/google+-ui-sprite-colour.png');  
+}
+
+:focus {
+	outline-color:transparent;
+}
+
+.ui-widget-overlay {
+	z-index:1998;
+}
+
+.ui-dialog {
+	z-index: 1999;
+}
+
+span.imap_messages_count {
+	position: absolute;
+	right: -3px;
+	bottom: -3px;
+	font-size: 0.9em;
+	display: block;
+	color: rgb(5, 14, 105);
+}
+
+.imap_dev_mes {
+	padding-bottom:5px;
+	margin-bottom:15px;
+	border-bottom:1px dotted gray;
 }

@@ -36,6 +36,8 @@ Look at file imap/tables-xxx.sql
 
 ### For MySQL:
 
+For users of previous versions you want to use file update-tables-mysql.sql
+
 You can open phpmyadmin, select the database Zabbix, and select this file in the Import section
 
 The second way for fans of the command line:
@@ -46,6 +48,8 @@ Replace zabbixbd the name of the table with the data zabbix, username for a user
 
 
 ### For PostgreSQL 
+
+For users of previous versions you want to use file update-tables-postgresql.sql
 
 run under root:
 

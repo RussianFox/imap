@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imap v.0.0.1\n"
 "POT-Creation-Date: 2014-11-30 23:31+0300\n"
-"PO-Revision-Date: 2015-05-16 22:12+0300\n"
+"PO-Revision-Date: 2015-05-19 18:21+0300\n"
 "Last-Translator: RusFox <horonitel@gmail.com>\n"
 "Language-Team:  <horonitel@gmail.com>\n"
 "Language: ru\n"
@@ -13,6 +13,15 @@ msgstr ""
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: ../../../\n"
 "X-Poedit-SearchPath-0: .\n"
+
+msgid "Bind item"
+msgstr "Привязка к данным"
+
+msgid "Bind triggers"
+msgstr "Привязка триггеров"
+
+msgid "Edit link"
+msgstr "Редактировать линк"
 
 msgid "Show weather"
 msgstr "Показать погоду"
@@ -89,31 +98,31 @@ msgid "Delete confirm"
 msgstr "Подтверждение удаления"
 
 msgid "Delete link"
-msgstr "Удалить связь"
+msgstr "Удалить линк"
 
 msgid "Link options"
-msgstr "Параметры связи"
+msgstr "Параметры линка"
 
 msgid "Link name"
-msgstr "Имя для связи"
+msgstr "Имя для линка"
 
 msgid "Link color"
-msgstr "Цвет линии"
+msgstr "Цвет линка"
 
 msgid "Link width"
-msgstr "Толщина линии"
+msgstr "Толщина линк"
 
 msgid "Link opacity"
-msgstr "Непрозрачность линии"
+msgstr "Непрозрачность линка"
 
 msgid "Link dash"
-msgstr "Шаблон линии"
+msgstr "Шаблон линка"
 
 msgid "Select hosts for links"
-msgstr "Выберите узлы для связи"
+msgstr "Выберите узлы для линка"
 
 msgid "Host\\'s links"
-msgstr "Связи узлов"
+msgstr "Линки узлов"
 
 msgid "Delete location"
 msgstr "Удалить местоположение"
