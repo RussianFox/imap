@@ -567,6 +567,7 @@ foreach ($needThisFiles as $file) {
 	locale['Items'] = '<?php echo _('Items'); ?>';
 	locale['Discovery rules'] = '<?php echo _('Discovery rules'); ?>';
 	locale['Web scenarios'] = '<?php echo _('Web scenarios'); ?>';
+	locale['Screens'] = '<?php echo _('Screens'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
