@@ -550,6 +550,7 @@ width: 10px !important;
 
 .host_inventory {
 	display:table;
+	width:100%;
 }
 
 .host_inventory_line {
@@ -732,7 +733,6 @@ span.graphPopupWindow {
 	bottom:0;
 	left:0;
 	right:0;
-	line-height: 100;
 }
 
 #showImage .loading_indicator {
@@ -748,11 +748,19 @@ span.graphPopupWindow {
 }
 
 #showImage .image_div img {
-	display:inline;
+	display:inline-block;
 	vertical-align: middle;
 	text-align:center;
 	max-width:98%;
 	max-height:98%;
+}
+
+#showImage .image_div:before { /* для IE8+ */
+  content: "";
+  display: inline-block;
+  min-height: inherit;
+  height: 100%;
+  vertical-align: middle;
 }
 
 #showImage .text_for_image_div {
@@ -797,3 +805,107 @@ span.graphPopupWindow {
 }
 
 
+.weathersection {
+  position: relative;
+  display: block;
+  border: 1px solid rgba(128, 128, 128, 0.44);
+  border-radius: 5px;
+  padding: 6px;
+  margin-top: 10px;
+  text-align: right;
+}
+
+.weathersection div {
+  position: relative;
+  display: inline;
+  padding: 2px;
+}
+
+.weathersectiondesc {
+  top: -15px;
+  left: 0px;
+  background-color: white;
+}
+
+.weatherlinkback {
+  margin-top: 10px;
+  font-size: 0.9em;
+  text-align: right; 
+}
+
+a.button {
+	background-color: rgba(210, 209, 209, 0.51);
+	padding: 3px;
+	border-radius: 3px;
+	border: 1px solid #969494;
+	color: #000;
+	font-weight: bold;
+	text-decoration: none;
+	display: inline-block;
+	margin:5px;
+	min-width:12px;
+	min-height:12px;
+	position:relative;
+}
+
+.imenu-control.leaflet-control {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	padding: 5px;
+}
+
+.imenu-control .button {
+	background-color:transparent !important;
+}
+
+.icon96 {
+	background-position: -270px -72px;
+}
+
+.icon113 {
+	background-position: -216px -90px;
+}
+
+.icon125 {
+	background-position: -72px -108px;
+}
+
+.icon197 {
+	background-position: -288px -162px;
+}
+
+.gp-ui {
+	border:0px !important;
+	background-image:url('google-plus-ui-buttons/images/google+-ui-sprite-gray.png');
+}
+.gp-ui:hover {
+	background-image:url('google-plus-ui-buttons/images/google+-ui-sprite-colour.png');  
+}
+
+:focus {
+	outline-color:transparent;
+}
+
+.ui-widget-overlay {
+	z-index:1998;
+}
+
+.ui-dialog {
+	z-index: 1999;
+}
+
+span.imap_messages_count {
+	position: absolute;
+	right: -3px;
+	bottom: -3px;
+	font-size: 0.9em;
+	display: block;
+	color: rgb(5, 14, 105);
+}
+
+.imap_dev_mes {
+	padding-bottom:5px;
+	margin-bottom:15px;
+	border-bottom:1px dotted gray;
+}

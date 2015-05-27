@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imap v.0.0.1\n"
 "POT-Creation-Date: 2014-11-30 23:31+0300\n"
-"PO-Revision-Date: 2015-05-08 00:05+0300\n"
+"PO-Revision-Date: 2015-05-16 22:12+0300\n"
 "Last-Translator: RusFox <horonitel@gmail.com>\n"
 "Language-Team:  <horonitel@gmail.com>\n"
 "Language: ru\n"
@@ -13,6 +13,48 @@ msgstr ""
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: ../../../\n"
 "X-Poedit-SearchPath-0: .\n"
+
+msgid "Show weather"
+msgstr "Показать погоду"
+
+msgid "Data obtained"
+msgstr "Данные от"
+
+msgid "Sunrise"
+msgstr "Восход"
+
+msgid "Sunset"
+msgstr "Закат"
+
+msgid "Pressure"
+msgstr "Давление"
+
+msgid "Humidity"
+msgstr "Влажность"
+
+msgid "Temperature"
+msgstr "Температура"
+
+msgid "Wind speed"
+msgstr "Скорость ветра"
+
+msgid "Wind points"
+msgstr "Ветер в баллах"
+
+msgid "Wind type"
+msgstr "Тип ветра"
+
+msgid "Wind direction"
+msgstr "Направление ветра"
+
+msgid "Config"
+msgstr "Конфигурация"
+
+msgid "Host config"
+msgstr "Конфигурация узла"
+
+msgid "Host view"
+msgstr "Просмотр узла"
 
 msgid "Sort by time"
 msgstr "По времени"

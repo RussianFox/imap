@@ -16,6 +16,7 @@
 	_imap.searchmarkers = L.layerGroup();
 	_imap.googlestreetviewer = false;
 	_imap.googlestreetviewer_marker = false;
+	_imap.messages = {count:0, text:{}};
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -71,7 +72,6 @@
 			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
-			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
@@ -127,11 +127,11 @@
 		
 		ttx = ttx + '<div style="display:none;" class="item dellinkconfirm"><button onClick="jQuery(\'.dellinkconfirm\').hide();">'+mlocale('Cancel')+'</button> <button style="display:none;" class=dellinkconfirm onClick="deleteLink('+hl+'); jQuery(\'#linkoptionsdialog\').dialog(\'destroy\');"><span class="delbutton">X</span> '+mlocale('Delete confirm')+'</button></div>';
 		
-		ttx = ttx + '<div class="item">'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></div>';
-		ttx = ttx + '<div class="item">'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></div>';
-		ttx = ttx + '<div class="item linkdash">'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link name')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.name+'" name=linkname type=text></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link color')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.color+'" name=linkcolor type=colorpicker></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link width')+', px<br><input class=linkoption value="'+_imap.lines[hl][2].options.weight+'" name=linkweight type=number min="1" max="20" step="1"></label></div>';
+		ttx = ttx + '<div class="item"><label>'+mlocale('Link opacity')+', %<br><input class=linkoption value="'+_imap.lines[hl][2].options.opacity*100+'" name=linkopacity type=number min="0" max="100" step="10"></label></div>';
+		ttx = ttx + '<div class="item linkdash"><label>'+mlocale('Link dash')+'<br><input class=linkoption value="'+_imap.lines[hl][2].options.dash+'" name=linkdash type=hidden></label><span onClick="jQuery(\'.item.linkdash ul\').slideToggle(\'fast\');"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="'+_imap.lines[hl][2].options.dash+'" stroke-width="5" d="M5 0 l215 0"></path></g></svg></span><ul style="display:none;">';
 		
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="5,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
 		ttx = ttx + '<li><a href="#"><svg height="8" width="100%"><g><path stroke="#2F2F2F" stroke-dasharray="2,5" stroke-width="5" d="M5 0 l215 0"></path></g></svg></a></li>';
@@ -228,7 +228,40 @@
 		});
 	};
 	
-	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
+	function get_last_messages() {
+		var onlymes = 1;
+		if (!getCookie('countertoday')) {
+			onlymes = 0;
+		};
+		jQuery.ajax({
+			url: 'http://imapmessages.lisss.ru',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				version: _imap.version,
+				zabbix: _imap.zabbixversion,
+				onlymes: onlymes
+			},
+			success: function(data){
+				if (onlymes == 0) setCookie('countertoday', '1', {expires: (3600*24), path: '/'});
+				var lastmes = +getCookie('imap_messages_last_num');
+				if (!lastmes) lastmes = 0;
+				var newlastmes = 0;
+				jQuery.each(data,function(num,text){
+					_imap.messages.text[num] = text;
+					if (num>lastmes) {
+						_imap.messages.count++;
+						newlastmes = Math.max(num,newlastmes);
+					};
+				});
+				_imap.messages.lastnum = newlastmes;
+				jQuery('.imap_messages_count').html(_imap.messages.count>0?_imap.messages.count:'');
+			},
+			error: function(data){
+				
+			}
+		});
+	};
 	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
@@ -755,6 +788,11 @@
 	};
 
 	function showMarker(nn) {
+	  
+		for (var mm in _imap.markersList[+nn].triggers) {
+			addLastTrigger(_imap.markersList[+nn].triggers[+mm]);
+		};
+	  
 		if (!_imap.markersList[+nn].marker) return;
 		if (_imap.markersList[+nn].marker.options.show) return;
 		_imap.markers.addLayer(_imap.markersList[+nn].marker);
@@ -765,6 +803,11 @@
 	};
 	
 	function unshowMarker(nn) {
+	  
+		for (var mm in _imap.markersList[+nn].triggers) {
+			delLastTrigger(+mm);
+		};
+	  
 		if (!_imap.markersList[+nn].marker) return;
 		if (!_imap.markersList[+nn].marker.options.show) return;
 		_imap.markersList[+nn].marker.options.del = true;
@@ -791,7 +834,7 @@
 	
 	
 	function addLastTrigger(trigger) {
-		_imap.Controls['lasttriggers'].addTrigger(trigger);
+		if (trigger.priority>=_imap.filter.show_severity) _imap.Controls['lasttriggers'].addTrigger(trigger);
 	};
 	
 	function delLastTrigger(nn) {
@@ -799,6 +842,8 @@
 	};
 	
 	function loadTriggers() {
+		if(!_imap.loadingtriggersid) _imap.loadingtriggersid=0;
+		_imap.loadingtriggersid++;
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -811,29 +856,41 @@
 				output: 'ajax'
 			},
 			success: function(data){
+				var lhi = _imap.loadingtriggersid;
+				
+				var luhost = new Object;
+				
+				/*
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
 						_imap.markersList[+nn].triggers[+mm].del = true;
 					};
 				};
+				*/
+				
 				for (var nn in data) {
 					var trigger = data[+nn];
 					if (!trigger) continue;
 					if (!trigger.value==1) continue;
 					if (!_imap.markersList[trigger.hostid]) continue;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
+					_imap.markersList[trigger.hostid].triggers[trigger.triggerid].lhi = lhi;
 					addLastTrigger(trigger);
+					luhost[trigger.hostid] = trigger.hostid;
 				};
 				
 				
 				
 				for (var nn in _imap.markersList) {
 					for (var mm in _imap.markersList[+nn].triggers) {
-						if (_imap.markersList[+nn].triggers[+mm].del) {
+						if (_imap.markersList[+nn].triggers[+mm].lhi<lhi) {
 							delete _imap.markersList[+nn].triggers[+mm];
+							delLastTrigger(+mm);
+							luhost[+nn] = +nn;
 						};
 					};
 				};
+				
 				for (var nn in _imap.markersList) {
 					if (!_imap.markersList[+nn].marker) continue;
 					updateMarker(+nn);
@@ -849,6 +906,7 @@
 						_imap.bbox = addBbox(_imap.markersList[+nn].marker._latlng.lat,_imap.markersList[+nn].marker._latlng.lng,_imap.bbox);
 					};
 				};
+				
 				if (_imap.settings.do_map_control | _imap.vars.it_first) {
 					mapBbox(_imap.bbox);
 				};
@@ -875,7 +933,7 @@
 		var hhs = jQuery('.host_in_list');
 		for (var nn=0; nn<hhs.length; nn++) {
 			if ( ( +jQuery(hhs[nn]).attr('hostid')!==+hh ) && (_imap.markersList[+jQuery(hhs[nn]).attr('hostid')]) ) {
-				ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</td></tr>';
+				ttx = ttx+'<tr class='+((nn % 2 == 0)?'even_row':'odd_row')+' hostid="'+jQuery(hhs[nn]).attr('hostid')+'"><td><label><input class="input checkbox pointer host_for_link" type="checkbox" value="'+jQuery(hhs[nn]).attr('hostid')+'">'+jQuery(hhs[nn]).text()+'</label></td></tr>';
 			};
 		};
 		ttx = ttx+'</table>';
@@ -994,7 +1052,8 @@
 				if (_imap.markersList[host_id].host_info.inventory.url_c) shh = shh + '<div class=link><a href="'+_imap.markersList[host_id].host_info.inventory.url_c+'" target=_blank>URL C</a></div>';
 			};
 			jQuery('#hostPopup'+host_id+' .host_links').html(shh);
-			
+			_imap.markersList[host_id].marker._popup.setContent(jQuery('#hostPopup'+host_id)[0].outerHTML);
+			createHostContextMenu(host_id);
 		};
 	};
 	
@@ -1020,8 +1079,8 @@
 	};
 	
 	function showImage(url,text) {
-		jQuery('#showImage').detach();
-		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery("html,body").css('overflow', 'auto'); jQuery(this).detach();});
+		jQuery('#showImage').remove();
+		var container = jQuery('<div />').attr('id','showImage').bind('click',function(){jQuery("html,body").css('overflow', 'auto'); jQuery(this).remove();});
 		jQuery(container).append('<div class=loading_indicator></div>');
 		if (text) jQuery(container).append('<div class=text_for_image_div><div class=text_for_image>'+text+'</div></div>').bind('contextmenu',function(){ jQuery(this).children('.text_for_image_div').toggle(); return false; });
 		var img = jQuery('<img />').attr('src',url).css('display','none').bind('load',function(){ jQuery(this).show(); }).bind('contextmenu',function(){ jQuery(this).parent().parent().children('.text_for_image_div').toggle(); return false; });
@@ -1111,7 +1170,8 @@
 			_imap.markersList[host_id].marker.setLatLng([host_lat,host_lng]);
 	};
 	
-	function hostUpdate(host) {
+	function hostUpdate(host,lhi) {
+		if (!lhi) lhi = _imap.loadinghostsid;
 		var new_host = false;
 		var host_id = host.hostid;
 		var host_name = host.name;
@@ -1136,7 +1196,7 @@
 		var nottrigger_t = (nottrigger?'nottrigger ':'');
 		
 		if (!_imap.markersList[host_id]) {
-			_imap.markersList[host_id] = {marker: false, triggers: new Object, del:false, clust:false};
+			_imap.markersList[host_id] = {marker: false, triggers: new Object, lhi:lhi, clust:false};
 		};
 		
 		if ( (host_lat) && (host_lon) ) {
@@ -1157,7 +1217,7 @@
 			_imap.markersList[host_id].marker.options.hardware = hardware;
 			_imap.markersList[host_id].marker.options.host_name = host_name;
 		};
-		_imap.markersList[host_id].del = false;
+		_imap.markersList[host_id].lhi = lhi;
 		
 		if (new_host) {
 			createPopup(host_id);
@@ -1172,12 +1232,26 @@
 		jQuery('#hostItems'+hh).html();
 	};
 	
-	function popupFrame(url) {
+	function getSID(textonly) {
+		var sid = getCookie('zbx_sessionid');
+		if (textonly) return sid.substring(16,32);
+		return 'sid='+sid.substring(16,32)+'&';
+	};
+	
+	function popupFrame(url,text) {
 		container = L.DomUtil.create('span', 'graphPopupWindow');
-		jQuery(container).append(
-			jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
-		).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
+		jQuery(container).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
 		.on('close',function(){ jQuery(this).remove(); });
+		
+		if (text) {
+			jQuery.get( url, function( data ) {
+				jQuery(container).append(data);
+			},'text');
+		} else {
+			jQuery(container).append(
+				jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
+			);
+		};
 	};
 	
 	function openPopupHost(hh) {
@@ -1212,7 +1286,11 @@
 	  
   
 		jQuery('#hostItems'+hh).html();
-		
+
+		return false;
+	};
+	
+	function createHostContextMenu(hh) {
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -1223,60 +1301,98 @@
 				output: 'ajax'
 			},
 			success: function(data){
-				var container = L.DomUtil.create('span', 'link_menu');
-				if (_imap.zabbixversion.search('2.2')!==0) {
-					var graphs=[];
-					for (nn in data) {
-						if (data[nn].graphid) {
-							graph = data[nn];
-							graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, css: 'hostInventories', clickCallback: function(){
-								var tn = jQuery(this).data('graphId');
-								popupFrame('charts.php?ispopup=1&graphid='+tn);
-								return false;
-							  
-							}, items: [], data: {graphId: +graph.graphid} };
-						};
+				var container = jQuery('<span/>', {class:'link_menu'});
+				var graphs=[];
+				for (nn in data) {
+					if (data[nn].graphid) {
+						graph = data[nn];
+						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?'+getSID()+'raphid='+graph.graphid, clickCallback: function(){
+							var tn = jQuery(this).data('graphId');
+							popupFrame('charts.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=1&graphid='+tn);
+							return false;
+						  
+						}, data: {graphId: +graph.graphid} };
 					};
-					
-					var lastdd = { label: mlocale('Latest data'), items: [], url: 'latest.php?filter_set=1&hostids%5B%5D='+hh, clickCallback: function(){ popupFrame('latest.php?ispopup=1&filter_set=1&hostids%5B%5D='+hh); return false; } };
-					var hostinv = { label: mlocale('Host inventory'), items: [], url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
-					var ltrig = { label: mlocale('Triggers'), items: [], url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
-					
-					jQuery(container).bind('click',function(event){ datas = [{label:'Host menu'}, {label: mlocale('Graphs'), items: graphs, url:''}, lastdd, hostinv, ltrig]; menuPopup2(datas, event); });
-					jQuery(container).html(mlocale('Tools'));
-					jQuery('#hostItems'+hh).append(container);
 				};
+				
+				var hscreens = { label: mlocale('Screens'), url: 'host_screen.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('host_screen.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				
+				if (_imap.zabbixversion.substr(0,3)=='2.2') {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&groupid=0&hostid='+hh); return false; } };
+				} else {
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&&hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
+				};
+				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				var chost = { label: mlocale('Host config'), items: [
+				  
+					{ label: mlocale('Host'), url: 'hosts.php?'+getSID()+'form=update&hostid='+hh},
+					{ label: mlocale('Applications'), url: 'applications.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Items'), url: 'items.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Triggers'), url: 'triggers.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Graphs'), url: 'graphs.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?'+getSID()+'hostid='+hh},
+					{ label: mlocale('Web scenarios'), url: 'httpconf.php?'+getSID()+'hostid='+hh}
+				    ]
+				};
+				
+				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, hscreens, {label:'Config'}, chost]; menuPopup2(datas, event); });
+				jQuery(container).html(mlocale('Tools'));
+				jQuery('.link_menu', '#hostItems'+hh).remove();
+				jQuery('#hostItems'+hh).append(container);
 			}
 		});
-		
-		return false;
-
 	};
 	
 	function menuPopup2Transform(data) {
 		var container = jQuery('<ul/>');
+		if (data.length==0) {
+			var item = jQuery('<li/>').addClass('ui-state-disabled').html('<a>none</a>').appendTo(container);
+		};
 		for (var nn=0; nn<data.length; nn++) {
 			el = data[nn];
 			var item = jQuery('<li/>');
 			if (el.data) {
 				jQuery(item).data(el.data);
-				
 			};
-			if ( (el.url==undefined) && (!el.clickCallback) ) {
+			
+			if (el.items) {
+				if (el.items.length==0) {
+					
+				}
+			};
+			
+			if (!el.url) {
+				el.url='';
+			};
+			
+			if ( (!el.url) && (!el.clickCallback) && (!el.items) ) {
 				jQuery(item).addClass('ui-widget-header').html(el.label);
 				
 			} else {
 				if (el.clickCallback) {
 					jQuery(item).click(el.clickCallback);
-					
 				};
-				jQuery(item).html('<a href="'+el.url+'">'+el.label+'</a>');
+				
+				var link = jQuery('<a/>');
+				jQuery(link).html(el.label);
+				jQuery(link).attr('href','#');
+				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (el.clickCallback) ) {
+					var inlink = jQuery('<a/>').attr('target','_blank').html('+').attr('href',el.url).prependTo(link).click(function(event){event.stopPropagation();});
+					jQuery('<span/>').addClass('ui-icon-document ui-icon ui-menu-icon').append(inlink).prependTo(link);
+				};
+				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (!el.clickCallback) ) {
+					jQuery(link).attr('href',el.url);
+				};
+				if (!el.onpage) jQuery(link).attr('target','_blank');
+				
+				jQuery(item).append(link);
 			};
 			if (el.items) {
-				if (el.items.length>0) {
+				
 					var addEl = menuPopup2Transform(el.items);
 					jQuery(item).append(addEl);
-				};
+				
 			};
 			jQuery(container).append(item);
 		};
@@ -1286,7 +1402,7 @@
 	function menuPopup2(data, event) {
 		jQuery('#menuPopup2').remove();
 		var container = jQuery(menuPopup2Transform(data)).menu();
-		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY).css('left',event.pageX)
+		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY-2).css('left',event.pageX-2)
 		.mouseleave(function(){
 			jQuery(this).delay(1000).hide(0, function(){ jQuery(this).remove(); });
 		})
@@ -1410,17 +1526,220 @@
 		
 	};
 	
+	function sect(gr,sc) {
+		var heading = gr;
+		
+		sgr = 360/sc;
+
+		heading = heading+(sgr/2);
+		heading = heading % 360;
+		if (heading<0) {
+		  heading = 360+heading;
+		};
+		heading = Math.floor(heading/sgr);		
+		return heading;
+		
+	};
+	
+	function openweathermap(latlng) {
+		if (!_imap.weatherrequestid) _imap.weatherrequestid=0;
+		_imap.weatherrequestid++;
+		var popup = L.popup().setLatLng([latlng.lat,latlng.lng]);
+		popup.setContent('<div id=weatherdiv><img width=50px src="imap/images/image-loading.gif"></div>');
+		popup.addTo(_imap.map);
+		var reqid = _imap.weatherrequestid;
+		
+		jQuery.ajax({
+			url: 'http://api.openweathermap.org/data/2.5/weather',
+			type: 'GET',
+			dataType: 'jsonp',
+			data: {
+				units: 'metric',
+				lang: _imap.settings.lang.substring(0,2),
+				lat: latlng.lat,
+				lon: latlng.lng
+			},
+			success: function(data){
+				container = openweathermapreturn(data);
+				if (container) {
+					popup.setContent(container[0]);
+				};
+			},
+			error: function(data){
+				jQuery("weatherdiv").html('Error request');
+			}
+		});
+
+	};
+	
+	function vednul(val) {
+	  if (val>9) return val;
+	  return '0'+val;
+	};
+		
+	function convert_data(val,ed,ms,nools) {
+			if (ed=='time') {
+				if (isNaN(val)) return '---';
+				H=Math.floor(val / 3600);
+				M=Math.floor(val / 60) - (Math.floor(val / 3600) * 60); if (M<10) M='0'+M;
+				S=Math.round(1000*(val % 60))/1000;
+				SS=''+S;
+				if (nools) SS = ''+S.toFixed(3);
+				if (S<10) SS='0'+SS;
+				
+				return H+':'+M+':'+SS;
+			};
+			if (ed=='hpa') {
+				if (isNaN(+val)) return '---';
+				return +val+'hPa';
+			};
+			if (ed=='mmhg') {
+				if (isNaN(+val)) return '---';
+				return (+val*100/133.3).toFixed(2)+'mmHg';
+			};
+			if (ed=='date') {
+				if (isNaN(val)) return '---';
+				bb=val-Math.round(val);
+				aa=new Date(+val*1000);
+				return (vednul(1900+aa.getYear())+'-'+vednul(1+aa.getMonth())+'-'+vednul(aa.getDate())+' '+vednul(aa.getHours())+':'+vednul(aa.getMinutes())+':'+vednul(aa.getSeconds()));
+			};
+			if (ed=='timeonly') {
+				if (isNaN(val)) return '---';
+				bb=val-Math.round(val);
+				aa=new Date(+val*1000);
+				return (vednul(aa.getHours())+':'+vednul(aa.getMinutes())+':'+vednul(aa.getSeconds()));
+			};
+			if (ed=='') {
+				return val;
+			};
+	};
+
+	function windType(bals) {
+		var typew = new Object;
+		typew['ru']=['отсутствует','тихий','лёгкий','слабый','умеренный','свежий', 'сильный','крепкий','очень крепкий','штормовой', 'сильный штормовой','жестокий штормовой','ураганный'];
+		typew['en']=['none','light air','light breeze','gentle breeze','moderate breeze','fresh breeze', 'strong breeze','whole breeze','fresh gale','strong gale', 'whole gale','storm','нurricane'];
+		var lang = _imap.settings.lang.substring(0,2);
+		if (!typew[lang]) {
+			lang = 'en';
+		};
+		return typew[lang][bals];
+	};
+	
+	function openweathermapreturn(weather,reqid) {
+		var nkw=['N','NNE','NE','ENE','E','ESE','SE','SSE','S', 'SSW','SW','WSW','W','WNW','NW','NNW'];
+		if (!weather.base) return;
+		if (_imap.weatherrequestid>reqid) return false;
+
+		if (weather.wind.deg>180) weather.wind.deg=weather.wind.deg-360;
+	  
+		var windDeg = Math.round(weather.wind.deg);
+		var windImage = -50*sect(windDeg,12);
+		var windDirection = nkw[sect(weather.wind.deg,16)];
+		
+		var windSpeed = Math.round(weather.wind.speed*100)/100+'m/s'
+		
+		var windBals = 12;
+		if (weather.wind.speed<32.6) windBals=11;
+		if (weather.wind.speed<28.4) windBals=10;
+		if (weather.wind.speed<24.4) windBals=9;
+		if (weather.wind.speed<20.7) windBals=8;
+		if (weather.wind.speed<17.1) windBals=7;
+		if (weather.wind.speed<13.8) windBals=6;
+		if (weather.wind.speed<10.7) windBals=5;
+		if (weather.wind.speed<7.9) windBals=4;
+		if (weather.wind.speed<5.4) windBals=3;
+		if (weather.wind.speed<3.3) windBals=2;
+		if (weather.wind.speed<1.5) windBals=1;
+		if (weather.wind.speed<0.2) windBals=0;
+		
+		var tempCur = Math.round(weather.main.temp*10)/10+'°C';
+		var tempMin = Math.round(weather.main.temp_min*10)/10+'°C';
+		var tempMax = Math.round(weather.main.temp_max*10)/10+'°C';
+		
+		var wcontainer = jQuery('<div/>').css('width','280px');
+		
+		var bcontainer = jQuery('<div/>').css('display','table-row');
+		
+		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;"><div style="display:block; width:50px; height:50px; background-image:url(http://openweathermap.org/img/w/'+weather.weather[0].icon+'.png);">'+tempCur+'</div></div>');
+		
+		var ocontainer = jQuery('<div/>').css('display','block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
+		var container = jQuery('<div/>').append(windDeg+'°<br>'+windDirection)
+		.css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px '+windImage+'px')
+		.css('vertical-align','middle').css('text-align','center').css('font-weight','bold').css('line-height','25px').css('font-size','14px');
+		jQuery(ocontainer).append(container);
+		
+		jQuery('<div/>').css('display','table-cell').css('vertical-align','middle').append(ocontainer).appendTo(bcontainer);
+		
+		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;">'+weather.weather[0].description+'<br>'+mlocale('Wind type')+' '+windType(windBals)+'<br>'+mlocale('Humidity')+' '+weather.main.humidity+'%</div><br>');
+		
+		jQuery('<div/>').css('display','table').append(bcontainer).appendTo(wcontainer);
+		
+		jQuery(wcontainer).append(mlocale('Temperature')+": "+tempMin+' - '+tempMax+' <br>');
+		jQuery(wcontainer).append(mlocale('Wind speed')+': '+windSpeed+', '+mlocale('Wind points')+': '+windBals+' ('+windType(windBals)+')<br>');
+		jQuery(wcontainer).append(mlocale('Wind direction')+': '+windDeg+'° ('+windDirection+')<br>');
+		jQuery(wcontainer).append(mlocale('Humidity')+": "+weather.main.humidity+'% <br>');
+		jQuery(wcontainer).append(mlocale('Pressure')+": "+convert_data(weather.main.pressure,'mmhg')+'('+convert_data(weather.main.pressure,'hpa')+') <br>');
+		jQuery(wcontainer).append(mlocale('Sunrise')+": "+convert_data(weather.sys.sunrise,'timeonly')+' '+mlocale('Sunset')+': '+convert_data(weather.sys.sunset,'timeonly')+' <br>');
+		jQuery(wcontainer).append(mlocale('Data obtained')+": "+convert_data(weather.dt,'date')+' <br>');
+		
+		jQuery(wcontainer).append('<div style="text-align:right; margin-top:5px; font-size:0.9em;">Powered by <a href="http://openweathermap.org/terms" title="Free Weather API" target="_blank">OpenWeatherMap</a></div>');
+		
+		return wcontainer;
+	};
+	
+	function worldweatheronline(latlng) {
+	  
+		var tempMax = 23;
+		var tempMin = 10;
+	  
+		var weatherImage = 'http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png';
+		var weatherDesk = 'sunny';
+		var weatherCode = '113';
+		
+		var windDirection = 'WSW';
+		var windDeg = 241;
+		var windImage = -50*sect(windDeg);
+		var windSpeed = 15;
+		
+		var linkback = 'Powered by <a href="http://www.worldweatheronline.com/" title="Free Weather API" target="_blank">World Weather Online</a>';
+		
+		var wcontainer = jQuery('<div/>');
+		jQuery(wcontainer).append('<div style="display:inline-block; margin-right:10px; text-align: center;"><img src="'+weatherImage+'"><br>'+weatherDesk+' </div>');
+		
+		var ocontainer = jQuery('<div/>').css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
+		var container = jQuery('<div/>').append(windDeg+'\'<br>'+windDirection)
+		.css('display','inline-block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px '+windImage+'px')
+		.css('vertical-align','middle').css('text-align','center').css('font-weight','bold').css('line-height','25px').css('font-size','14px');
+		jQuery(ocontainer).append(container);
+		
+		jQuery(wcontainer).append(ocontainer);
+		
+		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Temperature</div>'+tempMin+' - '+tempMax+'</div>');
+		
+		jQuery(wcontainer).append('<div class=weathersection><div class=weathersectiondesc>Wind</div>Speed '+windSpeed+'<br>Direction '+windDirection+' '+windDeg+'</div>');
+		
+		jQuery(wcontainer).append('<div class=weatherlinkback>'+linkback+'</div>');
+		
+
+	};
+	
 	function mapcontextmenu(e,latlng) {
-		var lastdd = { label: 'Google street view', items: [], url: '#', data: {latlng:latlng}, clickCallback: function(){ 
+		var gstreetview = { label: 'Google street view', data: {latlng:latlng}, clickCallback: function(){ 
 			var latlng = jQuery(this).data()['latlng'];
 			googlestreetview({lat:latlng.lat,lng:latlng.lng}); return false; }
-		  
 		};
-		jQuery('#'+jQuery(e.currentTarget).data('menu-popup-id')).detach();
-		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},lastdd], e);
+		
+		var gweather = { label: mlocale('Show weather'), data: {latlng:latlng}, clickCallback: function(){ 
+			var latlng = jQuery(this).data()['latlng'];
+			openweathermap({lat:latlng.lat,lng:latlng.lng}); return false; }
+		};
+		
+		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
 	};
 	
 	function loadHosts() {
+		if (!_imap.loadinghostsid) _imap.loadinghostsid=0;
+		_imap.loadinghostsid++;
 		jQuery.ajax({
 			url: 'imap.php',
 			type: 'POST',
@@ -1433,32 +1752,35 @@
 				hardwareField: _imap.settings.hardware_field
 			},
 			success: function(data){
-			  
+				var lhi = _imap.loadinghostsid;
 				if (data.error) {
 					ajaxError(data.error.message,1);
 					exit();
 				};
-			  
+				
+				/*
 				for (var nn in _imap.markersList) {
 					_imap.markersList[+nn].del = true;
 				};
+				*/
+				
 				for (var nn in data) {
 					var host = data[+nn];
 					if (!host) continue;
-					hostUpdate(host);
+					hostUpdate(host,lhi);
 				};
 
-				sortingHosts();
-				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
-				
 				
 				for (var nn in _imap.markersList) {
-					if ((_imap.markersList[+nn].del == true)) {
+					if ((_imap.markersList[+nn].lhi < lhi)) {
 						unshowMarker(nn);
 						delete _imap.markersList[+nn];
 					};
 				};
 
+				sortingHosts();
+				jQuery('.host_in_list').click(function(){viewHostOnMap(+jQuery(this).attr('hostid'))});
+				
 				if (_imap.vars.it_first) {
 					loadLinks();
 					loadTriggers();
@@ -1563,7 +1885,72 @@
 		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
 		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
-		counter();
+		get_last_messages();
+		
+		var imapMenu = L.Control.extend({
+			options: {
+				position: 'topleft'
+			},
+
+			onAdd: function (map) {
+				// create the control container with a particular class name
+				var container = L.DomUtil.create('div', 'imenu-control');
+				
+
+				
+				jQuery('<a/>',{class:'gp-ui icon197 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					mapBbox();
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon113 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					
+					var tabs = jQuery('<div/>',{id:'imap_information'});
+					
+					jQuery('<ul/>')
+					.append('<li><a href="#imap_information-1">About</a></li>')
+					.append('<li><a href="#imap_information-2">Components</a></li>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-1'})
+					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="http://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-2'})
+					.html(_imap.thirdtoolsinformation)
+					.appendTo(tabs);
+					
+					jQuery(tabs)
+					.tabs()
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Information') });
+					jQuery('#imap_information').css('padding','0px');
+					
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon125 button',href:'#'}).append(jQuery('<span/>',{class:'imap_messages_count'}).html(_imap.messages.count>0?_imap.messages.count:'')).appendTo(jQuery(container)).click(function(){
+					var text = '';
+					jQuery.each(_imap.messages.text,function(num){
+						text = '<div class="imap_dev_mes">'+this+'</div>'+text;
+					});
+					jQuery('<div/>')
+					.html(text)
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Messages') });
+					jQuery('.imap_messages_count').html('');
+					var lastmesnum = getCookie('imap_messages_last_num');
+					if (!lastmesnum) lastmesnum=0;
+					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24*90), path: '/'});
+					return false;				  
+				});
+				
+				jQuery(container).click(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				jQuery(container).contextmenu(function(event){ event.stopPropagation(); });
+				return container;
+			}
+		});
 		
 		var SearchControl = L.Control.extend({
 			options: {
@@ -1603,11 +1990,11 @@
 				var container = L.DomUtil.create('div', 'hosts_list');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-				'<div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div><div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+mlocale("Hosts")+'</b></div>'
+				'<div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+mlocale("Hosts")+'</b></div><div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div>'
 				);
 				
-				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
-				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
+				jQuery(container).mouseleave(function(){ jQuery('#under_hosts_list').delay(500).hide(0); _imap.map.scrollWheelZoom.enable(); });
+				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').stop().show(); _imap.map.scrollWheelZoom.disable(); });
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -1655,7 +2042,7 @@
 				/*this.layer = new L.layerGroup();*/
 				var container = L.DomUtil.create('div', 'panoramio');
 				jQuery(container).attr('aria-haspopup','true');
-				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> Panoramio');
+				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> <b>Panoramio</b>');
 				this.mas = new Object;
 				this.options.count = 100;
 				this.start = 0;
@@ -1768,7 +2155,7 @@
 						if (el) {
 							if (el.need==0) {
 								this.layer.removeLayer(el.marker);
-								jQuery('#panoramio_pcont_'+nn).detach();
+								jQuery('#panoramio_pcont_'+nn).remove();
 							};
 						};
 					};
@@ -1802,8 +2189,9 @@
 				L.DomEvent.on(sortselect, 'change', this.sorting, this);
 					  
 				var keepdiv = L.DomUtil.create('div', 'last_triggers_keep', container);
-				keepdiv.innerHTML = mlocale('Keep')+' ';
+				keepdiv.innerHTML = '<label>'+mlocale('Keep')+' ';
 				var keepselect = L.DomUtil.create('input', 'last_triggers_keep_input', keepdiv);
+				jQuery(keepdiv).append('</label>');
 				keepselect.type = 'checkbox';
 				keepselect.checked = getCookie('imap_lasttriggers_keep') === 'true';
 				L.DomEvent.on(keepselect, 'change', this.keep, this);
@@ -1861,14 +2249,14 @@
 				if (trigger.lastEvent.eventid) rstr = rstr + mlocale('Ack')+': <a class="'+(trigger.lastEvent.acknowledged=='1'?'enabled':'disabled')+'" target="_blank" href="acknow.php?eventid='+trigger.lastEvent.eventid+'&amp;triggerid='+trigger.triggerid+'">'+(trigger.lastEvent.acknowledged=='1'?mlocale('Yes'):mlocale('No'))+'</a>';
 				rstr = rstr + '<div class=lastchange lastchange='+trigger.lastchange+'></div></div>';
 				
-				container.append(rstr);
+				jQuery(container).append(rstr);
 			  
 				jQuery(this.container).children('.last_triggers_div').append(container);
 				this.sorting();
 			},
 			
 			removeTrigger: function(nn) {
-				jQuery('#lasttrigger'+nn).detach();
+				jQuery('#lasttrigger'+nn).remove();
 			},
 			
 			sorting: function (e) {
@@ -1936,6 +2324,8 @@
 				};
 			};
 		});
+		
+		_imap.map.addControl(new imapMenu);
 		
 		for (var nn in _imap.mapcorners) {
 			if (_imap.Controls[nn]) _imap.Controls[nn].addTo(_imap.map);

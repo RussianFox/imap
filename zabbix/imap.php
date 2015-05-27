@@ -13,6 +13,25 @@ textdomain("frontend");
 $page['file'] = 'imap.php';
 $page['hist_arg'] = array('groupid', 'hostid', 'show_severity','control_map','with_triggers_only');
 
+$fields = array(
+	'lat' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'lng' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'with_triggers_only' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
+	'control_map' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
+	'severity_min' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1,2,3,4,5'),	null),
+	'output' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'action_ajax' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'hostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'thostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'groupid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'hardware' =>			array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
+	'linkid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
+	'linkoptions' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'hardwareField' =>		array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
+	'searchstring' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null)
+);
+check_fields($fields);
+
 if (function_exists('get_request')) {
 	$lat = get_request('lat', null);
 	$lng = get_request('lng', null);
@@ -64,30 +83,6 @@ if (function_exists('GetCurrentNodeId')) {
 if ($output!='ajax') {
 	require_once dirname(__FILE__).'/include/page_header.php';
 };
-
-$fields = array(
-	'groupid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'hostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'thostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'linkid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
-	'severity_min' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
-	'fullscreen' =>			array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'control_map' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'with_triggers_only' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
-	'output' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'jsscriptid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	// ajax
-	'favobj' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favref' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
-	'favid' =>			array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
-	'favcnt' =>			array(T_ZBX_INT, O_OPT, null,	null,		null),
-	'pmasterid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
-	'favaction' =>			array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
-	'favstate' =>			array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
-	'favdata' =>			array(T_ZBX_STR, O_OPT, null,	null,		null),
-	'hardwareField' =>		array(T_ZBX_STR, O_OPT, null,	null,		null)
-);
-check_fields($fields);
 
 /*
  * Filter
@@ -418,7 +413,6 @@ if ($output!='block') {
 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
 	textdomain("imap");
-	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
 	textdomain("frontend");
 	
@@ -521,7 +515,7 @@ foreach ($needThisFiles as $file) {
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
 	_imap.settings.use_search = true;
-	_imap.settings.use_zoom_slider = true;
+	_imap.settings.use_zoom_slider = false;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
@@ -568,6 +562,12 @@ foreach ($needThisFiles as $file) {
 	locale['Triggers'] = '<?php echo _('Triggers'); ?>';
 	locale['Graphs'] = '<?php echo _('Graphs'); ?>';
 	locale['Latest data'] = '<?php echo _('Latest data'); ?>';
+	locale['Host'] = '<?php echo _('Host'); ?>';
+	locale['Applications'] = '<?php echo _('Applications'); ?>';
+	locale['Items'] = '<?php echo _('Items'); ?>';
+	locale['Discovery rules'] = '<?php echo _('Discovery rules'); ?>';
+	locale['Web scenarios'] = '<?php echo _('Web scenarios'); ?>';
+	locale['Screens'] = '<?php echo _('Screens'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -599,9 +599,22 @@ foreach ($needThisFiles as $file) {
 	locale['No hosts with inventory'] = "<?php echo _("No hosts with inventory"); ?>";
 	locale['Keep'] = "<?php echo _("Keep"); ?>";
 	locale['Tools'] = "<?php echo _("Tools"); ?>";
-	
 	locale['Sort by severity'] = "<?php echo _("Sort by severity"); ?>";
 	locale['Sort by time'] = "<?php echo _("Sort by time"); ?>";
+	locale['Config'] = '<?php echo _('Config'); ?>';
+	locale['Host config'] = '<?php echo _('Host config'); ?>';
+	locale['Host view'] = '<?php echo _('Host view'); ?>';
+	locale['Wind speed'] = "<?php echo _("Wind speed"); ?>";
+	locale['Wind points'] = "<?php echo _("Wind points"); ?>";
+	locale['Wind type'] = "<?php echo _("Wind type"); ?>";
+	locale['Wind direction'] = "<?php echo _("Wind direction"); ?>";
+	locale['Temperature'] = "<?php echo _("Temperature"); ?>";
+	locale['Humidity'] = "<?php echo _("Humidity"); ?>";
+	locale['Pressure'] = "<?php echo _("Pressure"); ?>";
+	locale['Sunset'] = "<?php echo _("Sunset"); ?>";
+	locale['Sunrise'] = "<?php echo _("Sunrise"); ?>";
+	locale['Data obtained'] = "<?php echo _("Data obtained"); ?>";
+	locale['Show weather'] = "<?php echo _("Show weather"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
@@ -612,7 +625,7 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js?<?php echo rand(); ?>"></script>
+<script type="text/javascript" src="imap/imap.js<?php echo '?'.rand(); ?>"></script>
 
 <?php
 
@@ -620,7 +633,12 @@ foreach ($needThisFiles as $file) {
 	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
-
+	if (file_exists('imap/js')) {
+		$files = scandir('imap/js');
+		foreach($files as $file) {
+			if (substr('imap/js/'.$file,-3)=='.js') echo '<script type="text/javascript" src="imap/js/'.$file.'"></script>';
+		};
+	};
 
 textdomain("frontend");
 if ($output!='block') {
