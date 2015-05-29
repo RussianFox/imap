@@ -22,6 +22,7 @@ $fields = array(
 	'control_map' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
 	'severity_min' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1,2,3,4,5'),	null),
 	'output' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
+	'fullscreen' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
 	'action_ajax' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
 	'hostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
 	'thostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
@@ -184,6 +185,48 @@ if ($output=='ajax') {
 		};
 		
 		$responseData = json_encode($ntriggers);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='setup_obj_items') {
+		$res = DBimap::delete('imap_items_links', array('objectid'=>array($objectid),'objecttype'=>array($objecttype)));
+		
+		$reqm[] = array(array( 'itemid' => $itemid, 'objectid' => $objectid, 'objecttype' => $objecttype, 'min_value' => $minvalue, 'max_value' => $maxvalue, 'gradient' => $gradient ));
+
+		$res = DBimap::insert('imap_items_links', $reqm);
+		$responseData = json_encode(array('result'=>$res), FALSE);
+		echo $responseData;
+		exit;
+	};
+	
+	if ($action_ajax=='get_items') {
+	
+		$litemslinks = DBimap::find('imap_items_links');
+		$itemlinks = array();
+		$itemids = array();
+		foreach ($litemslinks as $link) {
+			$itemids[] = $link['itemid'];
+			if (!isset($itemlinks[$link['itemid']])) $itemlinks[$link['itemid']] = array();
+			$itemlinks[$link['itemid']][] = $link;
+		};
+		$options['itemids'] = $itemids;
+		$options['expandData'] = true;
+		$options['expandDescription'] = true;
+		$options['expandName'] = true;
+		$options['output'] = array('itemid','name','hostid','units','lastvalue');
+		$options['output'] = 'extend';
+		$items = API::Item()->get($options);
+
+		$items = CMacrosResolverHelper::resolveItemNames($items);
+		
+		$nitems = array();
+		foreach ($items as $tr) {
+			$nitems[$tr['itemid']] = $tr;
+			$nitems[$tr['itemid']]['links'] = $itemlinks[$tr['itemid']];
+		};
+		
+		$responseData = json_encode($nitems);
 		echo $responseData;
 		exit;
 	};
@@ -576,12 +619,13 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.hardware_field = 'type';
 	_imap.settings.maxMarkersSpiderfy = 50;
 	_imap.settings.exluding_inventory = ['hostid','location_lat','location_lon','url_a','url_b','url_c'];
-	_imap.settings.useIconsInMarkers = false;
+	_imap.settings.useIconsInMarkers = true;
 	_imap.settings.startCoordinates = [59.95, 30.29];
 	_imap.settings.startZoom = 4;
 	_imap.settings.mapAnimation = true;
 	_imap.settings.intervalLoadHosts = 60;
 	_imap.settings.intervalLoadTriggers = 30;
+	_imap.settings.intervalLoadItems = 30;
 	_imap.settings.intervalLoadLinks = 60;
 	_imap.settings.showMarkersLabels = false;
 	_imap.settings.spiderfyDistanceMultiplier = 1;
@@ -622,6 +666,7 @@ foreach ($needThisFiles as $file) {
 	locale['Items'] = '<?php echo _('Items'); ?>';
 	locale['Discovery rules'] = '<?php echo _('Discovery rules'); ?>';
 	locale['Web scenarios'] = '<?php echo _('Web scenarios'); ?>';
+	locale['Screens'] = '<?php echo _('Screens'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -672,6 +717,7 @@ foreach ($needThisFiles as $file) {
 	locale['Show weather'] = "<?php echo _("Show weather"); ?>";
 	locale['Bind triggers'] = "<?php echo _("Bind triggers"); ?>";
 	locale['Bind item'] = "<?php echo _("Bind item"); ?>";
+	locale['Jump to'] = "<?php echo _("Jump to"); ?>";
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {

@@ -34,14 +34,16 @@ return array(
 				'length' => 10,
 			),
 			'color' => array(
-				'null' => true,
+				'null' => false,
 				'type' => DB::FIELD_TYPE_CHAR,
 				'length' => 30,
+				'default' => '#0000FF',
 			),
 			'alertcolor' => array(
-				'null' => true,
+				'null' => false,
 				'type' => DB::FIELD_TYPE_CHAR,
 				'length' => 30,
+				'default' => '#FF0000',
 			),
 			'weight' => array(
 				'null' => true,
@@ -73,10 +75,51 @@ return array(
 				'type' => DB::FIELD_TYPE_INT,
 				'length' => 20,
 			),
-			'type' => array(
+			'objecttype' => array(
 				'null' => false,
 				'type' => DB::FIELD_TYPE_CHAR,
 				'length' => 50,
+			),
+		),
+	),
+	'imap_items_links' => array(
+		'key' => 'id',
+		'fields' => array(
+			'id' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'itemid' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'objectid' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+			),
+			'objecttype' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_CHAR,
+				'length' => 50,
+			),
+			'max_value' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_FLOAT,
+				'length' => 16
+			),
+			'min_value' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_FLOAT,
+				'length' => 16
+			),
+			'gradient' => array(
+				'null' => false,
+				'type' => DB::FIELD_TYPE_INT,
+				'length' => 20,
+				'default' => 0,
 			),
 		),
 	),

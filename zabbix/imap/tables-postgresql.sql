@@ -25,3 +25,16 @@ CREATE TABLE imap_triggers_links (
     objecttype character varying(50) DEFAULT NULL::character varying NOT NULL
 );
 ALTER TABLE ONLY imap_triggers_links ADD CONSTRAINT imap_triggers_links_pkey PRIMARY KEY (id);
+
+CREATE SEQUENCE imap_items_links_seq;
+CREATE TABLE imap_items_links (
+    id bigint DEFAULT nextval('imap_items_links_seq'::regclass) NOT NULL,
+    triggerid bigint NOT NULL,
+    objectid bigint NOT NULL,
+    objecttype character varying(50) DEFAULT NULL::character varying NOT NULL,
+    max_value double precision NOT NULL,
+    min_value double precision NOT NULL,
+    gradient bigint DEFAULT '0'::bigint NOT NULL
+);
+ALTER TABLE ONLY imap_items_links ADD CONSTRAINT imap_items_links_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY imap_items_links ADD CONSTRAINT imap_items_unique UNIQUE (objectid, objecttype);

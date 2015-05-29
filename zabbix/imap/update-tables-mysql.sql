@@ -11,5 +11,28 @@ CREATE TABLE IF NOT EXISTS `imap_triggers_links` (
   `objectid` bigint(20) NOT NULL,
   `objecttype` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=29 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
+CREATE TABLE IF NOT EXISTS `imap_items_links` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `itemid` bigint(20) NOT NULL,
+  `objectid` bigint(20) NOT NULL,
+  `objecttype` varchar(50) NOT NULL,
+  `maxvalue` double(16,4) NOT NULL,
+  `minvalue` double(16,4) NOT NULL,
+  `gradient` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hosts` (`objectid`,`objecttype`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+
+CREATE TABLE IF NOT EXISTS `imap_items_links` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `itemid` bigint(20) NOT NULL,
+  `objectid` bigint(20) NOT NULL,
+  `objecttype` varchar(50) NOT NULL,
+  `max_value` double(16,4) NOT NULL,
+  `min_value` double(16,4) NOT NULL,
+  `gradient` bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hosts` (`objectid`,`objecttype`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;

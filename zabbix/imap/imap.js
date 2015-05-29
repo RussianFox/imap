@@ -3,23 +3,61 @@
 	jQuery('#imapworkareaError').hide();
 
 	_imap.linksLayer = L.layerGroup();
+	_imap.searchmarkers = L.layerGroup();
+	
+	var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
 	
 	_imap.markersList = new Object;
 	_imap.triggers = new Object;
+	_imap.items = new Object;
+	_imap.links = new Object;
 	_imap.map = false;
 	_imap.bbox = false;
 	_imap.searchpopup;
-	_imap.links = new Object;
 	_imap.vars = new Object;
 	_imap.vars.it_first = true;
 	_imap.vars.linksVisible = false;
 	_imap.hostsfilter = '';
-	_imap.searchmarkers = L.layerGroup();
 	_imap.googlestreetviewer = false;
 	_imap.googlestreetviewer_marker = false;
 	_imap.messages = {count:0, text:{}};
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
+	
+	_imap.markers = new L.MarkerClusterGroup({
+		maxClusterRadius: 30,
+		spiderfyDistanceMultiplier:_imap.settings.spiderfyDistanceMultiplier,
+		iconCreateFunction: function (cluster) {
+			var cmarkers = cluster.getAllChildMarkers();
+			var chost = new Object;
+			chost.ok = 0; chost.problem=0; chost.maintenance=0;
+			var n = 0;
+			var count = 0;
+			for (var i = 0; i < cmarkers.length; i++) {
+				n = Math.max(+cmarkers[i].options.status,n);
+				count++;
+				if (cmarkers[i].options.del) {
+					count--;
+				} else if ((cmarkers[i].options.nottrigger) & (cmarkers[i].options.maintenance)) {
+					chost.maintenance++;
+				} else if (cmarkers[i].options.status>0) {
+					chost.problem++;
+				} else {
+					chost.ok++;
+				};
+			};
+			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
+		}
+	});
+	
+	_imap.markers.on('clustercontextmenu',function(tt){ 
+		if ( (tt.layer._childCount<_imap.settings.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
+			tt.layer.spiderfy();
+		} else {
+			tt.layer.zoomToBounds();
+		}
+	});
+	
 	
 	function escapeHtml(text) {
 		if (text == undefined) return '';
@@ -83,42 +121,6 @@
 		
 		return([baseMaps,overlayMaps]);
 	};
-	
-	
-	_imap.markers = new L.MarkerClusterGroup({
-		maxClusterRadius: 30,
-		spiderfyDistanceMultiplier:_imap.settings.spiderfyDistanceMultiplier,
-		iconCreateFunction: function (cluster) {
-			var cmarkers = cluster.getAllChildMarkers();
-			var chost = new Object;
-			chost.ok = 0; chost.problem=0; chost.maintenance=0;
-			var n = 0;
-			var count = 0;
-			for (var i = 0; i < cmarkers.length; i++) {
-				n = Math.max(+cmarkers[i].options.status,n);
-				count++;
-				if (cmarkers[i].options.del) {
-					count--;
-				} else if ((cmarkers[i].options.nottrigger) & (cmarkers[i].options.maintenance)) {
-					chost.maintenance++;
-				} else if (cmarkers[i].options.status>0) {
-					chost.problem++;
-				} else {
-					chost.ok++;
-				};
-			};
-			return L.divIcon({className:'icon_status_cluster icon_status_'+n,html:'<span class=st_ok>'+chost.ok+'/</span><span class=st_problem>'+chost.problem+'/</span><span class=st_maintenance>'+chost.maintenance+'</span>',iconAnchor:[14, 14]});
-		}
-	});
-	
-	_imap.markers.on('clustercontextmenu',function(tt){ 
-		if ( (tt.layer._childCount<_imap.settings.maxMarkersSpiderfy) | (_imap.map.getMaxZoom() === _imap.map.getZoom()) ) {
-			tt.layer.spiderfy();
-		} else {
-			tt.layer.zoomToBounds();
-		}
-	});
-	
 	
 	
 	/* Изменение свойств линии связи */
@@ -219,7 +221,7 @@
 					ajaxError(data.error.message);
 					return;
 				};
-				delLine(linkid);
+				delLink(linkid);
 				showMes(mlocale('Successful'));
 			},
 			error: function(data){
@@ -280,6 +282,7 @@
 		for(key in ob) {
 			if (ob[key].ip) res = ((res) || (ob[key].ip.toLowerCase().indexOf(ff.toLowerCase())>-1));
 		};
+	
 		return res;
 	};
 	
@@ -372,9 +375,10 @@
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
 		
-		var needColor = (_imap.links[nn].alert ? _imap.links[nn].options.alertcolor : _imap.links[nn].options.color);
+		var needColor = _imap.links[nn].options.color;
+		needColor = (_imap.links[nn].itemid ? _imap.links[nn].itemcolor : needColor);
+		needColor = (_imap.links[nn].alert ? _imap.links[nn].options.alertcolor : needColor);
 		_imap.links[nn]['line'].setStyle({color:needColor, dashArray: _imap.links[nn].options.dash, alertcolor:_imap.links[nn].options.alertcolor, opacity:1, weight: _imap.links[nn].options.weight, smoothFactor:8});
-		_imap.links[nn]['line'].bindLabel('<b>' + escapeHtml(_imap.links[nn].options.name) + '</b><br>' + getHostname(_imap.links[nn][0]) + '<-->' + getHostname(_imap.links[nn][1]));
 
 		if ( (_imap.markersList[_imap.links[nn][0]]) && (_imap.markersList[_imap.links[nn][1]]) ) {
 			if ( (_imap.markers.hasLayer(_imap.markersList[_imap.links[nn][0]].marker)) && (_imap.markers.hasLayer(_imap.markersList[_imap.links[nn][1]].marker)) ) {
@@ -421,7 +425,7 @@
 		return ''+_imap.markersList[+id].marker.options.host_name;
 	};
 	
-	function loadLine(nl) {
+	function loadLink(nl) {
 		if (!_imap.settings.links_enabled) return;
 		if (!_imap.vars.linksVisible) return;
 
@@ -466,6 +470,15 @@
 		
 		jQuery(container).append(jQuery(lcontrol));
 		
+		var linkitems = jQuery('<div/>',{class:'link_items'});
+		if (_imap.links[link_id].itemid) {
+			var item = _imap.items[+_imap.links[link_id].itemid];
+			if (item)
+				jQuery('<div/>',{class:'item_value_'+item.itemid}).html(item.name+': '+item.lastvalue+item.units).appendTo(linkitems);
+		};
+		
+		jQuery(container).append(linkitems);
+		
 		jQuery(container).append('<div class="link_host_1"><span onClick="viewHostOnMap('+_imap.links[link_id][0]+')" class=hostname>'+getHostname(+_imap.links[link_id][0])+'</span></div>');
 
 		jQuery(container).append('<div class="link_host_2"><span onClick="viewHostOnMap('+_imap.links[link_id][1]+')" class=hostname>'+getHostname(+_imap.links[link_id][1])+'</span></div>');
@@ -474,7 +487,7 @@
 		
 	};
 	
-	function delLine(nn) {
+	function delLink(nn) {
 		_imap.linksLayer.removeLayer(_imap.links[nn]['line']);
 		delete _imap.links[nn];
 	};
@@ -889,7 +902,7 @@
 				if (_imap.markersList[+trigger.hostid].show) showtrigger = true;
 			};
 			jQuery.each(trigger.links,function() {
-				objectNoAlert(this.type,this.objectid,trigger.triggerid);
+				objectAlert(this.objecttype,this.objectid,trigger.triggerid);
 				showtrigger = true;
 			});
 		};
@@ -934,7 +947,7 @@
 		};
 		
 		jQuery.each(trigger.links,function(){
-			objectNoAlert(this.type,this.objectid,trigger.triggerid);
+			objectNoAlert(this.objecttype,this.objectid,trigger.triggerid);
 		});
 	};
 	
@@ -960,8 +973,7 @@
 		});
 	};
 	
-	function selectTriggers(hosts,objType,objId,functionOnSelect) {
-		_imap.selecting = new Object;
+	function selectItems(hosts,objType,objId,functionOnSelect) {
 		var container = jQuery('<div/>');
 		var hostselector = jQuery('<select/>');
 		jQuery.each(hosts, function(){
@@ -971,58 +983,43 @@
 		var hostselectordiv = jQuery('<div/>');
 		var hostselectorlabel = jQuery('<label/>');
 		
-		jQuery(hostselector).change(function(){
-			jQuery('#listTriggersForSelect').html('');
-			var host = jQuery(this).val();
-			jQuery.ajax({
-				url: 'imap.php',
-				type: 'POST',
-				dataType: 'json',
-				data: {
-					hostid: +host,
-					action_ajax: 'select_triggers',
-					output: 'ajax'
-				},
-				success: function(data){
-					jQuery.each(data, function() {
-						var trigger = this;
-						
-						jQuery.each(this.links,function(){ 
-						  
-							if ( (this.type==objType) && (this.objectid==objId) ) {
-								_imap.selecting[this.triggerid]=true;
-							};
-						  
-						})
-						
-						var ltrigger = jQuery('<label/>');
-						var etrigger = jQuery('<input/>',{id:'selecting'+trigger.triggerid, value:+trigger.triggerid, type:'checkbox'}).click(function(){
-						  
-							if ( jQuery(this).is(':checked') ) {
-								_imap.selecting[jQuery(this).val()]=true;
-							} else {
-								_imap.selecting[jQuery(this).val()]=false;
-							};
-						  
-						});
-						
-						jQuery(ltrigger).append(etrigger).append(' '+trigger.description).appendTo('#listTriggersForSelect');
-					});
-					jQuery.each(_imap.selecting,function(key,z){
-					  
-						if (z) {
-							jQuery('#selecting'+key).click();
-						};
-					  
-					});
-				}
-			});
-		});
-		
 		jQuery(hostselectorlabel).append(mlocale('Select host')+' ').append(jQuery(hostselector)).appendTo(hostselectordiv);
-		jQuery(container).append(jQuery(hostselectordiv)).append('<div id=listTriggersForSelect></div>');
+		var ltr = jQuery('<div/>',{class:'listTriggersForSelect'});
+		jQuery(container).append(jQuery(hostselectordiv)).append(ltr);
 		
-		
+		jQuery(hostselector).change(function(){
+			var host = jQuery(this).val();
+			if (jQuery('.triggers_'+host,ltr).length==0) {
+				ntr = jQuery('<div/>',{style:'display:none;', class:'triggers_list triggers_'+host}).appendTo(ltr);
+				jQuery.ajax({
+					url: 'imap.php',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						hostid: +host,
+						action_ajax: 'select_triggers',
+						output: 'ajax'
+					},
+					success: function(data){
+						jQuery.each(data, function() {
+							var trigger = this;
+							
+							var ltrigger = jQuery('<label/>');
+							var etrigger = jQuery('<input/>',{class:'selecting'+trigger.triggerid, value:+trigger.triggerid, type:'checkbox'});
+							
+							jQuery(ltrigger).append(etrigger).append(' '+trigger.description).appendTo(ntr);
+							jQuery.each(this.links,function(){ 
+								if ( (this.objecttype==objType) && (+this.objectid==objId) ) {
+									jQuery(etrigger).prop( "checked", true );
+								};
+							});
+						});
+					}
+				});
+			};
+			jQuery('.triggers_list',ltr).hide();
+			jQuery('.triggers_'+host,ltr).show();
+		});
 		
 		jQuery(container).dialog({
 			title: mlocale('Triggers selection'),
@@ -1031,6 +1028,11 @@
 					click: function() {
 						var str = Array();
 						jQuery.each(_imap.selecting,function(key,z){ if (z) str[str.length]=key });
+						
+						jQuery("input:checkbox:checked",ltr).each(function(){
+							str[str.length]=jQuery(this).val();
+						});
+						
 						functionOnSelect(str,objType,objId);
 						jQuery(this).remove();
 					}
@@ -1045,7 +1047,101 @@
 		  
 		});
 		jQuery(hostselector).change();
+	};
+	
+	function selectTriggers(hosts,objType,objId,functionOnSelect) {
+		_imap.selecting = new Object;
+		var container = jQuery('<div/>');
+		var hostselector = jQuery('<select/>');
+		jQuery.each(hosts, function(){
+			var host = this.marker.options;
+			jQuery('<option value="'+host.host_id+'">'+host.host_name+'</option>').appendTo(jQuery(hostselector));
+		});
+		var hostselectordiv = jQuery('<div/>');
+		var hostselectorlabel = jQuery('<label/>');
 		
+		jQuery(hostselectorlabel).append(mlocale('Select host')+' ').append(jQuery(hostselector)).appendTo(hostselectordiv);
+		var ltr = jQuery('<div/>',{class:'listTriggersForSelect'});
+		jQuery(container).append(jQuery(hostselectordiv)).append(ltr);
+		
+		jQuery(hostselector).change(function(){
+			var host = jQuery(this).val();
+			if (jQuery('.triggers_'+host,ltr).length==0) {
+				ntr = jQuery('<div/>',{style:'display:none;', class:'triggers_list triggers_'+host}).appendTo(ltr);
+				jQuery.ajax({
+					url: 'imap.php',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						hostid: +host,
+						action_ajax: 'select_triggers',
+						output: 'ajax'
+					},
+					success: function(data){
+						jQuery.each(data, function() {
+							var trigger = this;
+							
+							jQuery.each(this.links,function(){ 
+							  
+								if ( (this.objecttype==objType) && (+this.objectid==objId) ) {
+									_imap.selecting[this.triggerid]=true;
+								};
+							  
+							})
+							
+							var ltrigger = jQuery('<label/>');
+							var etrigger = jQuery('<input/>',{class:'selecting'+trigger.triggerid, value:+trigger.triggerid, type:'checkbox'}).click(function(){
+							  
+								/*if ( jQuery(this).is(':checked') ) {
+									_imap.selecting[jQuery(this).val()]=true;
+								} else {
+									_imap.selecting[jQuery(this).val()]=false;
+								};*/
+							  
+							});
+							
+							jQuery(ltrigger).append(etrigger).append(' '+trigger.description).appendTo(ntr);
+						});
+						jQuery.each(_imap.selecting,function(key,z){
+						  
+							if (z) {
+								jQuery('.selecting'+key,ntr).click();
+							};
+						  
+						});
+					}
+				});
+			};
+			jQuery('.triggers_list',ltr).hide();
+			jQuery('.triggers_'+host,ltr).show();
+		});
+		
+		jQuery(container).dialog({
+			title: mlocale('Triggers selection'),
+			buttons: [
+				{	text:"Ok",
+					click: function() {
+						var str = Array();
+						jQuery.each(_imap.selecting,function(key,z){ if (z) str[str.length]=key });
+						
+						jQuery("input:checkbox:checked",ltr).each(function(){
+							str[str.length]=jQuery(this).val();
+						});
+						
+						functionOnSelect(str,objType,objId);
+						jQuery(this).remove();
+					}
+				},
+				{	text:"Cancel",
+					click: function() {
+						jQuery(this).remove();
+					}
+				},
+			],
+			close: function(){jQuery(this).remove(); return false;}
+		  
+		});
+		jQuery(hostselector).change();
 	};
 	
 	function loadTriggers() {
@@ -1215,7 +1311,6 @@
 			
 			
 			jQuery('#hostPopup'+host_id+' .host_interfaces').html('');
-			var intftype = {'1': 'Agent', '2':'SNMP', '3':'IPMI', '4':'JMX'};
 			var shh = '';
 			_imap.markersList[host_id].host_info.interfaces.each(function(el) {
 					shh = shh + '<div class=host_interfaces_line>';
@@ -1259,11 +1354,11 @@
 		
 		rstr = rstr + '<div class=hostcontrol>';
 		rstr = rstr + '<div class="hostItems" id="hostItems'+host_id+'"></div>';
-		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+mlocale('Change location')+'"><img src="imap/images/target.png"></a>';
-		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+mlocale('Delete location')+'"><img src="imap/images/target-del.png"></a>';
-		if (_imap.settings.links_enabled) rstr = rstr + '<a href="#" Title="'+mlocale('Add a link to another host')+'" onClick="addLinkHost('+host_id+');"><img src="imap/images/link.png"></a>';
-		if (_imap.settings.show_icons) rstr = rstr + '<a onClick="getHardware('+host_id+')" href="#" Title="'+mlocale('Set a hardware type')+'"><img src="imap/images/hardware.png"></a>';
-		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+mlocale('Show debug information')+'"><img src="imap/images/debug.png"></a>';
+		rstr = rstr + '<a onClick="getHostLocation('+host_id+')" href="#" Title="'+mlocale('Change location')+'" class="imap_button bg-target"></a>';
+		rstr = rstr + '<a onClick="reQdelHostLocation('+host_id+');" href="#" Title="'+mlocale('Delete location')+'" class="imap_button bg-deltarget"></a>';
+		if (_imap.settings.links_enabled) rstr = rstr + '<a href="#" Title="'+mlocale('Add a link to another host')+'" onClick="addLinkHost('+host_id+');" class="imap_button bg-link"></a>';
+		if (_imap.settings.show_icons) rstr = rstr + '<a onClick="getHardware('+host_id+')" href="#" Title="'+mlocale('Set a hardware type')+'" class="imap_button bg-hardware"></a>';
+		if (_imap.settings.debug_enabled) rstr = rstr + '<a onClick="getDebugInfo(\'host\','+host_id+')" href="#" Title="'+mlocale('Show debug information')+'" class="imap_button bg-debug"></a>';
 		rstr = rstr + '</div>';
 		
 		rstr = rstr + '<div class=host_interfaces></div><div class=host_des><div class=hostdescription></div><div class=host_inventory></div></div><div class=host_links></div>';
@@ -1307,47 +1402,98 @@
 	function updateMarker(host_id) {
 		if (!_imap.markersList[host_id].marker) return;
 		var status=0;
-		var maintenance_t = (_imap.markersList[host_id].marker.options.maintenance?'maintenance ':'');
-		var nottrigger_t = (_imap.markersList[host_id].marker.options.nottrigger?'nottrigger ':'');
+		var host = _imap.markersList[+host_id];
+		var maintenance_t = (host.marker.options.maintenance?'maintenance ':'');
+		var nottrigger_t = (host.marker.options.nottrigger?'nottrigger ':'');
 		
-		if (!((_imap.markersList[host_id].marker.options.nottrigger) & (_imap.markersList[host_id].marker.options.maintenance))) {
-			jQuery.each(_imap.markersList[host_id].triggers,function(nn){
+		if (!((host.marker.options.nottrigger) & (host.marker.options.maintenance))) {
+			jQuery.each(host.triggers,function(nn){
 				var trigger = _imap.triggers[+nn];
 				status = Math.max(status,(trigger.priority>=_imap.settings.min_status?trigger.priority:0));
 			})
 		};
 		
-		_imap.markersList[host_id].marker.options.status = status;
-		if (!_imap.markersList[host_id].marker.label) {
-			_imap.markersList[host_id].marker.bindLabel('', {noHide: _imap.settings.showMarkersLabels, direction: 'auto', offset:[25,-15]})
+		host.marker.options.status = status;
+		if (!host.marker.label) {
+			host.marker.bindLabel('', {noHide: _imap.settings.showMarkersLabels, direction: 'auto', offset:[25,-15]})
 		};
-		hardware = '<img style="max-height:1.5em;" onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>';
-		_imap.markersList[host_id].marker.label.setContent((_imap.settings.useIconsInMarkers ? '' : hardware+' ')+'<b>'+escapeHtml(_imap.markersList[host_id].marker.options.host_name)+'</b>');
+		var hardware = '<img style="max-height:1.5em;" onerror="this.remove();" src=\'imap/hardware/'+host.marker.options.hardware+'.png\'>';
+		
+		host.marker.label.setContent((_imap.settings.useIconsInMarkers ? '' : hardware+' ')+'<b>'+escapeHtml(host.marker.options.host_name)+'</b>');
 		if (_imap.settings.useIconsInMarkers) {
-			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+_imap.markersList[host_id].marker.options.status,html:'<img onerror="this.src=\'imap/images/status'+_imap.markersList[host_id].marker.options.status+'.gif\';" src=\'imap/hardware/'+_imap.markersList[host_id].marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
+			host.marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status_img icon_status_'+status,html:'<img onerror="jQuery(this).parent().removeClass(\'icon_status_img\'); jQuery(this).parent().addClass(\'icon_status icon_status_smile_'+status+'\'); this.remove();" src=\'imap/hardware/'+host.marker.options.hardware+'.png\'>',iconAnchor:[8, 8]}));
 		} else {
-			_imap.markersList[host_id].marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+_imap.markersList[host_id].marker.options.status + ' icon_status_'+_imap.markersList[host_id].marker.options.status,html:'',iconAnchor:[8, 8]}));
+			host.marker.setIcon(L.divIcon({className:nottrigger_t+maintenance_t+'icon_status icon_status_smile_'+status + ' icon_status_'+status,html:'',iconAnchor:[8, 8]}));
 		};
 		var needshow = false;
 		
-		if (_imap.markersList[+host_id].show) {
+		if (host.show) {
 			needshow = true;
 		};
 		
-		if ( (_imap.settings.show_with_triggers_only) && (_imap.markersList[host_id].marker.options.status<_imap.settings.min_status) ) {
+		if ( (_imap.settings.show_with_triggers_only) && (host.marker.options.status<_imap.settings.min_status) ) {
 			needshow = false;
 		};
 		
-		if ( (needshow) && (!_imap.markers.hasLayer(_imap.markersList[+host_id].marker)) ) {
-			_imap.markers.addLayer(_imap.markersList[+host_id].marker);
+		if ( (needshow) && (!_imap.markers.hasLayer(host.marker)) ) {
+			_imap.markers.addLayer(host.marker);
 			updateLinksMarker(+host_id);
 		};
 			
-		if ( (!needshow) && (_imap.markers.hasLayer(_imap.markersList[+host_id].marker)) ) {
-			_imap.markers.removeLayer(_imap.markersList[+host_id].marker);
+		if ( (!needshow) && (_imap.markers.hasLayer(host.marker)) ) {
+			_imap.markers.removeLayer(host.marker);
 			updateLinksMarker(+host_id);
 		};
 		updateIcon(+host_id);
+	};
+	
+	function getGradient(val, maxval, minval, gr) {
+		var value = Math.min(maxval,Math.max(minval,val));
+		value = value - minval;
+		var maxvalue = maxval - minval;
+		var percent = Math.round(value*100/maxvalue);
+		
+		var color = 'rgba('+(Math.round(255*percent/100))+',255,'+(255-Math.round(255*percent/100))+',1)';
+		
+		return color;
+	};
+	
+	function updateItem(itemid) {
+		if (!_imap.items[itemid]) return;
+		var item = _imap.items[itemid];
+		jQuery.each(item.links,function(){
+		  
+			if (this.objecttype=='hostlink') {
+				if (_imap.links[this.objectid]) { 
+					var itemcolor = getGradient(+item.lastvalue,+this.max_value,+this.min_value,+this.gradient);
+					_imap.links[this.objectid].itemid = item.itemid;
+					_imap.links[this.objectid].itemcolor = itemcolor;
+				};
+			};
+		  
+		});
+		jQuery('.item_value_'+item.itemid).html(item.name+': '+item.lastvalue+item.units);
+	};
+	
+	function loadItems() {
+		jQuery.ajax({
+			url: 'imap.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action_ajax: 'get_items',
+				output: 'ajax'
+			},
+			success: function(data){
+				jQuery.each(data,function(key){
+					_imap.items[+key] = this;
+					updateItem(+key);
+				});
+			},
+			error: function(data){
+				ajaxError(mlocale('Failed to get data'));
+			}	   
+		});
 	};
 	
 	function loadLinks(hl) {
@@ -1368,7 +1514,7 @@
 				for (var nn in data) {
 					var link = data[+nn];
 					if (!link) continue;
-					loadLine(link);
+					loadLink(link);
 				};
 			},
 			error: function(data){
@@ -1398,7 +1544,7 @@
 		if (!jQuery('div.host_in_list').is('[hostid="'+host_id+'"]')) {
 			jQuery('#hosts_list').append('<div class="host_in_list" hostname="'+host_name+'" hostid="'+host_id+'">'+host_name+'</div>');
 			if ((host.inventory.location_lat=='') || (host.inventory.location_lon=='')) {
-				jQuery('div.host_in_list').filter('[hostid="'+host_id+'"]').prepend('<img Title="'+mlocale('This host does not have coordinates')+'" onClick="getHostLocation('+host_id+')" class="host_crosschair" src="imap/images/target.png"> ');
+				jQuery('div.host_in_list').filter('[hostid="'+host_id+'"]').prepend('<span Title="'+mlocale('This host does not have coordinates')+'" onClick="getHostLocation('+host_id+')" class="host_crosschair imap_button bg-target"></span> ');
 			};
 		};
 		if ((host.inventory.location_lat=='') || (host.inventory.location_lon=='')) {
@@ -1538,11 +1684,8 @@
 					};
 				};
 				
-				if (_imap.zabbixversion.substr(0,3)=='2.2') {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&groupid=0&hostid='+hh); return false; } };
-				} else {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&&hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
-				};
+				var hscreens = { label: mlocale('Screens'), url: 'host_screen.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('host_screen.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&&hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
 				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
 				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
 				var chost = { label: mlocale('Host config'), items: [
@@ -1557,7 +1700,23 @@
 				    ]
 				};
 				
-				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
+				
+				var links = [];
+				
+				if (_imap.markersList[+hh].host_info.inventory.url_a) links[links.length] = { label: 'URL A', url: _imap.markersList[+hh].host_info.inventory.url_a, clickCallback: function(){ popupFrame(_imap.markersList[+hh].host_info.inventory.url_a); return false; }};
+				if (_imap.markersList[+hh].host_info.inventory.url_b) links[links.length] = { label: 'URL B', url: _imap.markersList[+hh].host_info.inventory.url_b, clickCallback: function(){ popupFrame(_imap.markersList[+hh].host_info.inventory.url_b); return false; }};
+				if (_imap.markersList[+hh].host_info.inventory.url_c) links[links.length] = { label: 'URL C', url: _imap.markersList[+hh].host_info.inventory.url_c, clickCallback: function(){ popupFrame(_imap.markersList[+hh].host_info.inventory.url_c); return false; }};
+				
+				_imap.markersList[+hh].host_info.interfaces.each(function(el) {
+					var addr = el.dns;
+					if ( (el.useip=='1') && (el.ip!=='') ) addr = el.ip;
+					links[links.length] = { label: intftype[el.type], url: '//'+addr, clickCallback: function(){ popupFrame('//'+addr); return false; }};
+						
+				});
+				var hostlinks = { label: mlocale('Jump to'), items: links};
+				
+
+				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, hscreens, hostlinks, {label:'Config'}, chost]; menuPopup2(datas, event); });
 				jQuery(container).html(mlocale('Tools'));
 				jQuery('.link_menu', '#hostItems'+hh).remove();
 				jQuery('#hostItems'+hh).append(container);
@@ -1577,14 +1736,8 @@
 				jQuery(item).data(el.data);
 			};
 			
-			if (el.items) {
-				if (el.items.length==0) {
-					
-				}
-			};
-			
 			if (!el.url) {
-				el.url='';
+				el.url=undefined;
 			};
 			
 			if ( (!el.url) && (!el.clickCallback) && (!el.items) ) {
@@ -1594,19 +1747,26 @@
 				if (el.clickCallback) {
 					jQuery(item).click(el.clickCallback);
 				};
-				
 				var link = jQuery('<a/>');
 				jQuery(link).html(el.label);
-				if (el.url!=='') jQuery(link).attr('href',el.url);
+				jQuery(link).attr('href','#');
+				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (el.clickCallback) ) {
+					var inlink = jQuery('<a/>').attr('target','_blank').html('+').attr('href',el.url).prependTo(link).click(function(event){event.stopPropagation();});
+					jQuery('<span/>').addClass('ui-icon-document ui-icon ui-menu-icon').append(inlink).prependTo(link);
+				};
+				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (!el.clickCallback) ) {
+					jQuery(link).attr('href',el.url);
+				};
+				if ( ((el.url=='') || (el.url==undefined) || (el.url=='#')) && (!el.clickCallback) ) {
+					jQuery(link).click(function(){return false;});
+				};
 				if (!el.onpage) jQuery(link).attr('target','_blank');
-				
 				jQuery(item).append(link);
 			};
+			
 			if (el.items) {
-				
 					var addEl = menuPopup2Transform(el.items);
 					jQuery(item).append(addEl);
-				
 			};
 			jQuery(container).append(item);
 		};
@@ -2121,7 +2281,7 @@
 					jQuery('.imap_messages_count').html('');
 					var lastmesnum = getCookie('imap_messages_last_num');
 					if (!lastmesnum) lastmesnum=0;
-					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24), path: '/'});
+					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24*90), path: '/'});
 					return false;				  
 				});
 				
@@ -2173,11 +2333,11 @@
 				var container = L.DomUtil.create('div', 'hosts_list');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-				'<div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div><div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+mlocale("Hosts")+'</b></div>'
+				'<div id=show_hosts_list><div id=filter-indicator class="imap_button bg-filter" style="display:none;"></div> <b>'+mlocale("Hosts")+'</b></div><div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div>'
 				);
 				
-				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
-				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
+				jQuery(container).mouseleave(function(){ jQuery('#under_hosts_list').delay(500).hide(0); _imap.map.scrollWheelZoom.enable(); });
+				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').stop().show(); _imap.map.scrollWheelZoom.disable(); });
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -2669,9 +2829,12 @@
 		_imap.settings.exluding_inventory[_imap.settings.exluding_inventory.length] = 'inventory_mode';
 		setInterval(function() { timeUpdate(); },1000);
 		loadHosts();
+		loadLinks();
+		loadItems();
 		_imap.vars.intervalHostsID = window.setInterval(function(){loadHosts();}, _imap.settings.intervalLoadHosts*1000);
 		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadLinks(); }, _imap.settings.intervalLoadLinks*1000);
 		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadTriggers(); }, _imap.settings.intervalLoadTriggers*1000);
+		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadItems(); }, _imap.settings.intervalLoadItems*1000);
 	});
 
 	jQuery(window).resize(function(){if (document.readyState=='complete') setInterval(function() { mapSize(); },1000);});

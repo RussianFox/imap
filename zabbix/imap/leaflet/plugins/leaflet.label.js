@@ -6,4 +6,539 @@
 	http://leafletjs.com
 	https://github.com/jacobtoye
 */
-(function(t){var e=t.L;e.labelVersion="0.2.2-dev",e.Label=(e.Layer?e.Layer:e.Class).extend({includes:e.Mixin.Events,options:{className:"",clickable:!1,direction:"right",noHide:!1,offset:[12,-15],opacity:1,zoomAnimation:!0},initialize:function(t,i){e.setOptions(this,t),this._source=i,this._animated=e.Browser.any3d&&this.options.zoomAnimation,this._isOpen=!1},onAdd:function(t){this._map=t,this._pane=this.options.pane?t._panes[this.options.pane]:this._source instanceof e.Marker?t._panes.markerPane:t._panes.popupPane,this._container||this._initLayout(),this._pane.appendChild(this._container),this._initInteraction(),this._update(),this.setOpacity(this.options.opacity),t.on("moveend",this._onMoveEnd,this).on("viewreset",this._onViewReset,this),this._animated&&t.on("zoomanim",this._zoomAnimation,this),e.Browser.touch&&!this.options.noHide&&(e.DomEvent.on(this._container,"click",this.close,this),t.on("click",this.close,this))},onRemove:function(t){this._pane.removeChild(this._container),t.off({zoomanim:this._zoomAnimation,moveend:this._onMoveEnd,viewreset:this._onViewReset},this),this._removeInteraction(),this._map=null},setLatLng:function(t){return this._latlng=e.latLng(t),this._map&&this._updatePosition(),this},setContent:function(t){return this._previousContent=this._content,this._content=t,this._updateContent(),this},close:function(){var t=this._map;t&&(e.Browser.touch&&!this.options.noHide&&(e.DomEvent.off(this._container,"click",this.close),t.off("click",this.close,this)),t.removeLayer(this))},updateZIndex:function(t){this._zIndex=t,this._container&&this._zIndex&&(this._container.style.zIndex=t)},setOpacity:function(t){this.options.opacity=t,this._container&&e.DomUtil.setOpacity(this._container,t)},_initLayout:function(){this._container=e.DomUtil.create("div","leaflet-label "+this.options.className+" leaflet-zoom-animated"),this.updateZIndex(this._zIndex)},_update:function(){this._map&&(this._container.style.visibility="hidden",this._updateContent(),this._updatePosition(),this._container.style.visibility="")},_updateContent:function(){this._content&&this._map&&this._prevContent!==this._content&&"string"==typeof this._content&&(this._container.innerHTML=this._content,this._prevContent=this._content,this._labelWidth=this._container.offsetWidth)},_updatePosition:function(){var t=this._map.latLngToLayerPoint(this._latlng);this._setPosition(t)},_setPosition:function(t){var i=this._map,n=this._container,o=i.latLngToContainerPoint(i.getCenter()),s=i.layerPointToContainerPoint(t),a=this.options.direction,l=this._labelWidth,h=e.point(this.options.offset);"right"===a||"auto"===a&&s.x<o.x?(e.DomUtil.addClass(n,"leaflet-label-right"),e.DomUtil.removeClass(n,"leaflet-label-left"),t=t.add(h)):(e.DomUtil.addClass(n,"leaflet-label-left"),e.DomUtil.removeClass(n,"leaflet-label-right"),t=t.add(e.point(-h.x-l,h.y))),e.DomUtil.setPosition(n,t)},_zoomAnimation:function(t){var e=this._map._latLngToNewLayerPoint(this._latlng,t.zoom,t.center).round();this._setPosition(e)},_onMoveEnd:function(){this._animated&&"auto"!==this.options.direction||this._updatePosition()},_onViewReset:function(t){t&&t.hard&&this._update()},_initInteraction:function(){if(this.options.clickable){var t=this._container,i=["dblclick","mousedown","mouseover","mouseout","contextmenu"];e.DomUtil.addClass(t,"leaflet-clickable"),e.DomEvent.on(t,"click",this._onMouseClick,this);for(var n=0;i.length>n;n++)e.DomEvent.on(t,i[n],this._fireMouseEvent,this)}},_removeInteraction:function(){if(this.options.clickable){var t=this._container,i=["dblclick","mousedown","mouseover","mouseout","contextmenu"];e.DomUtil.removeClass(t,"leaflet-clickable"),e.DomEvent.off(t,"click",this._onMouseClick,this);for(var n=0;i.length>n;n++)e.DomEvent.off(t,i[n],this._fireMouseEvent,this)}},_onMouseClick:function(t){this.hasEventListeners(t.type)&&e.DomEvent.stopPropagation(t),this.fire(t.type,{originalEvent:t})},_fireMouseEvent:function(t){this.fire(t.type,{originalEvent:t}),"contextmenu"===t.type&&this.hasEventListeners(t.type)&&e.DomEvent.preventDefault(t),"mousedown"!==t.type?e.DomEvent.stopPropagation(t):e.DomEvent.preventDefault(t)}}),e.BaseMarkerMethods={showLabel:function(){return this.label&&this._map&&(this.label.setLatLng(this._latlng),this._map.showLabel(this.label)),this},hideLabel:function(){return this.label&&this.label.close(),this},setLabelNoHide:function(t){this._labelNoHide!==t&&(this._labelNoHide=t,t?(this._removeLabelRevealHandlers(),this.showLabel()):(this._addLabelRevealHandlers(),this.hideLabel()))},bindLabel:function(t,i){var n=this.options.icon?this.options.icon.options.labelAnchor:this.options.labelAnchor,o=e.point(n)||e.point(0,0);return o=o.add(e.Label.prototype.options.offset),i&&i.offset&&(o=o.add(i.offset)),i=e.Util.extend({offset:o},i),this._labelNoHide=i.noHide,this.label||(this._labelNoHide||this._addLabelRevealHandlers(),this.on("remove",this.hideLabel,this).on("move",this._moveLabel,this).on("add",this._onMarkerAdd,this),this._hasLabelHandlers=!0),this.label=new e.Label(i,this).setContent(t),this},unbindLabel:function(){return this.label&&(this.hideLabel(),this.label=null,this._hasLabelHandlers&&(this._labelNoHide||this._removeLabelRevealHandlers(),this.off("remove",this.hideLabel,this).off("move",this._moveLabel,this).off("add",this._onMarkerAdd,this)),this._hasLabelHandlers=!1),this},updateLabelContent:function(t){this.label&&this.label.setContent(t)},getLabel:function(){return this.label},_onMarkerAdd:function(){this._labelNoHide&&this.showLabel()},_addLabelRevealHandlers:function(){this.on("mouseover",this.showLabel,this).on("mouseout",this.hideLabel,this),e.Browser.touch&&this.on("click",this.showLabel,this)},_removeLabelRevealHandlers:function(){this.off("mouseover",this.showLabel,this).off("mouseout",this.hideLabel,this),e.Browser.touch&&this.off("click",this.showLabel,this)},_moveLabel:function(t){this.label.setLatLng(t.latlng)}},e.Icon.Default.mergeOptions({labelAnchor:new e.Point(9,-20)}),e.Marker.mergeOptions({icon:new e.Icon.Default}),e.Marker.include(e.BaseMarkerMethods),e.Marker.include({_originalUpdateZIndex:e.Marker.prototype._updateZIndex,_updateZIndex:function(t){var e=this._zIndex+t;this._originalUpdateZIndex(t),this.label&&this.label.updateZIndex(e)},_originalSetOpacity:e.Marker.prototype.setOpacity,setOpacity:function(t,e){this.options.labelHasSemiTransparency=e,this._originalSetOpacity(t)},_originalUpdateOpacity:e.Marker.prototype._updateOpacity,_updateOpacity:function(){var t=0===this.options.opacity?0:1;this._originalUpdateOpacity(),this.label&&this.label.setOpacity(this.options.labelHasSemiTransparency?this.options.opacity:t)},_originalSetLatLng:e.Marker.prototype.setLatLng,setLatLng:function(t){return this.label&&!this._labelNoHide&&this.hideLabel(),this._originalSetLatLng(t)}}),e.CircleMarker.mergeOptions({labelAnchor:new e.Point(0,0)}),e.CircleMarker.include(e.BaseMarkerMethods),e.Path.include({bindLabel:function(t,i){return this.label&&this.label.options===i||(this.label=new e.Label(i,this)),this.label.setContent(t),this._showLabelAdded||(this.on("mouseover",this._showLabel,this).on("mousemove",this._moveLabel,this).on("mouseout remove",this._hideLabel,this),e.Browser.touch&&this.on("click",this._showLabel,this),this._showLabelAdded=!0),this},unbindLabel:function(){return this.label&&(this._hideLabel(),this.label=null,this._showLabelAdded=!1,this.off("mouseover",this._showLabel,this).off("mousemove",this._moveLabel,this).off("mouseout remove",this._hideLabel,this)),this},updateLabelContent:function(t){this.label&&this.label.setContent(t)},_showLabel:function(t){this.label.setLatLng(t.latlng),this._map.showLabel(this.label)},_moveLabel:function(t){this.label.setLatLng(t.latlng)},_hideLabel:function(){this.label.close()}}),e.Map.include({showLabel:function(t){return this.addLayer(t)}}),e.FeatureGroup.include({clearLayers:function(){return this.unbindLabel(),this.eachLayer(this.removeLayer,this),this},bindLabel:function(t,e){return this.invoke("bindLabel",t,e)},unbindLabel:function(){return this.invoke("unbindLabel")},updateLabelContent:function(t){this.invoke("updateLabelContent",t)}})})(window,document);
+(function (window, document, undefined) {
+var L = window.L;/*
+ * Leaflet.label assumes that you have already included the Leaflet library.
+ */
+
+L.labelVersion = '0.2.2-dev';
+
+L.Label = (L.Layer ? L.Layer : L.Class).extend({
+
+	includes: L.Mixin.Events,
+
+	options: {
+		className: '',
+		clickable: false,
+		direction: 'right',
+		noHide: false,
+		offset: [12, -15], // 6 (width of the label triangle) + 6 (padding)
+		opacity: 1,
+		zoomAnimation: true
+	},
+
+	initialize: function (options, source) {
+		L.setOptions(this, options);
+
+		this._source = source;
+		this._animated = L.Browser.any3d && this.options.zoomAnimation;
+		this._isOpen = false;
+	},
+
+	onAdd: function (map) {
+		this._map = map;
+
+		this._pane = this.options.pane ? map._panes[this.options.pane] :
+			this._source instanceof L.Marker ? map._panes.markerPane : map._panes.popupPane;
+
+		if (!this._container) {
+			this._initLayout();
+		}
+
+		this._pane.appendChild(this._container);
+
+		this._initInteraction();
+
+		this._update();
+
+		this.setOpacity(this.options.opacity);
+
+		map
+			.on('moveend', this._onMoveEnd, this)
+			.on('viewreset', this._onViewReset, this);
+
+		if (this._animated) {
+			map.on('zoomanim', this._zoomAnimation, this);
+		}
+
+		if (L.Browser.touch && !this.options.noHide) {
+			L.DomEvent.on(this._container, 'click', this.close, this);
+			map.on('click', this.close, this);
+		}
+	},
+
+	onRemove: function (map) {
+		this._pane.removeChild(this._container);
+
+		map.off({
+			zoomanim: this._zoomAnimation,
+			moveend: this._onMoveEnd,
+			viewreset: this._onViewReset
+		}, this);
+
+		this._removeInteraction();
+
+		this._map = null;
+	},
+
+	setLatLng: function (latlng) {
+		this._latlng = L.latLng(latlng);
+		if (this._map) {
+			this._updatePosition();
+		}
+		return this;
+	},
+
+	setContent: function (content) {
+		// Backup previous content and store new content
+		this._previousContent = this._content;
+		this._content = content;
+
+		this._updateContent();
+
+		return this;
+	},
+
+	close: function () {
+		var map = this._map;
+		if (map) {
+			if (L.Browser.touch && !this.options.noHide) {
+				L.DomEvent.off(this._container, 'click', this.close);
+				map.off('click', this.close, this);
+			}
+
+			map.removeLayer(this);
+		}
+	},
+
+	updateZIndex: function (zIndex) {
+		this._zIndex = zIndex;
+
+		if (this._container && this._zIndex) {
+			this._container.style.zIndex = zIndex;
+		}
+	},
+
+	setOpacity: function (opacity) {
+		this.options.opacity = opacity;
+
+		if (this._container) {
+			L.DomUtil.setOpacity(this._container, opacity);
+		}
+	},
+
+	_initLayout: function () {
+		this._container = L.DomUtil.create('div', 'leaflet-label ' + this.options.className + ' leaflet-zoom-animated');
+		this.updateZIndex(this._zIndex);
+	},
+
+	_update: function () {
+		if (!this._map) { return; }
+
+		this._container.style.visibility = 'hidden';
+
+		this._updateContent();
+		this._updatePosition();
+
+		this._container.style.visibility = '';
+	},
+
+	_updateContent: function () {
+		if (!this._content || !this._map || this._prevContent === this._content) {
+			return;
+		}
+
+		if (typeof this._content === 'string') {
+			this._container.innerHTML = this._content;
+
+			this._prevContent = this._content;
+
+			this._labelWidth = this._container.offsetWidth;
+		}
+	},
+
+	_updatePosition: function () {
+		var pos = this._map.latLngToLayerPoint(this._latlng);
+
+		this._setPosition(pos);
+	},
+
+	_setPosition: function (pos) {
+		var map = this._map,
+			container = this._container,
+			centerPoint = map.latLngToContainerPoint(map.getCenter()),
+			labelPoint = map.layerPointToContainerPoint(pos),
+			direction = this.options.direction,
+			labelWidth = this._labelWidth,
+			offset = L.point(this.options.offset);
+
+		// position to the right (right or auto & needs to)
+		if (direction === 'right' || direction === 'auto' && labelPoint.x < centerPoint.x) {
+			L.DomUtil.addClass(container, 'leaflet-label-right');
+			L.DomUtil.removeClass(container, 'leaflet-label-left');
+
+			pos = pos.add(offset);
+		} else { // position to the left
+			L.DomUtil.addClass(container, 'leaflet-label-left');
+			L.DomUtil.removeClass(container, 'leaflet-label-right');
+
+			pos = pos.add(L.point(-offset.x - labelWidth, offset.y));
+		}
+
+		L.DomUtil.setPosition(container, pos);
+	},
+
+	_zoomAnimation: function (opt) {
+		var pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+
+		this._setPosition(pos);
+	},
+
+	_onMoveEnd: function () {
+		if (!this._animated || this.options.direction === 'auto') {
+			this._updatePosition();
+		}
+	},
+
+	_onViewReset: function (e) {
+		/* if map resets hard, we must update the label */
+		if (e && e.hard) {
+			this._update();
+		}
+	},
+
+	_initInteraction: function () {
+		if (!this.options.clickable) { return; }
+
+		var container = this._container,
+			events = ['dblclick', 'mousedown', 'mouseover', 'mouseout', 'contextmenu'];
+
+		L.DomUtil.addClass(container, 'leaflet-clickable');
+		L.DomEvent.on(container, 'click', this._onMouseClick, this);
+
+		for (var i = 0; i < events.length; i++) {
+			L.DomEvent.on(container, events[i], this._fireMouseEvent, this);
+		}
+	},
+
+	_removeInteraction: function () {
+		if (!this.options.clickable) { return; }
+
+		var container = this._container,
+			events = ['dblclick', 'mousedown', 'mouseover', 'mouseout', 'contextmenu'];
+
+		L.DomUtil.removeClass(container, 'leaflet-clickable');
+		L.DomEvent.off(container, 'click', this._onMouseClick, this);
+
+		for (var i = 0; i < events.length; i++) {
+			L.DomEvent.off(container, events[i], this._fireMouseEvent, this);
+		}
+	},
+
+	_onMouseClick: function (e) {
+		if (this.hasEventListeners(e.type)) {
+			L.DomEvent.stopPropagation(e);
+		}
+
+		this.fire(e.type, {
+			originalEvent: e
+		});
+	},
+
+	_fireMouseEvent: function (e) {
+		this.fire(e.type, {
+			originalEvent: e
+		});
+
+		// TODO proper custom event propagation
+		// this line will always be called if marker is in a FeatureGroup
+		if (e.type === 'contextmenu' && this.hasEventListeners(e.type)) {
+			L.DomEvent.preventDefault(e);
+		}
+		if (e.type !== 'mousedown') {
+			L.DomEvent.stopPropagation(e);
+		} else {
+			L.DomEvent.preventDefault(e);
+		}
+	}
+});
+
+
+// This object is a mixin for L.Marker and L.CircleMarker. We declare it here as both need to include the contents.
+L.BaseMarkerMethods = {
+	showLabel: function () {
+		if (this.label && this._map) {
+			this.label.setLatLng(this._latlng);
+			this._map.showLabel(this.label);
+		}
+
+		return this;
+	},
+
+	hideLabel: function () {
+		if (this.label) {
+			this.label.close();
+		}
+		return this;
+	},
+
+	setLabelNoHide: function (noHide) {
+		if (this._labelNoHide === noHide) {
+			return;
+		}
+
+		this._labelNoHide = noHide;
+
+		if (noHide) {
+			this._removeLabelRevealHandlers();
+			this.showLabel();
+		} else {
+			this._addLabelRevealHandlers();
+			this.hideLabel();
+		}
+	},
+
+	bindLabel: function (content, options) {
+		var labelAnchor = this.options.icon ? this.options.icon.options.labelAnchor : this.options.labelAnchor,
+			anchor = L.point(labelAnchor) || L.point(0, 0);
+
+		anchor = anchor.add(L.Label.prototype.options.offset);
+
+		if (options && options.offset) {
+			anchor = anchor.add(options.offset);
+		}
+
+		options = L.Util.extend({offset: anchor}, options);
+
+		this._labelNoHide = options.noHide;
+
+		if (!this.label) {
+			if (!this._labelNoHide) {
+				this._addLabelRevealHandlers();
+			}
+
+			this
+				.on('remove', this.hideLabel, this)
+				.on('move', this._moveLabel, this)
+				.on('add', this._onMarkerAdd, this);
+
+			this._hasLabelHandlers = true;
+		}
+
+		this.label = new L.Label(options, this)
+			.setContent(content);
+
+		return this;
+	},
+
+	unbindLabel: function () {
+		if (this.label) {
+			this.hideLabel();
+
+			this.label = null;
+
+			if (this._hasLabelHandlers) {
+				if (!this._labelNoHide) {
+					this._removeLabelRevealHandlers();
+				}
+
+				this
+					.off('remove', this.hideLabel, this)
+					.off('move', this._moveLabel, this)
+					.off('add', this._onMarkerAdd, this);
+			}
+
+			this._hasLabelHandlers = false;
+		}
+		return this;
+	},
+
+	updateLabelContent: function (content) {
+		if (this.label) {
+			this.label.setContent(content);
+		}
+	},
+
+	getLabel: function () {
+		return this.label;
+	},
+
+	_onMarkerAdd: function () {
+		if (this._labelNoHide) {
+			this.showLabel();
+		}
+	},
+
+	_addLabelRevealHandlers: function () {
+		this
+			.on('mouseover', this.showLabel, this)
+			.on('mouseout', this.hideLabel, this);
+
+		if (L.Browser.touch) {
+			this.on('click', this.showLabel, this);
+		}
+	},
+
+	_removeLabelRevealHandlers: function () {
+		this
+			.off('mouseover', this.showLabel, this)
+			.off('mouseout', this.hideLabel, this);
+
+		if (L.Browser.touch) {
+			this.off('click', this.showLabel, this);
+		}
+	},
+
+	_moveLabel: function (e) {
+		this.label.setLatLng(e.latlng);
+	}
+};
+
+// Add in an option to icon that is used to set where the label anchor is
+L.Icon.Default.mergeOptions({
+	labelAnchor: new L.Point(9, -20)
+});
+
+// Have to do this since Leaflet is loaded before this plugin and initializes
+// L.Marker.options.icon therefore missing our mixin above.
+L.Marker.mergeOptions({
+	icon: new L.Icon.Default()
+});
+
+L.Marker.include(L.BaseMarkerMethods);
+L.Marker.include({
+	_originalUpdateZIndex: L.Marker.prototype._updateZIndex,
+
+	_updateZIndex: function (offset) {
+		var zIndex = this._zIndex + offset;
+
+		this._originalUpdateZIndex(offset);
+
+		if (this.label) {
+			this.label.updateZIndex(zIndex);
+		}
+	},
+
+	_originalSetOpacity: L.Marker.prototype.setOpacity,
+
+	setOpacity: function (opacity, labelHasSemiTransparency) {
+		this.options.labelHasSemiTransparency = labelHasSemiTransparency;
+
+		this._originalSetOpacity(opacity);
+	},
+
+	_originalUpdateOpacity: L.Marker.prototype._updateOpacity,
+
+	_updateOpacity: function () {
+		var absoluteOpacity = this.options.opacity === 0 ? 0 : 1;
+
+		this._originalUpdateOpacity();
+
+		if (this.label) {
+			this.label.setOpacity(this.options.labelHasSemiTransparency ? this.options.opacity : absoluteOpacity);
+		}
+	},
+
+	_originalSetLatLng: L.Marker.prototype.setLatLng,
+
+	setLatLng: function (latlng) {
+		if (this.label && !this._labelNoHide) {
+			this.hideLabel();
+		}
+
+		return this._originalSetLatLng(latlng);
+	}
+});
+
+// Add in an option to icon that is used to set where the label anchor is
+L.CircleMarker.mergeOptions({
+	labelAnchor: new L.Point(0, 0)
+});
+
+
+L.CircleMarker.include(L.BaseMarkerMethods);
+
+L.Path.include({
+	bindLabel: function (content, options) {
+		if (!this.label || this.label.options !== options) {
+			this.label = new L.Label(options, this);
+		}
+
+		this.label.setContent(content);
+
+		if (!this._showLabelAdded) {
+			this
+				.on('mouseover', this._showLabel, this)
+				.on('mousemove', this._moveLabel, this)
+				.on('mouseout remove', this._hideLabel, this);
+
+			if (L.Browser.touch) {
+				this.on('click', this._showLabel, this);
+			}
+			this._showLabelAdded = true;
+		}
+
+		return this;
+	},
+
+	unbindLabel: function () {
+		if (this.label) {
+			this._hideLabel();
+			this.label = null;
+			this._showLabelAdded = false;
+			this
+				.off('mouseover', this._showLabel, this)
+				.off('mousemove', this._moveLabel, this)
+				.off('mouseout remove', this._hideLabel, this);
+		}
+		return this;
+	},
+
+	updateLabelContent: function (content) {
+		if (this.label) {
+			this.label.setContent(content);
+		}
+	},
+
+	_showLabel: function (e) {
+		this.label.setLatLng(e.latlng);
+		this._map.showLabel(this.label);
+	},
+
+	_moveLabel: function (e) {
+		this.label.setLatLng(e.latlng);
+	},
+
+	_hideLabel: function () {
+		this.label.close();
+	}
+});
+
+L.Map.include({
+	showLabel: function (label) {
+		return this.addLayer(label);
+	}
+});
+
+L.FeatureGroup.include({
+	// TODO: remove this when AOP is supported in Leaflet, need this as we cannot put code in removeLayer()
+	clearLayers: function () {
+		this.unbindLabel();
+		this.eachLayer(this.removeLayer, this);
+		return this;
+	},
+
+	bindLabel: function (content, options) {
+		return this.invoke('bindLabel', content, options);
+	},
+
+	unbindLabel: function () {
+		return this.invoke('unbindLabel');
+	},
+
+	updateLabelContent: function (content) {
+		this.invoke('updateLabelContent', content);
+	}
+});
+
+}(window, document));

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `imap_hosts_links` (
   `host2` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hosts` (`host1`,`host2`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 CREATE TABLE IF NOT EXISTS `imap_hosts_links_settings` (
   `ids` bigint(20) NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `imap_hosts_links_settings` (
   `weight` int(11) DEFAULT NULL,
   `dash` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ids`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 CREATE TABLE IF NOT EXISTS `imap_triggers_links` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -22,5 +22,16 @@ CREATE TABLE IF NOT EXISTS `imap_triggers_links` (
   `objectid` bigint(20) NOT NULL,
   `objecttype` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=29 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
+CREATE TABLE IF NOT EXISTS `imap_items_links` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `itemid` bigint(20) NOT NULL,
+  `objectid` bigint(20) NOT NULL,
+  `objecttype` varchar(50) NOT NULL,
+  `max_value` double(16,4) NOT NULL,
+  `min_value` double(16,4) NOT NULL,
+  `gradient` bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hosts` (`objectid`,`objecttype`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
