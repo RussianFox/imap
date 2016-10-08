@@ -3,7 +3,7 @@
 
 Screenshots: http://zabbiximap.lisss.ru/
 
-This version is designed for Zabbix versions 2.2 and 2.4
+This version is designed for Zabbix versions 3.x
 
 In old versions of efficiency is not guaranteed and will not be further developed.
 
@@ -15,7 +15,7 @@ For new versions the development will be output as the official release.
 For install copy the contents of a folder zabbix in the directory of your Zabbix Server (Example, /usr/share/zabbix for Debian).
 
 Edit include/menu.inc.php to connect Interactive Map at standard interface
-Add this to the end of file:
+Add this in 314 string, befor "$denied_page_requested = false;":
 
 	require_once dirname(__FILE__).'/../imap/menu.inc.php';
 
