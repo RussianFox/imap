@@ -823,6 +823,7 @@
 					if (!trigger.value==1) continue;
 					if (trigger.hosts.length<1) continue;
 					trigger.hostid = trigger.hosts[0].hostid;
+					trigger.hostname = trigger.hosts[0].name;
 					if (!_imap.markersList[trigger.hostid]) continue;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid].lhi = lhi;

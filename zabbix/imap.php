@@ -276,7 +276,7 @@ if ($output=='ajax') {
 		$options['sortfield'] = array('lastchange');
 		$options['sortorder'] = 'DESC';
 		$options['filter'] = array('value' => TRIGGER_VALUE_TRUE);
-		$options['selectHosts'] = array('hostid');
+		$options['selectHosts'] = array('hostid', 'name');
 		if ($showSeverity > TRIGGER_SEVERITY_NOT_CLASSIFIED) {
 			$options['min_severity'] = $showSeverity;
 		};
