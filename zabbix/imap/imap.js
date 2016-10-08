@@ -53,7 +53,7 @@
 			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
-			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
+			//overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
