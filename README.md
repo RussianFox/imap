@@ -17,7 +17,7 @@ For install copy the contents of a folder zabbix in the directory of your Zabbix
 Edit include/menu.inc.php to connect Interactive Map at standard interface
 Add this in 314 string, befor "$denied_page_requested = false;":
 
-	require_once dirname(__FILE__).'/../imap/menu.inc.php';
+	require_once dirname(__FILE__).'/../imap/menu3.inc.php';
 
 Now, the basic functionality is efficient. Go to your Zabbix and you'll see a new menu item.
 

@@ -794,7 +794,7 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js<?php echo '?'.rand(); ?>"></script>
+<script type="text/javascript" src="imap/imap.js"></script>
 
 <?php
 
@@ -802,7 +802,12 @@ foreach ($needThisFiles as $file) {
 	if (file_exists('imap/additions.js')) echo '<script src="imap/additions.js?'.rand().'"></script>';
 	if (!$check_links) echo '<script type="text/javascript"> _imap.settings.links_enabled = false; </script>';
 
-
+	if (file_exists('imap/js')) {
+		$files = scandir('imap/js');
+		foreach($files as $file) {
+			if (substr('imap/js/'.$file,-3)=='.js') echo '<script type="text/javascript" src="imap/js/'.$file.'"></script>';
+		};
+	};
 
 textdomain("frontend");
 if ($output!='block') {

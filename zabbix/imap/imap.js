@@ -16,6 +16,7 @@
 	_imap.searchmarkers = L.layerGroup();
 	_imap.googlestreetviewer = false;
 	_imap.googlestreetviewer_marker = false;
+	_imap.messages = {count:0, text:{}};
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -342,6 +343,41 @@
 			};
 		};
 		_imap.links.removeLayer(_imap.lines[nn][2]);
+	};
+	
+	function get_last_messages() {
+		var onlymes = 1;
+		if (!getCookie('countertoday')) {
+			onlymes = 0;
+		};
+		jQuery.ajax({
+			url: 'http://imapmessages.lisss.ru',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				version: _imap.version,
+				zabbix: _imap.zabbixversion,
+				onlymes: onlymes
+			},
+			success: function(data){
+				if (onlymes == 0) setCookie('countertoday', '1', {expires: (3600*24), path: '/'});
+				var lastmes = +getCookie('imap_messages_last_num');
+				if (!lastmes) lastmes = 0;
+				var newlastmes = 0;
+				jQuery.each(data,function(num,text){
+					_imap.messages.text[num] = text;
+					if (num>lastmes) {
+						_imap.messages.count++;
+						newlastmes = Math.max(num,newlastmes);
+					};
+				});
+				_imap.messages.lastnum = newlastmes;
+				jQuery('.imap_messages_count').html(_imap.messages.count>0?_imap.messages.count:'');
+			},
+			error: function(data){
+				
+			}
+		});
 	};
 	
 	function updateLines() {
@@ -1815,6 +1851,73 @@
 		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
 		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
+		get_last_messages();
+		
+		var imapMenu = L.Control.extend({
+			options: {
+				position: 'topleft'
+			},
+
+			onAdd: function (map) {
+				// create the control container with a particular class name
+				var container = L.DomUtil.create('div', 'imenu-control');
+				
+
+				
+				jQuery('<a/>',{class:'gp-ui icon197 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					mapBbox();
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon113 button',href:'#'}).appendTo(jQuery(container)).click(function(){
+					
+					var tabs = jQuery('<div/>',{id:'imap_information'});
+					
+					jQuery('<ul/>')
+					.append('<li><a href="#imap_information-1">About</a></li>')
+					.append('<li><a href="#imap_information-2">Components</a></li>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-1'})
+					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="http://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
+					.appendTo(tabs);
+					
+					jQuery('<div/>',{id:'imap_information-2'})
+					.html(_imap.thirdtoolsinformation)
+					.appendTo(tabs);
+					
+					jQuery(tabs)
+					.tabs()
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Information') });
+					jQuery('#imap_information').css('padding','0px');
+					
+					return false;				  
+				});
+				
+				jQuery('<a/>',{class:'gp-ui icon125 button',href:'#'}).append(jQuery('<span/>',{class:'imap_messages_count'}).html(_imap.messages.count>0?_imap.messages.count:'')).appendTo(jQuery(container)).click(function(){
+					var text = '';
+					jQuery.each(_imap.messages.text,function(num){
+						text = '<div class="imap_dev_mes">'+this+'</div>'+text;
+					});
+					jQuery('<div/>')
+					.html(text)
+					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Messages') });
+					jQuery('.imap_messages_count').html('');
+					var lastmesnum = getCookie('imap_messages_last_num');
+					if (!lastmesnum) lastmesnum=0;
+					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24*90), path: '/'});
+					return false;				  
+				});
+				
+				jQuery(container).click(function(event){ event.stopPropagation(); });
+				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
+				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
+				jQuery(container).scroll(function(event){ event.stopPropagation(); });
+				jQuery(container).contextmenu(function(event){ event.stopPropagation(); });
+				return container;
+			}
+		});
+		
 		counter();
 		
 		var SearchControl = L.Control.extend({
@@ -2189,6 +2292,8 @@
 				};
 			};
 		});
+		
+		_imap.map.addControl(new imapMenu);
 		
 		for (var nn in _imap.mapcorners) {
 			if (_imap.Controls[nn]) _imap.Controls[nn].addTo(_imap.map);
