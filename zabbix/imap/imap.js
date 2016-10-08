@@ -1479,7 +1479,7 @@
 		jQuery.ajax({
 			url: 'http://api.openweathermap.org/data/2.5/weather',
 			type: 'GET',
-			dataType: 'json',
+			dataType: 'jsonp',
 			data: {
 				units: 'metric',
 				lang: _imap.settings.lang.substring(0,2),
@@ -1661,7 +1661,7 @@
 			openweathermap({lat:latlng.lat,lng:latlng.lng}); return false; }
 		};
 		
-		//menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
+		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
 	};
 	
 	function loadHosts() {
