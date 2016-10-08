@@ -16,7 +16,6 @@
 	_imap.searchmarkers = L.layerGroup();
 	_imap.googlestreetviewer = false;
 	_imap.googlestreetviewer_marker = false;
-	_imap.messages = {count:0, text:{}};
 
 	_imap.settings._zoom_meters = [1000000,500000,300000,100000,50000,20000,10000,5000,2000,1000,500,300,100,50,30,20,10,5,0];
 	
@@ -72,6 +71,7 @@
 			baseMaps["Yandex"].options.maxZoom = 18;
 			baseMaps["Yandex Satellite"] = new L.Yandex('satellite');
 			baseMaps["Yandex Hybrid"] = new L.Yandex('hybrid');
+			overlayMaps["Yandex Traffic"] = new L.Yandex("null", {traffic:true, opacity:0.8, overlay:true});
 		}  catch(e) {} finally {};
 		
 		try {
@@ -228,40 +228,7 @@
 		});
 	};
 	
-	function get_last_messages() {
-		var onlymes = 1;
-		if (!getCookie('countertoday')) {
-			onlymes = 0;
-		};
-		jQuery.ajax({
-			url: 'http://imapmessages.lisss.ru',
-			type: 'POST',
-			dataType: 'json',
-			data: {
-				version: _imap.version,
-				zabbix: _imap.zabbixversion,
-				onlymes: onlymes
-			},
-			success: function(data){
-				if (onlymes == 0) setCookie('countertoday', '1', {expires: (3600*24), path: '/'});
-				var lastmes = +getCookie('imap_messages_last_num');
-				if (!lastmes) lastmes = 0;
-				var newlastmes = 0;
-				jQuery.each(data,function(num,text){
-					_imap.messages.text[num] = text;
-					if (num>lastmes) {
-						_imap.messages.count++;
-						newlastmes = Math.max(num,newlastmes);
-					};
-				});
-				_imap.messages.lastnum = newlastmes;
-				jQuery('.imap_messages_count').html(_imap.messages.count>0?_imap.messages.count:'');
-			},
-			error: function(data){
-				
-			}
-		});
-	};
+	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
 	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
@@ -907,7 +874,7 @@
 					};
 				};
 				
-				if (_imap.settings.do_map_control | _imap.vars.it_first) {
+				if (_imap.settings.do_map_control) {
 					mapBbox(_imap.bbox);
 				};
 				
@@ -1232,26 +1199,12 @@
 		jQuery('#hostItems'+hh).html();
 	};
 	
-	function getSID(textonly) {
-		var sid = getCookie('zbx_sessionid');
-		if (textonly) return sid.substring(16,32);
-		return 'sid='+sid.substring(16,32)+'&';
-	};
-	
-	function popupFrame(url,text) {
+	function popupFrame(url) {
 		container = L.DomUtil.create('span', 'graphPopupWindow');
-		jQuery(container).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
+		jQuery(container).append(
+			jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
+		).dialog({maxWidth:'100%', maxHeight:'100%', width:800, height:650, resizable:true})
 		.on('close',function(){ jQuery(this).remove(); });
-		
-		if (text) {
-			jQuery.get( url, function( data ) {
-				jQuery(container).append(data);
-			},'text');
-		} else {
-			jQuery(container).append(
-				jQuery("<iframe />").attr("src", url).prop('height','100%').prop('width','100%').css('bottom','0').css('right','0').css('top','0').css('left','0').css('position','absolute')
-			);
-		};
 	};
 	
 	function openPopupHost(hh) {
@@ -1306,37 +1259,36 @@
 				for (nn in data) {
 					if (data[nn].graphid) {
 						graph = data[nn];
-						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?'+getSID()+'raphid='+graph.graphid, clickCallback: function(){
+						graphs[graphs.length] = {label: escapeHtml(graph.name), url: 'charts.php?graphid='+graph.graphid, clickCallback: function(){
 							var tn = jQuery(this).data('graphId');
-							popupFrame('charts.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=1&graphid='+tn);
+							popupFrame('charts.php?ispopup=1&graphid='+tn);
 							return false;
 						  
 						}, data: {graphId: +graph.graphid} };
 					};
 				};
 				
-				var hscreens = { label: mlocale('Screens'), url: 'host_screen.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('host_screen.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
-				
 				if (_imap.zabbixversion.substr(0,3)=='2.2') {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'form_refresh=1&groupid=0&hostid='+hh, clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&groupid=0&hostid='+hh); return false; } };
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostid='+hh+'&groupid=0', clickCallback: function(){ popupFrame('latest.php?hostid'+hh+'&groupid=0'); return false; } };
 				} else {
-					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?'+getSID()+'hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&&hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
+					var lastdd = { label: mlocale('Latest data'), url: 'latest.php?hostids%5B%5D='+hh+'&filter_set=Filter', clickCallback: function(){ popupFrame('latest.php?hostids%5B%5D='+hh+'&filter_set=Filter'); return false; } };
 				};
-				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
-				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?'+getSID()+'hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?'+getSID()+'form_refresh=1&fullscreen=1&filterState=0&hostid='+hh); return false; } };
+				
+				var hostinv = { label: mlocale('Host inventory'), url: 'hostinventories.php?hostid='+hh, clickCallback: function(){ popupFrame('hostinventories.php?ispopup=1&hostid='+hh); return false; } };
+				var ltrig = { label: mlocale('Triggers'), url: 'tr_status.php?hostid='+hh, clickCallback: function(){ popupFrame('tr_status.php?ispopup=1&hostid='+hh); return false; } };
 				var chost = { label: mlocale('Host config'), items: [
 				  
-					{ label: mlocale('Host'), url: 'hosts.php?'+getSID()+'form=update&hostid='+hh},
-					{ label: mlocale('Applications'), url: 'applications.php?'+getSID()+'hostid='+hh},
-					{ label: mlocale('Items'), url: 'items.php?'+getSID()+'hostid='+hh},
-					{ label: mlocale('Triggers'), url: 'triggers.php?'+getSID()+'hostid='+hh},
-					{ label: mlocale('Graphs'), url: 'graphs.php?'+getSID()+'hostid='+hh},
-					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?'+getSID()+'hostid='+hh},
-					{ label: mlocale('Web scenarios'), url: 'httpconf.php?'+getSID()+'hostid='+hh}
+					{ label: mlocale('Host'), url: 'hosts.php?form=update&hostid='+hh},
+					{ label: mlocale('Applications'), url: 'applications.php?hostid='+hh},
+					{ label: mlocale('Items'), url: 'items.php?hostid='+hh},
+					{ label: mlocale('Triggers'), url: 'triggers.php?hostid='+hh},
+					{ label: mlocale('Graphs'), url: 'graphs.php?hostid='+hh},
+					{ label: mlocale('Discovery rules'), url: 'host_discovery.php?hostid='+hh},
+					{ label: mlocale('Web scenarios'), url: 'httpconf.php?hostid='+hh}
 				    ]
 				};
 				
-				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, hscreens, {label:'Config'}, chost]; menuPopup2(datas, event); });
+				jQuery(container).bind('click',function(event){ datas = [{label:mlocale('Host view')}, {label: mlocale('Graphs'), items: graphs}, lastdd, hostinv, ltrig, {label:'Config'}, chost]; menuPopup2(datas, event); });
 				jQuery(container).html(mlocale('Tools'));
 				jQuery('.link_menu', '#hostItems'+hh).remove();
 				jQuery('#hostItems'+hh).append(container);
@@ -1376,14 +1328,7 @@
 				
 				var link = jQuery('<a/>');
 				jQuery(link).html(el.label);
-				jQuery(link).attr('href','#');
-				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (el.clickCallback) ) {
-					var inlink = jQuery('<a/>').attr('target','_blank').html('+').attr('href',el.url).prependTo(link).click(function(event){event.stopPropagation();});
-					jQuery('<span/>').addClass('ui-icon-document ui-icon ui-menu-icon').append(inlink).prependTo(link);
-				};
-				if ( (el.url!=='') && (el.url!==undefined) && (el.url!=='#') && (!el.clickCallback) ) {
-					jQuery(link).attr('href',el.url);
-				};
+				if (el.url!=='') jQuery(link).attr('href',el.url);
 				if (!el.onpage) jQuery(link).attr('target','_blank');
 				
 				jQuery(item).append(link);
@@ -1402,7 +1347,7 @@
 	function menuPopup2(data, event) {
 		jQuery('#menuPopup2').remove();
 		var container = jQuery(menuPopup2Transform(data)).menu();
-		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY-2).css('left',event.pageX-2)
+		jQuery('<div/>',{id:'menuPopup2'}).append(container).addClass('menuPopup').css('position','fixed').css('top',event.pageY).css('left',event.pageX)
 		.mouseleave(function(){
 			jQuery(this).delay(1000).hide(0, function(){ jQuery(this).remove(); });
 		})
@@ -1885,72 +1830,7 @@
 		_imap.Controls['scale'] = L.control.scale({position:setMapCorner(_imap.mapcorners['scale']),metric:true});
 		_imap.Controls['measure'] = L.control.measure({position:setMapCorner(_imap.mapcorners['measure'])})
 	
-		get_last_messages();
-		
-		var imapMenu = L.Control.extend({
-			options: {
-				position: 'topleft'
-			},
-
-			onAdd: function (map) {
-				// create the control container with a particular class name
-				var container = L.DomUtil.create('div', 'imenu-control');
-				
-
-				
-				jQuery('<a/>',{class:'gp-ui icon197 button',href:'#'}).appendTo(jQuery(container)).click(function(){
-					mapBbox();
-					return false;				  
-				});
-				
-				jQuery('<a/>',{class:'gp-ui icon113 button',href:'#'}).appendTo(jQuery(container)).click(function(){
-					
-					var tabs = jQuery('<div/>',{id:'imap_information'});
-					
-					jQuery('<ul/>')
-					.append('<li><a href="#imap_information-1">About</a></li>')
-					.append('<li><a href="#imap_information-2">Components</a></li>')
-					.appendTo(tabs);
-					
-					jQuery('<div/>',{id:'imap_information-1'})
-					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="http://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
-					.appendTo(tabs);
-					
-					jQuery('<div/>',{id:'imap_information-2'})
-					.html(_imap.thirdtoolsinformation)
-					.appendTo(tabs);
-					
-					jQuery(tabs)
-					.tabs()
-					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Information') });
-					jQuery('#imap_information').css('padding','0px');
-					
-					return false;				  
-				});
-				
-				jQuery('<a/>',{class:'gp-ui icon125 button',href:'#'}).append(jQuery('<span/>',{class:'imap_messages_count'}).html(_imap.messages.count>0?_imap.messages.count:'')).appendTo(jQuery(container)).click(function(){
-					var text = '';
-					jQuery.each(_imap.messages.text,function(num){
-						text = '<div class="imap_dev_mes">'+this+'</div>'+text;
-					});
-					jQuery('<div/>')
-					.html(text)
-					.dialog({ closeOnEscape: true, modal:true, title:mlocale('Messages') });
-					jQuery('.imap_messages_count').html('');
-					var lastmesnum = getCookie('imap_messages_last_num');
-					if (!lastmesnum) lastmesnum=0;
-					if (lastmesnum<_imap.messages.lastnum) setCookie('imap_messages_last_num', _imap.messages.lastnum, {expires: (3600*24*90), path: '/'});
-					return false;				  
-				});
-				
-				jQuery(container).click(function(event){ event.stopPropagation(); });
-				jQuery(container).dblclick(function(event){ event.stopPropagation(); });
-				jQuery(container).mousemove(function(event){ event.stopPropagation(); });
-				jQuery(container).scroll(function(event){ event.stopPropagation(); });
-				jQuery(container).contextmenu(function(event){ event.stopPropagation(); });
-				return container;
-			}
-		});
+		counter();
 		
 		var SearchControl = L.Control.extend({
 			options: {
@@ -1990,11 +1870,11 @@
 				var container = L.DomUtil.create('div', 'hosts_list');
 				jQuery(container).attr('aria-haspopup','true');
 				jQuery(container).append(
-				'<div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+mlocale("Hosts")+'</b></div><div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div>'
+				'<div id=under_hosts_list style="display:none;"><div id=search_hosts_list><input oninput="getHostsFilter1T(event.target.value);" type=search placeholder="'+mlocale('Search')+'"></div><div id=hosts_list class="nicescroll"></div></div><div id=show_hosts_list><div id=filter-indicator style="display:none;"><img src="imap/images/filter.png"></div> <b>'+mlocale("Hosts")+'</b></div>'
 				);
 				
-				jQuery(container).mouseleave(function(){ jQuery('#under_hosts_list').delay(500).hide(0); _imap.map.scrollWheelZoom.enable(); });
-				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').stop().show(); _imap.map.scrollWheelZoom.disable(); });
+				jQuery(container).mouseleave(function(){ jQuery('#show_hosts_list').show(); jQuery('#under_hosts_list').hide(); _imap.map.scrollWheelZoom.enable(); });
+				jQuery(container).mouseover(function(){ jQuery('#under_hosts_list').show(); jQuery('#show_hosts_list').hide(); _imap.map.scrollWheelZoom.disable(); });
 				
 				jQuery(container).click(function(event){ 
 				  event.stopPropagation();
@@ -2325,8 +2205,6 @@
 			};
 		});
 		
-		_imap.map.addControl(new imapMenu);
-		
 		for (var nn in _imap.mapcorners) {
 			if (_imap.Controls[nn]) _imap.Controls[nn].addTo(_imap.map);
 		};
@@ -2441,14 +2319,16 @@
 	};
 	
 	function mapSize() {
-		nheight = jQuery(window).innerHeight() - jQuery('.page_footer').outerHeight(true) - jQuery('#mapdiv').offset().top - 2;
+		nheight = jQuery(window).innerHeight() - jQuery('.footer').outerHeight(true) - jQuery('#imapworkarea').offset().top - jQuery('.msg-bad').height() - (jQuery('.article').innerHeight() - jQuery('.article').height()) - 20;
 		
 		jQuery('.last_triggers.leaflet-control .last_triggers_div').css('max-height',+nheight*0.7);
 		jQuery('#hosts_list').css('max-height',+nheight*0.7);
 		
-		jQuery('#mapdiv').height(nheight);
-		_imap.map.invalidateSize();
-		if (_imap.settings.do_map_control) mapBbox();
+		if (jQuery('#mapdiv').height() != nheight) {
+			jQuery('#mapdiv').height(nheight);
+			_imap.map.invalidateSize();
+			if (_imap.settings.do_map_control) mapBbox();
+		};
 	};
 
 	function fuptime(val) {
@@ -2484,6 +2364,7 @@
 		setLayersMap();
 		_imap.settings.exluding_inventory[_imap.settings.exluding_inventory.length] = 'inventory_mode';
 		setInterval(function() { timeUpdate(); },1000);
+		setInterval(function() { mapSize(); },1000);
 		loadHosts();
 		_imap.vars.intervalHostsID = window.setInterval(function(){loadHosts();}, _imap.settings.intervalLoadHosts*1000);
 		_imap.vars.intervalTriggersID = window.setInterval(function(){ loadLinks(); }, _imap.settings.intervalLoadLinks*1000);
