@@ -821,6 +821,8 @@
 					var trigger = data[+nn];
 					if (!trigger) continue;
 					if (!trigger.value==1) continue;
+					if (trigger.hosts.length<1) continue;
+					trigger.hostid = trigger.hosts[0].hostid;
 					if (!_imap.markersList[trigger.hostid]) continue;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid] = trigger;
 					_imap.markersList[trigger.hostid].triggers[trigger.triggerid].lhi = lhi;
@@ -1661,7 +1663,7 @@
 			openweathermap({lat:latlng.lat,lng:latlng.lng}); return false; }
 		};
 		
-		menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
+		//menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
 	};
 	
 	function loadHosts() {
