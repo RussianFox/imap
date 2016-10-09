@@ -245,6 +245,8 @@ div.search-control {
 	padding-left: 50px;
 	box-sizing: border-box;
 	-webkit-appearance: none;
+	color: #383838;
+	background-color: #f2f2f2;
 
 }
 
@@ -908,4 +910,16 @@ span.imap_messages_count {
 	padding-bottom:5px;
 	margin-bottom:15px;
 	border-bottom:1px dotted gray;
+}
+
+.link_menu {
+	cursor:pointer;
+}
+
+.ui-menu .ui-menu-item {
+    white-space: nowrap;
+}
+
+#mapdiv {
+	color:black;
 }
