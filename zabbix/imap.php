@@ -794,7 +794,7 @@ foreach ($needThisFiles as $file) {
 	
 
 </script>
-<script type="text/javascript" src="imap/imap.js"></script>
+<script type="text/javascript" src="imap/imap.js<?php echo '?'.rand(); ?>"></script>
 
 <?php
 
