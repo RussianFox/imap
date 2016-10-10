@@ -853,8 +853,8 @@
 				};
 				*/
 				
-				for (var nn in data) {
-					var trigger = data[+nn];
+				for (index=0; index<data.length; index++) {
+					var trigger = data[index];
 					if (!trigger) continue;
 					if (!trigger.value==1) continue;
 					if (trigger.hosts.length<1) continue;
@@ -2153,6 +2153,8 @@
 				sortselect.innerHTML = '<option value="status">'+mlocale('Sort by severity')+'</option><option value="time">'+mlocale('Sort by time')+'</option>';
 				
 				jQuery(sortselect).val(getCookie('imap_lasttriggers_sorttype'));
+				
+				if (jQuery(sortselect).val() === null) jQuery(sortselect).val('status');
 				
 				L.DomEvent.on(sortselect, 'change', this.sorting, this);
 					  
