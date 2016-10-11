@@ -2411,10 +2411,11 @@
 	};
 	
 	function mapSize() {
-		nheight = jQuery(window).innerHeight() - jQuery('.footer').outerHeight(true) - jQuery('#imapworkarea').offset().top - jQuery('.msg-bad').height() - (jQuery('.article').innerHeight() - jQuery('.article').height()) - 20;
+		nheight = jQuery(window).innerHeight() - jQuery('.footer').outerHeight(true) - jQuery('#imapworkarea').offset().top - jQuery('.msg-bad').height() - (jQuery('.article').innerHeight() - jQuery('.article').height());
 		
 		jQuery('.last_triggers.leaflet-control .last_triggers_div').css('max-height',+nheight*0.7);
 		jQuery('#hosts_list').css('max-height',+nheight*0.7);
+		jQuery('body').css('margin-bottom','0');
 		
 		if (jQuery('#mapdiv').height() != nheight) {
 			jQuery('#mapdiv').height(nheight);
