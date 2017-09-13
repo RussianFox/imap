@@ -232,11 +232,9 @@ function rightsErrorAjax() {
 };
 
 function checkHostsIsWritable($hostsids) {
-		$hosts = API::Host()->get(array('hostids'=>$hostsids));
-		foreach ($hosts as $host) {
-			if (!$host['editable']) return FALSE;
-		}
-		return TRUE;
+		$hosts = API::Host()->get(array('editable'=>true,'hostids'=>$hostsids));
+		if (count($hosts) == count($hostsids)) return TRUE;
+		return FALSE;
 }
 
 function rightsForLink($idl) {
@@ -715,7 +713,6 @@ foreach ($needThisFiles as $file) {
 	_imap.mapcorners['lasttriggers'] = 0;
 	_imap.mapcorners['layers'] = 1;
 	_imap.mapcorners['hosts'] = 1;
-	_imap.mapcorners['panoramio'] = 1;
 	_imap.mapcorners['attribution'] = 3;
 	_imap.mapcorners['scale'] = 3;
 	_imap.mapcorners['measure'] = 3;
