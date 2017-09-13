@@ -232,7 +232,7 @@ function rightsErrorAjax() {
 };
 
 function checkHostsIsWritable($hostsids) {
-		$hosts = API::Host()->get(array('hostids'->$hostsids));
+		$hosts = API::Host()->get(array('hostids'=>$hostsids));
 		foreach ($hosts as $host) {
 			if (!$host['editable']) return FALSE;
 		}
