@@ -231,12 +231,20 @@ function rightsErrorAjax() {
 		exit;
 };
 
+function checkHostsIsWritable($hostsids) {
+		$hosts = API::Host()->get(array('hostids'->$hostsids));
+		foreach ($hosts as $host) {
+			if (!$host['editable']) return FALSE;
+		}
+		return TRUE;
+}
+
 function rightsForLink($idl) {
 	$glinks = DBfetchArray(DBselect(
 	'SELECT host1, host2
 	FROM hosts_links WHERE hosts_links.id = '.$idl
 	));
-	if (API::Host()->isWritable(array(1*$glinks[0]['host1'])) and API::Host()->isWritable(array(1*$glinks[0]['host2']))) return (true);
+	if (checkHostsIsWritable(array(1*$glinks[0]['host1'], 1*$glinks[0]['host2']))) return (true);
 	return (false);
 };
 
@@ -349,7 +357,7 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='update_coords') {
 	
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 	
 		if ((lat=='none') or ($lng=='none')) { 
 			$lat=null; $lng=null;
@@ -388,7 +396,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='set_hardware') {
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 		$options = array(
 			'hostid' => $hostid,
 			'inventory' => array()
@@ -461,10 +469,10 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='add_links') {
 		
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
-				if (API::Host()->isWritable(array($hostid))) {
+				if (checkHostsIsWritable(array($hostid))) {
 					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
 					$res = DBimap::insert('hosts_links', array($newlink));
 				};
