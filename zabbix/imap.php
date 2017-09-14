@@ -651,7 +651,7 @@ foreach ($needThisFiles as $file) {
 <script src="https://api-maps.yandex.ru/2.1/?load=package.map&lang=<?php echo CWebUser::$data['lang']; ?>" type="text/javascript"></script>
 <script src="imap/leaflet/plugins/layer/tile/Yandex.js"></script>
 
-<script src="https://maps.google.com/maps/api/js?v=3&sensor=false&language=<?php echo CWebUser::$data['lang']; ?>"></script>
+<script src="https://maps.google.com/maps/api/js?v=3&language=<?php echo CWebUser::$data['lang']; ?>" async defer></script>
 <script src="imap/leaflet/plugins/layer/tile/Google.js"></script>
 
 <script src="imap/leaflet/plugins/jquery.fs.stepper.min.js"></script>

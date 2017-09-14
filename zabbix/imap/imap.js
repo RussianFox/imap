@@ -1414,7 +1414,7 @@
 	
 	function googlestreetviewresize() {
 		if (_imap.googlestreetviewer) {
-			setCookie('imap_googlestreetview_size',jQuery(_imap.googlestreetviewer.S).width()+','+jQuery(_imap.googlestreetviewer.S).height(), {expires: 36000000, path: '/'});
+			setCookie('imap_googlestreetview_size',jQuery(_imap.googlestreetviewer.b).width()+','+jQuery(_imap.googlestreetviewer.b).height(), {expires: 36000000, path: '/'});
 			google.maps.event.trigger(_imap.googlestreetviewer, 'resize');
 		};
 	};
@@ -1702,6 +1702,7 @@
 		};
 		
 		mPopupContent = [{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview];
+		
 		if (_imap.settings.weather_apikey !== '-') {
 			mPopupContent.push(gweather);
 		}
