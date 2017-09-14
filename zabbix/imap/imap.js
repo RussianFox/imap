@@ -211,7 +211,7 @@
 		});
 	};
 	
-	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'http://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
+	function counter() {if (!getCookie('countertoday')) {jQuery.ajax({type: "POST",url: 'https://imapcounter.lisss.ru',data: {version: _imap.version, zabbix: _imap.zabbixversion},dataType: 'text'});setCookie('countertoday', '1', {expires: (3600*24), path: '/'});		};};
 	
 	/* фильтр поиска хостов */
 	function hostsFilter(hh,ff) {
@@ -351,7 +351,7 @@
 			onlymes = 0;
 		};
 		jQuery.ajax({
-			url: 'http://imapmessages.lisss.ru',
+			url: 'https://imapmessages.lisss.ru',
 			type: 'POST',
 			dataType: 'json',
 			data: {
@@ -1516,12 +1516,13 @@
 		var reqid = _imap.weatherrequestid;
 		
 		jQuery.ajax({
-			url: 'http://api.openweathermap.org/data/2.5/weather',
+			url: 'https://api.openweathermap.org/data/2.5/weather',
 			type: 'GET',
 			dataType: 'jsonp',
 			data: {
 				units: 'metric',
 				lang: _imap.settings.lang.substring(0,2),
+				APPID: _imap.settings.weather_apikey,
 				lat: latlng.lat,
 				lon: latlng.lng
 			},
@@ -1626,7 +1627,7 @@
 		
 		var bcontainer = jQuery('<div/>').css('display','table-row');
 		
-		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;"><div style="display:block; width:50px; height:50px; background-image:url(http://openweathermap.org/img/w/'+weather.weather[0].icon+'.png);">'+tempCur+'</div></div>');
+		jQuery(bcontainer).append('<div style="display:table-cell; vertical-align: middle; padding:5px;"><div style="display:block; width:50px; height:50px; background-image:url(https://openweathermap.org/img/w/'+weather.weather[0].icon+'.png);">'+tempCur+'</div></div>');
 		
 		var ocontainer = jQuery('<div/>').css('display','block').css('width','50px').css('height','50px').css('background-image','url("imap/images/wind_arrow_x1.png")').css('background-position','0px 50px');
 		var container = jQuery('<div/>').append(windDeg+'°<br>'+windDirection)
@@ -1658,7 +1659,7 @@
 		var tempMax = 23;
 		var tempMin = 10;
 	  
-		var weatherImage = 'http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png';
+		var weatherImage = 'https://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png';
 		var weatherDesk = 'sunny';
 		var weatherCode = '113';
 		
@@ -1700,7 +1701,12 @@
 			openweathermap({lat:latlng.lat,lng:latlng.lng}); return false; }
 		};
 		
-		//menuPopup2([{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview,gweather], e);
+		mPopupContent = [{label:''+latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5)},gstreetview];
+		if (_imap.settings.weather_apikey !== '-') {
+			mPopupContent.push(gweather);
+		}
+		
+		menuPopup2(mPopupContent, e);
 	};
 	
 	function loadHosts() {
@@ -1879,7 +1885,7 @@
 					.appendTo(tabs);
 					
 					jQuery('<div/>',{id:'imap_information-1'})
-					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="http://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
+					.html('<h2>Zabbix Interactive Map</h2> Version '+_imap.version+' <br><a href="https://zabbiximap.lisss.ru" target=_blank>zabbiximap.lisss.ru</a> <h2>Zabbix</h2> Version '+_imap.zabbixversion+'<br> <a href="http://zabbix.com" target=_blank>zabbix.com</a>')
 					.appendTo(tabs);
 					
 					jQuery('<div/>',{id:'imap_information-2'})

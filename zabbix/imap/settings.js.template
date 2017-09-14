@@ -93,3 +93,7 @@ _imap.settings.showMarkersLabels = false;
 /*Show Panoramio photos from this user only*/
 /*Показывать фото в Panoramio только от этого пользователя*/
 /*_imap.panoramiouserid = '959842942402428529';*/
+
+/*Your API key for Openweathermap. http://openweathermap.org/faq#error401*/
+/*Ваш API key для Openweathermap. http://openweathermap.org/faq#error401*/
+/*_imap.settings.weather_apikey = "-";*/

@@ -707,6 +707,7 @@ foreach ($needThisFiles as $file) {
 	_imap.settings.showMarkersLabels = false;
 	_imap.settings.spiderfyDistanceMultiplier = 1;
 	_imap.settings.defaultbaselayer = "OpenStreetMap";
+	_imap.settings.weather_apikey = "-";
 	bingAPIkey=false;
 	
 	_imap.mapcorners['googlesearch'] = 0;
