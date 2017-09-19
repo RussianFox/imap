@@ -43,10 +43,10 @@
 		baseMaps["Stamen B&W"] = new L.tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcd', attribution: 'Map Data: © <a href="http://maps.stamen.com/" target="_blank">Stamen.com</a>'});
 		baseMaps["Kosmosnimki.ru OSM"] = new L.tileLayer('https://tilessputnik.ru/{z}/{x}/{y}.png', {maxZoom:18, subdomains:'abcdef', attribution: 'Map Data: © <a href="http://osm.kosmosnimki.ru/" target="_blank">osm.kosmosnimki.ru</a>'});
 		
-		if (bingAPIkey) {
-			baseMaps["Bing Satellite"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Aerial'});
-			baseMaps["Bing Hybrid"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'AerialWithLabels'});
-			baseMaps["Bing"] = new L.BingLayer(bingAPIkey, {culture: _imap.settings.lang, type: 'Road'});
+		if (_imap.settings.bing_apikey) {
+			baseMaps["Bing Satellite"] = new L.BingLayer(_imap.settings.bing_apikey, {culture: _imap.settings.lang, type: 'Aerial'});
+			baseMaps["Bing Hybrid"] = new L.BingLayer(_imap.settings.bing_apikey, {culture: _imap.settings.lang, type: 'AerialWithLabels'});
+			baseMaps["Bing"] = new L.BingLayer(_imap.settings.bing_apikey, {culture: _imap.settings.lang, type: 'Road'});
 		};
 		
 		try {
@@ -1993,152 +1993,6 @@
 		});
 		
 		_imap.Controls['hosts'] = new HostsControl;
-		
-		
-		var PanoramioControl = L.Control.extend({
-		  
-			options: {
-				position: setMapCorner(_imap.mapcorners['panoramio'])
-				
-			},
-			onAdd: function (map) {
-				this.enabled = false;
-				this.requestid = 0;
-				this.layer = new L.MarkerClusterGroup({
-					maxClusterRadius: 30,
-					iconCreateFunction: function (cluster) {
-						var cmarkers = cluster.getAllChildMarkers();
-						return L.divIcon({iconSize:[18, 18], iconAnchor:[9, 9], popupAnchor:[0, -9], className:'panoramio-cluster', html:'<div style="font-weight:bold;width:18px;height:18px;text-align: center;">'+cmarkers.length+'</div>',iconAnchor:[9, 9]});
-					}
-				});
-				this.layer.on('clustercontextmenu',function(tt){ 
-					tt.layer.spiderfy();
-				});
-				/*this.layer = new L.layerGroup();*/
-				var container = L.DomUtil.create('div', 'panoramio');
-				jQuery(container).attr('aria-haspopup','true');
-				jQuery(container).append('<img src="imap/images/panoramio-cluster.png"> <b>Panoramio</b>');
-				this.mas = new Object;
-				this.options.count = 100;
-				this.start = 0;
-				L.DomEvent.on(container, 'click', this._switch, this);
-				map.on('moveend', this._update, this);
-				this.container = container;
-				this._update();
-				return container;
-			},
-			_switch: function() {
-				if (this.enabled) {
-					this.enabled = false;
-					this._map.removeLayer(this.layer);
-					jQuery(this.container).children('img').attr('src','imap/images/panoramio-cluster.png');
-				} else {
-					this.enabled = true;
-					this._update();
-					this._map.addLayer(this.layer);
-					jQuery(this.container).children('img').attr('src','imap/images/panoramio-marker.png');
-				};
-			},
-			_update: function() {
-				if (!this.enabled) return;
-				this.start = 0;
-				this.requestid++;
-				this.loadData();
-			},
-			loadData: function () {
-				if (!this.enabled) return;
-				var set = 'full'; /*full, public, userId*/
-				if (_imap.panoramiouserid) set = _imap.panoramiouserid;
-				var size = 'small'; /* original, medium (default value), small, thumbnail, square, mini_square */
-				var bounds = this._map.getBounds();
-				var maxlat = bounds.getNorth();
-				var minlat = bounds.getSouth();
-				var maxlng = bounds.getEast();
-				var minlng = bounds.getWest();
-				var url = 'http://www.panoramio.com/map/get_panoramas.php?set='+set+'&from=0&to=20&minx='+minlng+'&miny='+minlat+'&maxx='+maxlng+'&maxy='+maxlat+'&size='+size+'&mapfilter=true&callback=?';
-				var cor = this;
-				var requestid = this.requestid;
-				jQuery.ajax({
-					url: 'http://www.panoramio.com/map/get_panoramas.php',
-					type: 'GET',
-					dataType: 'jsonp',
-					data: {
-						set:set,
-						from:cor.start,
-						to:(cor.start+cor.options.count-1),
-						minx:minlng,
-						miny:minlat,
-						maxx:maxlng,
-						maxy:maxlat,
-						size:size,
-						mapfilter:true
-					},
-					success: function(data){
-						cor.showMarkers(data, requestid);
-					},
-					error: function(data){
-						
-					}
-				});
-			},
-			showMarkers: function (data,requestid) {
-				/*alert('Markers!');*/
-				if (this.requestid!==requestid) return;
-				if (this.start==0) {
-					for (var nn in this.mas) {
-						if (this.mas[nn]) {
-							this.mas[nn].need=0;
-						};
-					};
-				};
-				var tt=0;
-				for (var nn=0; nn<data.count; nn++) {
-					var photo = data.photos[nn];
-					if (photo) {
-						tt++;
-						if (!this.mas[photo.photo_id]) {
-							var icon = L.icon({
-								iconUrl: 'imap/images/panoramio-marker.png',
-
-								iconSize:     [18, 18], // size of the icon
-								shadowSize:   [50, 64], // size of the shadow
-								iconAnchor:   [9, 9], // point of the icon which will correspond to marker's location
-								shadowAnchor: [4, 62],  // the same for the shadow
-								popupAnchor:  [0, -9] // point from which the popup should open relative to the iconAnchor
-							});
-							var marker = L.marker([photo.latitude,photo.longitude],{icon:icon}).bindPopup('<div style="text-align:center;"><h3>'+photo.photo_title+'</h3></div><div style="text-align:center;"><a style="text-align:center; display:block;" onClick="showImage(\'http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg\',jQuery(this).attr(\'comment\')); return false;" href="#" comment="Added '+photo.upload_date+' by '+photo.owner_name+'"><img style="width:'+photo.width+'px; height:'+photo.height+'px" src="'+photo.photo_file_url+'"></a></div><div>Added '+photo.upload_date+' by <a target=_blank href="'+photo.owner_url+'">'+photo.owner_name+'</a></div><div><a target=_blank href="http://www.panoramio.com/photo/'+photo.photo_id+'">View on Panaramio</a></div>',{minWidth:photo.width+10, minHeight:photo.height+30, keepInView:false, autoPan:true, closeButton:true}).bindLabel(photo.photo_title);
-							this.layer.addLayer(marker);
-							this.mas[photo.photo_id] = {marker:marker};
-							var pcont = jQuery('<div />');
-							if (this.options.photocontainer) {
-								jQuery(pcont).attr('id','panoramio_pcont_'+photo.photo_id).attr('data-tooltip',photo.photo_title);
-								jQuery(pcont).addClass('panoramio_photo_container').width(photo.width).height(photo.height).html('<img alt="'+photo.photo_title+'" title="'+photo.photo_title+'" src="'+photo.photo_file_url+'">').attr('originurl','http://static.panoramio.com/photos/original/'+photo.photo_id+'.jpg');
-								jQuery(pcont).mouseout(function(){jQuery(this).removeClass('hover');}).mouseover(function(){jQuery(this).addClass('hover');}).bind('click',function(){showImage(jQuery(this).attr('originurl'));});
-								jQuery('#'+this.options.photocontainer).append(pcont);
-							};
-						};
-						this.mas[photo.photo_id].need=1;
-					};
-				};
-				if (data.has_more) {
-					this.start = this.start + tt;
-					this.loadData();
-				} else {
-					/*удалить старые*/
-					for (var nn in this.mas) {
-						var el = this.mas[nn];
-						if (el) {
-							if (el.need==0) {
-								this.layer.removeLayer(el.marker);
-								jQuery('#panoramio_pcont_'+nn).remove();
-							};
-						};
-					};
-				};
-			}		  
-		})
-		_imap.Controls['panoramio'] = new PanoramioControl;
-		
 		
 		var LastTriggers = L.Control.extend({
 			container: undefined,
