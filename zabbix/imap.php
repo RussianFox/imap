@@ -13,25 +13,6 @@ textdomain("frontend");
 $page['file'] = 'imap.php';
 $page['hist_arg'] = array('groupid', 'hostid', 'show_severity','control_map','with_triggers_only');
 
-$fields = array(
-	'lat' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
-	'lng' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
-	'with_triggers_only' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
-	'control_map' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1'),		null),
-	'severity_min' =>		array(T_ZBX_INT, 	O_OPT, 		P_SYS,		IN('0,1,2,3,4,5'),	null),
-	'output' =>			array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
-	'action_ajax' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
-	'hostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
-	'thostid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
-	'groupid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
-	'hardware' =>			array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
-	'linkid' =>			array(T_ZBX_INT, 	O_OPT, 		P_SYS,		DB_ID,			null),
-	'linkoptions' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null),
-	'hardwareField' =>		array(T_ZBX_STR, 	O_OPT, 		null,		null,			null),
-	'searchstring' =>		array(T_ZBX_STR, 	O_OPT, 		P_SYS,		null,			null)
-);
-check_fields($fields);
-
 if (function_exists('get_request')) {
 	$lat = get_request('lat', null);
 	$lng = get_request('lng', null);
@@ -84,6 +65,43 @@ if ($output!='ajax') {
 	require_once dirname(__FILE__).'/include/page_header.php';
 };
 
+$fields = array(
+	'groupid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'hostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'thostid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'linkid' =>			array(T_ZBX_INT, O_OPT, P_SYS,	DB_ID,		null),
+	'severity_min' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1,2,3,4,5'),		null),
+	'fullscreen' =>			array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
+	'control_map' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
+	'with_triggers_only' =>		array(T_ZBX_INT, O_OPT, P_SYS,			IN('0,1'),	null),
+	'output' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'jsscriptid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	// ajax
+	'favobj' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favref' =>			array(T_ZBX_STR, O_OPT, P_ACT,	null,		null),
+	'favid' =>			array(T_ZBX_INT, O_OPT, P_ACT,	null,		null),
+	'favcnt' =>			array(T_ZBX_INT, O_OPT, null,	null,		null),
+	'pmasterid' =>			array(T_ZBX_STR, O_OPT, P_SYS,	null,		null),
+	'favaction' =>			array(T_ZBX_STR, O_OPT, P_ACT,	IN("'add','remove','refresh','flop','sort'"), null),
+	'favstate' =>			array(T_ZBX_INT, O_OPT, P_ACT,	NOT_EMPTY,	'isset({favaction})&&("flop"=={favaction})'),
+	'favdata' =>			array(T_ZBX_STR, O_OPT, null,	null,		null),
+	'hardwareField' =>		array(T_ZBX_STR, O_OPT, null,	null,		null),
+	//стандартные
+	'btnSelect' =>			[T_ZBX_STR, O_OPT, null,	null,		null],
+	'filter_rst' =>			[T_ZBX_STR, O_OPT, P_SYS,	null,		null],
+	'filter_set' =>			[T_ZBX_STR, O_OPT, P_SYS,	null,		null],
+	'show_triggers' =>		[T_ZBX_INT, O_OPT, null,	null,		null],
+	'show_events' =>		[T_ZBX_INT, O_OPT, P_SYS,	null,		null],
+	'ack_status' =>			[T_ZBX_INT, O_OPT, P_SYS,	null,		null],
+	'show_severity' =>		[T_ZBX_INT, O_OPT, P_SYS,	null,		null],
+	'status_change_days' =>		[T_ZBX_INT, O_OPT, null,	BETWEEN(1, DAY_IN_YEAR * 2), null],
+	'status_change' =>		[T_ZBX_INT, O_OPT, null,	null,		null],
+	'txt_select' =>			[T_ZBX_STR, O_OPT, null,	null,		null],
+	'application' =>		[T_ZBX_STR, O_OPT, null,	null,		null],
+	'inventory' =>			[T_ZBX_STR, O_OPT, null,	null,		null]
+);
+check_fields($fields);
+
 /*
  * Filter
  */
@@ -98,20 +116,114 @@ $pageFilter = new CPageFilter(array(
 		'withInventory' => true
 	),
 	'hostid' => $hostid,
-	'groupid' => $groupid,
-	'severitiesMin' => array(
-		TRIGGER_SEVERITY_NOT_CLASSIFIED => getSeverityCaption(TRIGGER_SEVERITY_NOT_CLASSIFIED),
-		TRIGGER_SEVERITY_INFORMATION => getSeverityCaption(TRIGGER_SEVERITY_INFORMATION),
-		TRIGGER_SEVERITY_WARNING => getSeverityCaption(TRIGGER_SEVERITY_WARNING),
-		TRIGGER_SEVERITY_AVERAGE => getSeverityCaption(TRIGGER_SEVERITY_AVERAGE),
-		TRIGGER_SEVERITY_HIGH => getSeverityCaption(TRIGGER_SEVERITY_HIGH),
-		TRIGGER_SEVERITY_DISASTER => getSeverityCaption(TRIGGER_SEVERITY_DISASTER)
-	),
-	'severityMin' => $showSeverity
+	'groupid' => $groupid
 ));
 
 $_REQUEST['groupid'] = $pageFilter->groupid;
 $_REQUEST['hostid'] = $pageFilter->hostid;
+
+
+// filter set
+if (hasRequest('filter_set')) {
+	CProfile::update('web.tr_status.filter.show_details', getRequest('show_details', 0), PROFILE_TYPE_INT);
+	CProfile::update('web.tr_status.filter.show_maintenance', getRequest('show_maintenance', 0), PROFILE_TYPE_INT);
+	CProfile::update('web.tr_status.filter.show_severity',
+		getRequest('show_severity', TRIGGER_SEVERITY_NOT_CLASSIFIED), PROFILE_TYPE_INT
+	);
+	CProfile::update('web.tr_status.filter.txt_select', getRequest('txt_select', ''), PROFILE_TYPE_STR);
+	CProfile::update('web.tr_status.filter.status_change', getRequest('status_change', 0), PROFILE_TYPE_INT);
+	CProfile::update('web.tr_status.filter.status_change_days', getRequest('status_change_days', 14),
+		PROFILE_TYPE_INT
+	);
+	CProfile::update('web.tr_status.filter.application', getRequest('application'), PROFILE_TYPE_STR);
+
+	// show triggers
+	// when this filter is set to "All" it must not be remembered in the profiles because it may render the
+	// whole page inaccessible on large installations.
+	if (getRequest('show_triggers') != TRIGGERS_OPTION_ALL) {
+		CProfile::update('web.tr_status.filter.show_triggers', getRequest('show_triggers'), PROFILE_TYPE_INT);
+	}
+
+	// show events
+	$showEvents = getRequest('show_events', EVENTS_OPTION_NOEVENT);
+	if ($config['event_ack_enable'] == EVENT_ACK_ENABLED || $showEvents != EVENTS_OPTION_NOT_ACK) {
+		CProfile::update('web.tr_status.filter.show_events', $showEvents, PROFILE_TYPE_INT);
+	}
+
+	// ack status
+	if ($config['event_ack_enable'] == EVENT_ACK_ENABLED) {
+		CProfile::update('web.tr_status.filter.ack_status', getRequest('ack_status', ZBX_ACK_STS_ANY), PROFILE_TYPE_INT);
+	}
+
+	// update host inventory filter
+	$inventoryFields = [];
+	$inventoryValues = [];
+	foreach (getRequest('inventory', []) as $field) {
+		if ($field['value'] === '') {
+			continue;
+		}
+
+		$inventoryFields[] = $field['field'];
+		$inventoryValues[] = $field['value'];
+	}
+	CProfile::updateArray('web.tr_status.filter.inventory.field', $inventoryFields, PROFILE_TYPE_STR);
+	CProfile::updateArray('web.tr_status.filter.inventory.value', $inventoryValues, PROFILE_TYPE_STR);
+}
+elseif (hasRequest('filter_rst')) {
+	DBStart();
+	CProfile::delete('web.tr_status.filter.show_triggers');
+	CProfile::delete('web.tr_status.filter.show_details');
+	CProfile::delete('web.tr_status.filter.show_maintenance');
+	CProfile::delete('web.tr_status.filter.show_events');
+	CProfile::delete('web.tr_status.filter.ack_status');
+	CProfile::delete('web.tr_status.filter.show_severity');
+	CProfile::delete('web.tr_status.filter.txt_select');
+	CProfile::delete('web.tr_status.filter.status_change');
+	CProfile::delete('web.tr_status.filter.status_change_days');
+	CProfile::delete('web.tr_status.filter.application');
+	CProfile::deleteIdx('web.tr_status.filter.inventory.field');
+	CProfile::deleteIdx('web.tr_status.filter.inventory.value');
+	DBend();
+}
+
+if (hasRequest('filter_set') && getRequest('show_triggers') == TRIGGERS_OPTION_ALL) {
+	$showTriggers = TRIGGERS_OPTION_ALL;
+}
+else {
+	$showTriggers = CProfile::get('web.tr_status.filter.show_triggers', TRIGGERS_OPTION_RECENT_PROBLEM);
+}
+$showDetails = CProfile::get('web.tr_status.filter.show_details', 0);
+$showMaintenance = CProfile::get('web.tr_status.filter.show_maintenance', 1);
+$showSeverity = CProfile::get('web.tr_status.filter.show_severity', TRIGGER_SEVERITY_NOT_CLASSIFIED);
+$txtSelect = CProfile::get('web.tr_status.filter.txt_select', '');
+$showChange = CProfile::get('web.tr_status.filter.status_change', 0);
+$statusChangeBydays = CProfile::get('web.tr_status.filter.status_change_days', 14);
+$ackStatus = ($config['event_ack_enable'] == EVENT_ACK_DISABLED)
+	? ZBX_ACK_STS_ANY : CProfile::get('web.tr_status.filter.ack_status', ZBX_ACK_STS_ANY);
+$showEvents = CProfile::get('web.tr_status.filter.show_events', EVENTS_OPTION_NOEVENT);
+
+// check event acknowledges
+if ($config['event_ack_enable'] == EVENT_ACK_DISABLED && $showEvents == EVENTS_OPTION_NOT_ACK) {
+	$showEvents = EVENTS_OPTION_NOEVENT;
+}
+
+// fetch filter from profiles
+$filter = [
+	'application' => CProfile::get('web.tr_status.filter.application', ''),
+	'inventory' => []
+];
+
+foreach (CProfile::getArray('web.tr_status.filter.inventory.field', []) as $i => $field) {
+	$filter['inventory'][] = [
+		'field' => $field,
+		'value' => CProfile::get('web.tr_status.filter.inventory.value', null, $i)
+	];
+}
+
+
+
+
+
 
 function rightsErrorAjax() {
 		$responseData = '{"jsonrpc": "2.0","error": {"message": "Access error. Check rights."}}';
@@ -119,12 +231,18 @@ function rightsErrorAjax() {
 		exit;
 };
 
+function checkHostsIsWritable($hostsids) {
+		$hosts = API::Host()->get(array('editable'=>true,'hostids'=>$hostsids));
+		if (count($hosts) == count($hostsids)) return TRUE;
+		return FALSE;
+}
+
 function rightsForLink($idl) {
 	$glinks = DBfetchArray(DBselect(
 	'SELECT host1, host2
 	FROM hosts_links WHERE hosts_links.id = '.$idl
 	));
-	if (API::Host()->isWritable(array(1*$glinks[0]['host1'])) and API::Host()->isWritable(array(1*$glinks[0]['host2']))) return (true);
+	if (checkHostsIsWritable(array(1*$glinks[0]['host1'], 1*$glinks[0]['host2']))) return (true);
 	return (false);
 };
 
@@ -164,6 +282,7 @@ if ($output=='ajax') {
 		$options['sortfield'] = array('lastchange');
 		$options['sortorder'] = 'DESC';
 		$options['filter'] = array('value' => TRIGGER_VALUE_TRUE);
+		$options['selectHosts'] = array('hostid', 'name');
 		if ($showSeverity > TRIGGER_SEVERITY_NOT_CLASSIFIED) {
 			$options['min_severity'] = $showSeverity;
 		};
@@ -236,7 +355,7 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='update_coords') {
 	
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 	
 		if ((lat=='none') or ($lng=='none')) { 
 			$lat=null; $lng=null;
@@ -275,7 +394,7 @@ if ($output=='ajax') {
 	};
 	
 	if ($action_ajax=='set_hardware') {
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 		$options = array(
 			'hostid' => $hostid,
 			'inventory' => array()
@@ -348,10 +467,10 @@ if ($output=='ajax') {
 	
 	if ($action_ajax=='add_links') {
 		
-		if (!API::Host()->isWritable(array($hostid))) rightsErrorAjax();
+		if (!checkHostsIsWritable(array($hostid))) rightsErrorAjax();
 		$shost=$hostid;
 			foreach ($thostid as $thost) {
-				if (API::Host()->isWritable(array($hostid))) {
+				if (checkHostsIsWritable(array($hostid))) {
 					$newlink = array('host1' => MIN($shost,$thost), 'host2' => MAX($shost,$thost));
 					$res = DBimap::insert('hosts_links', array($newlink));
 				};
@@ -403,25 +522,79 @@ if ($output!='block') {
 	// $showEvents = $_REQUEST['show_events'];
 	// $ackStatus = $_REQUEST['ack_status'];
 
-	$triggerWidget = new CWidget();
+// 	$triggerWidget = new CWidget();
+// 
+// 	$rightForm = new CForm('get');
+// 	$rightForm->addItem(array(_('Group').SPACE, $pageFilter->getGroupsCB(true)));
+// 	$rightForm->addItem(array(SPACE._('Host').SPACE, $pageFilter->getHostsCB(true)));
+// 	$severityComboBox = new CComboBox('severity_min', $showSeverity,'javascript: submit();');
+// 	$severityComboBox->addItems($pageFilter->severitiesMin);
+// 	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
+// 
+// 	textdomain("imap");
+// 	$rightForm->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
+// 	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
+// 	textdomain("frontend");
+// 	
+// 	$rightForm->addVar('fullscreen', $_REQUEST['fullscreen']);
+// 
+// 	$triggerWidget->addHeader(SPACE,$rightForm);
+// 	$triggerWidget->addPageHeader(_('Interactive map'), get_icon('fullscreen', array('fullscreen' => $_REQUEST['fullscreen'])));
+// 		
+// 	$triggerWidget->show();
 
-	$rightForm = new CForm('get');
-	$rightForm->addItem(array(_('Group').SPACE, $pageFilter->getGroupsCB(true)));
-	$rightForm->addItem(array(SPACE._('Host').SPACE, $pageFilter->getHostsCB(true)));
-	$severityComboBox = new CComboBox('severity_min', $showSeverity,'javascript: submit();');
-	$severityComboBox->addItems($pageFilter->severitiesMin);
-	$rightForm->addItem(array(SPACE._('Minimum trigger severity').SPACE, $severityComboBox));
 
+	/*
+	* Display
+	*/
 	textdomain("imap");
-	$rightForm->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
-	textdomain("frontend");
-	
-	$rightForm->addVar('fullscreen', $_REQUEST['fullscreen']);
+	$triggerWidget = (new CWidget())->setTitle(_('Interactive map'));
 
-	$triggerWidget->addHeader(SPACE,$rightForm);
-	$triggerWidget->addPageHeader(_('Interactive map'), get_icon('fullscreen', array('fullscreen' => $_REQUEST['fullscreen'])));
-		
+	$rightForm = (new CForm('get'))
+		->addVar('fullscreen', $_REQUEST['fullscreen']);
+
+	$controls = new CList();
+	$controls->addItem(array(SPACE.SPACE._('With triggers only').SPACE, new CCheckBox('with_triggers_only', $with_triggers_only, 'javascript: submit();', 1)));
+	$controls->addItem(array(SPACE.SPACE._('Control map').SPACE, new CCheckBox('control_map', $control_map, '_imap.settings.do_map_control = jQuery(\'#control_map\')[0].checked; if (_imap.settings.do_map_control) {mapBbox(_imap.bbox)};', 1)));
+	$controls->addItem([_('Group').SPACE, $pageFilter->getGroupsCB()]);
+	$controls->addItem([_('Host').SPACE, $pageFilter->getHostsCB()]);
+	$controls->addItem(get_icon('fullscreen', ['fullscreen' => $_REQUEST['fullscreen']]));
+
+	$rightForm->addItem($controls);
+
+	$triggerWidget->setControls($rightForm);
+	
+	
+	// filter
+	textdomain("frontend");
+	$filterFormView = new CView('common.filter.trigger', [
+		'overview' => false,
+		'filter' => [
+			'filterid' => 'web.tr_status.filter.state',
+			'showTriggers' => $showTriggers,
+			'ackStatus' => $ackStatus,
+			'showEvents' => $showEvents,
+			'showSeverity' => $showSeverity,
+			'statusChange' => $showChange,
+			'statusChangeDays' => $statusChangeBydays,
+			'showDetails' => $showDetails,
+			'txtSelect' => $txtSelect,
+			'application' => $filter['application'],
+			'inventory' => $filter['inventory'],
+			'showMaintenance' => $showMaintenance,
+			'hostId' => getRequest('hostid'),
+			'groupId' => getRequest('groupid'),
+			'fullScreen' => getRequest('fullscreen')
+		],
+		'config' => $config
+	]);
+
+	$filterForm = $filterFormView->render();
+	$triggerWidget->addItem($filterForm);
+	// filter end
+	
 	$triggerWidget->show();
+
 };
 
 $version=trim(file_get_contents('imap/version'));
@@ -460,6 +633,9 @@ foreach ($needThisFiles as $file) {
 	<div id=ajax></div>
 	<div id=imapmes><div id=mesLoading><div><?php echo _('Loading...'); ?></div></div></div>
 </div>
+
+<link href="imap/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="imap/jquery-ui/jquery-ui.js"></script>
 
 <link rel="stylesheet" href="imap/leaflet/leaflet.css" />
 <script type="text/javascript" src="imap/leaflet/leaflet.js"></script>
@@ -515,7 +691,7 @@ foreach ($needThisFiles as $file) {
 	/* This settings changing in file settings.js */
 	_imap.settings.show_icons = true;
 	_imap.settings.use_search = true;
-	_imap.settings.use_zoom_slider = false;
+	_imap.settings.use_zoom_slider = true;
 	_imap.settings.links_enabled = true;
 	_imap.settings.debug_enabled = false;
 	_imap.settings.hardware_field = 'type';
@@ -537,7 +713,6 @@ foreach ($needThisFiles as $file) {
 	_imap.mapcorners['lasttriggers'] = 0;
 	_imap.mapcorners['layers'] = 1;
 	_imap.mapcorners['hosts'] = 1;
-	_imap.mapcorners['panoramio'] = 1;
 	_imap.mapcorners['attribution'] = 3;
 	_imap.mapcorners['scale'] = 3;
 	_imap.mapcorners['measure'] = 3;
@@ -567,7 +742,6 @@ foreach ($needThisFiles as $file) {
 	locale['Items'] = '<?php echo _('Items'); ?>';
 	locale['Discovery rules'] = '<?php echo _('Discovery rules'); ?>';
 	locale['Web scenarios'] = '<?php echo _('Web scenarios'); ?>';
-	locale['Screens'] = '<?php echo _('Screens'); ?>';
 	
 	<?php textdomain("imap"); ?>
 	locale['Change location'] = '<?php echo _('Change location'); ?>';
@@ -618,7 +792,7 @@ foreach ($needThisFiles as $file) {
 	
 	/* Фильтр для отбора хостов и групп */
 	_imap.filter = {
-		show_severity: <?php echo $pageFilter->severityMin; ?>,
+		show_severity: 0,
 		hostid: <?php echo $pageFilter->hostid; ?>,
 		groupid: <?php echo $pageFilter->groupid; ?>
 	};

@@ -1,7 +1,7 @@
 # imap
 Interactive map for Zabbix
 
-Данная версия разработана для Zabbix версий 2.2 и 2.4
+Данная версия разработана для Zabbix версии 3.x
 
 На старых версиях работоспособность не гарантирована и дорабатываться не будет.
 
@@ -16,9 +16,9 @@ Interactive map for Zabbix
 Для установки скопируйте содержимое папки zabbix в директорию вашего zabbix (/usr/share/zabbix для Debian, например).
 
 Чтобы подключить imap в стандартный интерфейс, отредактируйте include/menu.inc.php
-В самый конец файла вставьте:
+В 314 строку перед "$denied_page_requested = false;" вставьте:
 
-	require_once dirname(__FILE__).'/../imap/menu.inc.php';
+	require_once dirname(__FILE__).'/../imap/menu3.inc.php';
 
 Теперь основной функционал работоспособен. Зайдите в ваш Zabbix и вы увидите новый пункт меню.
 
